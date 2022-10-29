@@ -1,0 +1,122 @@
+﻿Basic Instruction Set Computer (BISC)
+
+
+
+Registers
+---------
+pc - program counter
+sp - stack pointer
+ra - return address
+rv - return value
+r0-r7 - general-purpose registers
+f0-f7 - floating-point registers
+
+
+
+Instructions
+------------
+reg ::= register
+mem ::= reg[0]
+imm ::= 0 | 0x0 | '0'
+
+nop
+hlt
+sys  arg0 (reg/imm)
+call addr (label)
+ret
+
+push arg0 (reg/imm)
+pop  arg0 (reg)
+
+// all dem loads ld lh lb, st sh sb
+ld   dest (reg), arg0 (label/mem)
+la   dest (reg), arg0 (label/mem)
+st   dest (mem), arg0 (reg)
+
+// figure out how to use all 32 bits
+load immediate
+load upper immediate
+sign extension?
+
+lli  dest (reg), arg0 (imm)
+lui dest (reg), arg0 (imm)
+
+mov  dest (reg), arg0 (reg)
+add  dest (reg), arg0 (reg), arg1 (reg)
+sub  dest (reg), arg0 (reg), arg1 (reg)
+mul  dest (reg), arg0 (reg), arg1 (reg)
+div  dest (reg), arg0 (reg), arg1 (reg)
+mod  dest (reg), arg0 (reg), arg1 (reg)
+inc  dest (reg)
+dec  dest (reg)
+neg  dest (reg)
+
+and  dest (reg), arg0 (reg), arg1 (reg)
+or   dest (reg), arg0 (reg), arg1 (reg)
+xor  dest (reg), arg0 (reg), arg1 (reg)
+nand dest (reg), arg0 (reg), arg1 (reg)
+nor  dest (reg), arg0 (reg), arg1 (reg)
+xnor dest (reg), arg0 (reg), arg1 (reg)
+bsl  dest (reg), arg0 (reg), arg1 (reg)
+bsr  dest (reg), arg0 (reg), arg1 (reg)
+
+jmp addr (label/reg)
+jz  addr (label/reg), arg0 (reg)
+jnz addr (label/reg), arg0 (reg)
+je  addr (label/reg), arg0 (reg), arg1 (reg)
+jne addr (label/reg), arg0 (reg), arg1 (reg)
+jgt addr (label/reg), arg0 (reg), arg1 (reg)
+jlt addr (label/reg), arg0 (reg), arg1 (reg)
+jge addr (label/reg), arg0 (reg), arg1 (reg)
+jle addr (label/reg), arg0 (reg), arg1 (reg)
+
+
+Opcode Format
+-------------
+
+Instruction Format
+ opcode          null        
+|------|-----------------------|
+31     24                      0
+
+Register-Immediate Format
+ opcode   dest        imm
+|------|-------|---------------|
+31     24      16              0
+
+Register Format
+ opcode   dest        null
+|------|-------|---------------|
+31     24      16              0
+
+Register-Register Format
+ opcode   dest   arg0    null
+|------|-------|-------|-------|
+31     24      16      8       0
+
+Register-Register-Register Format
+ opcode   dest   arg0    arg1
+|------|-------|-------|-------|
+31     24      16      8       0
+
+Calling Convention
+------------------
+int example_function(int a, int b) {
+	return a + b;
+}
+
+int c = example_function(1, 2);
+
+push 2
+push 1
+//add ra, pc, 1 // ?? wherever return address is
+call example_function
+
+example_function:
+	sub sp, sp, 8  // put 8 bytes of space on stack
+	st r0, sp[0]  // first argument
+	st r1, sp[4]  // second argument
+	add r2, r0, r1 // c = a + b
+	mov rv, r2     // move result to return value
+	add sp, sp, 8  // restore stack pointer
+	ret            // return from function

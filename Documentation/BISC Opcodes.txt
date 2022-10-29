@@ -1,0 +1,7 @@
+﻿Mneumonic | Opcode
+---------------------
+VERY SUBJECT TO CHANGE
+nop       | 00000000
+hlt       | 01000000
+li        | 02rriiii
+add       | 03rrrrrr
