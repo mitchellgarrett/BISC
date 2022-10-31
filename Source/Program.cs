@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace FTG.Studios.BISC {
 
@@ -6,7 +7,15 @@ namespace FTG.Studios.BISC {
 
         static void Main(string[] args) {
 
-            UInt32[] instructions = new UInt32[] { 0x00000000, 0x02001234, 0x03040500 };
+            UInt32[] instructions = Assembler.Assemble(File.ReadAllText("Programs/instructions.asm"));
+            foreach (var inst in instructions) {
+                Console.WriteLine("{0:x8}", inst);
+            }
+
+            Assembler.WriteInstructions("Programs/instructions.bin", instructions);
+            return;
+            instructions = Assembler.ReadInstructions("Programs/instructions.bin");
+
             VirtualMachine vm = new VirtualMachine();
 
             vm.PrintRegisters();

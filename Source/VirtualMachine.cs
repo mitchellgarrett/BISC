@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace FTG.Studios.BISC {
     
-    public enum Opcode : byte { NOP = 0x00, HLT = 0x01, LI = 0x02, ADD = 0x03 };
+    public enum Opcode : byte { NOP = 0x00, HLT = 0x01, LLI = 0x02, LUI = 0x03, ADD = 0x04 };
 
     public class VirtualMachine {
 
@@ -22,8 +22,23 @@ namespace FTG.Studios.BISC {
 
         public VirtualMachine() {
             registers = new UInt32[NUM_REGISTERS];
-            instructions = new InstructionHandler[] { NOP, null, LI, ADD };
+            instructions = new InstructionHandler[] { NOP, null, LLI, LUI, ADD };
         }
+
+        public void Execute(byte[] instructions) {
+            UInt32[] words = new UInt32[instructions.Length / 4];
+            for (int i = 0; i < words.Length; i++) {
+                UInt32 word = BitConverter.ToUInt32(instructions, i * 4);
+                words[i] = word;
+            }
+            Execute(words);
+        }
+
+        public void Execute(UInt32[] instructions) {
+            for (int i = 0; i < instructions.Length; i++) {
+                ExecuteInstruction(instructions[i]);
+            }
+        } 
 
         public void ExecuteInstruction(UInt32 instruction) {
             //Console.WriteLine("Executing instruction: 0x{0:x8}", instruction);
@@ -62,13 +77,23 @@ namespace FTG.Studios.BISC {
             return true;
         }
 
-        bool LI(byte opcode, byte arg0, byte arg1, byte arg2) {
-            if (opcode != ((byte)Opcode.LI) || arg0 >= NUM_REGISTERS) return false;
+        bool LLI(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.LLI) || arg0 >= NUM_REGISTERS) return false;
             UInt16 imm;
             if (BitConverter.IsLittleEndian) imm = BitConverter.ToUInt16(new byte[] { arg2, arg1 }, 0);
             else imm = BitConverter.ToUInt16(new byte[] { arg1, arg2 }, 0);
-            Console.WriteLine("li {0}, 0x{1:x4}", register_names[arg0], imm);
+            Console.WriteLine("lli {0}, 0x{1:x4}", register_names[arg0], imm);
             registers[arg0] = imm;
+            return true;
+        }
+
+        bool LUI(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.LUI) || arg0 >= NUM_REGISTERS) return false;
+            UInt16 imm;
+            if (BitConverter.IsLittleEndian) imm = BitConverter.ToUInt16(new byte[] { arg2, arg1 }, 0);
+            else imm = BitConverter.ToUInt16(new byte[] { arg1, arg2 }, 0);
+            Console.WriteLine("lui {0}, 0x{1:x4}", register_names[arg0], imm);
+            registers[arg0] = (UInt32)((registers[arg0] & 0xFFFF) | (UInt32)(imm << 16));
             return true;
         }
 

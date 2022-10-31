@@ -15,6 +15,7 @@ f0-f7 - floating-point registers
 
 Instructions
 ------------
+comment ::= ;
 reg ::= register
 mem ::= reg[0]
 imm ::= 0 | 0x0 | '0'
