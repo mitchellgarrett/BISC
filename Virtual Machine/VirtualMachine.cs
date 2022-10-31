@@ -4,8 +4,15 @@ using System.Reflection;
 
 namespace FTG.Studios.BISC {
     
-    public enum Opcode : byte { NOP = 0x00, HLT = 0x01, LLI = 0x02, LUI = 0x03, ADD = 0x04 };
+    public enum Opcode : byte { 
+        NOP = 0x00, HLT = 0x01, SYS = 0x02, CALL = 0x03, RET = 0x04,
+        LLI = 0x05, LUI = 0x06, ADD = 0x07, SUB = 0x08, MUL = 0x09, DIV = 0x0A, MOD = 0x0B, INC = 0x0C, DEC = 0x0D, NEG = 0x0E,
+        NOT = 0x0F, AND = 0x10, OR = 0x11, XOR = 0x12, NAND = 0x13, NOR = 0x14, XNOR = 0x15, BSL = 0x16, BSR = 0x17
+    };
 
+    /// <summary>
+    /// BISC virtual machine.
+    /// </summary>
     public class VirtualMachine {
 
         delegate bool InstructionHandler(byte opcode, byte arg0, byte arg1, byte arg2);
@@ -22,9 +29,13 @@ namespace FTG.Studios.BISC {
 
         public VirtualMachine() {
             registers = new UInt32[NUM_REGISTERS];
-            instructions = new InstructionHandler[] { NOP, null, LLI, LUI, ADD };
+            instructions = new InstructionHandler[] { NOP, HLT, null ,null, null, LLI, LUI, ADD };
         }
 
+        /// <summary>
+        /// Executes a byte array as BISC instructions.
+        /// </summary>
+        /// <param name="instructions">Instructions in byte form.</param>
         public void Execute(byte[] instructions) {
             UInt32[] words = new UInt32[instructions.Length / 4];
             for (int i = 0; i < words.Length; i++) {
@@ -34,12 +45,20 @@ namespace FTG.Studios.BISC {
             Execute(words);
         }
 
+        /// <summary>
+        /// Executes an array of 32-bit BISC instructions.
+        /// </summary>
+        /// <param name="instructions">Array of instructions.</param>
         public void Execute(UInt32[] instructions) {
             for (int i = 0; i < instructions.Length; i++) {
                 ExecuteInstruction(instructions[i]);
             }
         } 
 
+        /// <summary>
+        /// Executes a single 32-bit BISC instruction.
+        /// </summary>
+        /// <param name="instruction">32-bit instruction.</param>
         public void ExecuteInstruction(UInt32 instruction) {
             //Console.WriteLine("Executing instruction: 0x{0:x8}", instruction);
 
@@ -77,6 +96,30 @@ namespace FTG.Studios.BISC {
             return true;
         }
 
+        bool HLT(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.HLT) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+            Console.WriteLine("hlt");
+            return true;
+        }
+
+        bool SYS(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.SYS) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+            Console.WriteLine("sys");
+            return true;
+        }
+
+        bool CALL(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.CALL) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+            Console.WriteLine("call");
+            return true;
+        }
+
+        bool RET(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.RET) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+            Console.WriteLine("ret");
+            return true;
+        }
+
         bool LLI(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.LLI) || arg0 >= NUM_REGISTERS) return false;
             UInt16 imm;
@@ -101,6 +144,34 @@ namespace FTG.Studios.BISC {
             if (opcode != ((byte)Opcode.ADD) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
             Console.WriteLine("add {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] + registers[arg2];
+            return true;
+        }
+
+        bool SUB(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.SUB) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("sub {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            registers[arg0] = registers[arg1] - registers[arg2];
+            return true;
+        }
+
+        bool MUL(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.MUL) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("mul {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            registers[arg0] = registers[arg1] * registers[arg2];
+            return true;
+        }
+
+        bool DIV(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.DIV) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("add {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            registers[arg0] = registers[arg1] / registers[arg2];
+            return true;
+        }
+
+        bool MOD(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.ADD) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("mod {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            registers[arg0] = registers[arg1] % registers[arg2];
             return true;
         }
     }

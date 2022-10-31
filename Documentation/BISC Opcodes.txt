@@ -1,8 +1,29 @@
-﻿Mneumonic | Opcode
+﻿***VERY SUBJECT TO CHANGE***
+
+Mneumonic | Opcode
 ---------------------
-VERY SUBJECT TO CHANGE
 nop       | 00000000
 hlt       | 01000000
-lli       | 02rriiii
-lui       | 03rriiii
-add       | 04rrrrrr
+sys       | 0200iiii
+sys       | 020100rr
+call      | 04mmmm00
+ret       | 00000000
+lli       | 05rriiii
+lui       | 06rriiii
+add       | 07rrrrrr
+sub       | 08rrrrrr
+mul       | 09rrrrrr
+div       | 0Arrrrrr
+mod       | 0Brrrrrr
+inc       | 0Crr0000
+dec       | 0Drr0000
+neg       | 0Err0000
+not       | 0Frrrr00
+and       | 10rrrrrr
+or        | 11rrrrrr
+xor       | 12rrrrrr
+nand      | 13rrrrrr
+nor       | 14rrrrrr
+xnor      | 15rrrrrr
+bsl       | 16rrrrrr
+bsr       | 17rrrrrr

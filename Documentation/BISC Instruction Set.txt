@@ -52,6 +52,7 @@ inc  dest (reg)
 dec  dest (reg)
 neg  dest (reg)
 
+not  dest (reg), arg0 (reg)
 and  dest (reg), arg0 (reg), arg1 (reg)
 or   dest (reg), arg0 (reg), arg1 (reg)
 xor  dest (reg), arg0 (reg), arg1 (reg)
