@@ -8,12 +8,13 @@ namespace FTG.Studios.BISC {
         static void Main(string[] args) {
             Console.Title = "BISC Assembler";
 
-            UInt32[] instructions = Assembler.Assemble(File.ReadAllText("Programs/instructions.asm"));
-            foreach (var inst in instructions) {
-                Console.WriteLine("{0:x8}", inst);
+            string file_name = "Programs/fibonacci";
+            Program program = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
+            for (UInt32 addr = 0; addr < program.Instructions.Length; addr++) {
+                Console.WriteLine("{0:x}: {1:x08}", program.Offset + addr * 4, program.Instructions[addr]);
             }
 
-            Assembler.WriteInstructions("Programs/instructions.bin", instructions);
+            Program.Write(file_name + ".bin", program);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace FTG.Studios.BISC {
 
@@ -7,19 +8,12 @@ namespace FTG.Studios.BISC {
         static void Main(string[] args) {
             Console.Title = "BISC Virtual Machine";
 
-            UInt32[] instructions = Assembler.ReadInstructions("Programs/instructions.bin");
+            string file_name = "Programs/fibonacci";
+            Program program = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
+            Program.Write(file_name + ".bin", program);
             VirtualMachine vm = new VirtualMachine();
 
-            vm.PrintRegisters();
-            for (int i = 0; i < instructions.Length; i++) {
-                Console.SetCursorPosition(0, 21);
-                Console.Write("Continue execution...");
-                Console.ReadKey(false);
-                vm.ExecuteInstruction(instructions[i]);
-            }
-            Console.SetCursorPosition(0, 21);
-            Console.Write("Program complete...");
-            Console.ReadKey(false);
+            vm.Execute(program);
         }
     }
 }

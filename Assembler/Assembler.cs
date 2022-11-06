@@ -10,74 +10,39 @@ namespace FTG.Studios.BISC {
     /// </summary>
     public static class Assembler {
 
-        enum ArgumentType { None, Register, Address, IntegerImmediate, DecimalImmediate };
-
-        const char COMMENT = ';';
+        static Dictionary<string, byte> opcodes;
+        static Dictionary<string, UInt32> symbols;
 
         /// <summary>
         /// Assembles BISC source code into binary opcodes.
         /// </summary>
         /// <param name="source">Source code.</param>
-        /// <returns>Instructions in binary form.</returns>
-        public static UInt32[] Assemble(string source) {
+        /// <returns>An executable program.</returns>
+        public static Program Assemble(string source) {
+            if (opcodes == null) {
+                opcodes = new Dictionary<string, byte>();
+                foreach (Opcode opcode in Enum.GetValues(typeof(Opcode))) {
+                    opcodes[opcode.ToString()] = (byte)opcode;
+                }
+            }
+
             List<UInt32> instructions = new List<UInt32>();
             using (StringReader reader = new StringReader(source)) {
                 string line;
-                while (!string.IsNullOrEmpty(line = reader.ReadLine())) {
-                    instructions.Add(ParseInstruction(line));
+                while ((line = reader.ReadLine()) != null) {
+                    int comment_index = line.IndexOf(Specification.COMMENT);
+                    if (comment_index >= 0) line = line.Substring(0, comment_index);
+                    if (string.IsNullOrEmpty(line)) continue;
+                    instructions.AddRange(ParseInstruction(line));
                 }
             }
-            return instructions.ToArray();
+
+            Program program = new Program(instructions.ToArray());
+            return program;
         }
 
-        /// <summary>
-        /// Writes binary instructions to specified file.
-        /// </summary>
-        /// <param name="path">File to write to.</param>
-        /// <param name="instructions">Instructions to write.</param>
-        public static void WriteInstructions(string path, UInt32[] instructions) {
-            byte[] bytes = new byte[instructions.Length * 4];
-            Buffer.BlockCopy(instructions, 0, bytes, 0, bytes.Length);
-            if (BitConverter.IsLittleEndian) {
-                byte b0, b1, b2, b3;
-                for (int i = 0; i < bytes.Length; i += 4) {
-                    b0 = bytes[i + 0];
-                    b1 = bytes[i + 1];
-                    b2 = bytes[i + 2];
-                    b3 = bytes[i + 3];
-                    bytes[i + 0] = b3;
-                    bytes[i + 1] = b2;
-                    bytes[i + 2] = b1;
-                    bytes[i + 3] = b0;
-                }
-            }
-            File.WriteAllBytes(path, bytes);
-        }
+        static UInt32[] ResolvePseudoInstruction(string line) {
 
-        /// <summary>
-        /// Reads instructions from a binary file.
-        /// </summary>
-        /// <param name="path">File to read from.</param>
-        /// <returns>Instructions in binary form.</returns>
-        public static UInt32[] ReadInstructions(string path) {
-            byte[] bytes = File.ReadAllBytes(path);
-            if (BitConverter.IsLittleEndian) {
-                byte b0, b1, b2, b3;
-                for (int i = 0; i < bytes.Length; i += 4) {
-                    b0 = bytes[i + 0];
-                    b1 = bytes[i + 1];
-                    b2 = bytes[i + 2];
-                    b3 = bytes[i + 3];
-                    bytes[i + 0] = b3;
-                    bytes[i + 1] = b2;
-                    bytes[i + 2] = b1;
-                    bytes[i + 3] = b0;
-                }
-            }
-
-            UInt32[] instructions = new UInt32[bytes.Length / 4];
-            Buffer.BlockCopy(bytes, 0, instructions, 0, bytes.Length);
-            return instructions;
         }
 
         /// <summary>
@@ -85,25 +50,28 @@ namespace FTG.Studios.BISC {
         /// </summary>
         /// <param name="line">Line to parse.</param>
         /// <returns>A single BISC instruction in binary form.</returns>
-        static UInt32 ParseInstruction(string line) {
+        static UInt32[] ParseInstruction(string line) {
 
+            Console.WriteLine(line);
             string[] parameters = line.Split(' ', '\t', ',').Where(s => !string.IsNullOrEmpty(s)).ToArray();
-            foreach (var s in parameters) {
-                Console.WriteLine(s);
-            }
-
             UInt32 instruction = 0x00000000;
+
+            // Check for pseudo instructions
+            if (parameters[0].ToUpper() == "LI") {
+
+            }
 
             byte opcode = GetOpcode(parameters[0]);
             instruction |= (UInt32) opcode << 24;
 
-            ArgumentType[] arg_types = argument_types[opcode];
+            ArgumentType[] arg_types = Specification.argument_types[opcode];
             for (int i = 0; i < arg_types.Length; i++) {
                 switch (arg_types[i]) {
                     case ArgumentType.Register:
                         instruction |= (UInt32) GetRegister(parameters[i + 1]) << (2 - i) * 8;
                         break;
                     case ArgumentType.Address:
+                        instruction |= (UInt32) GetAddress(parameters[i + 1]) << (1 - i) * 8;
                         break;
                     case ArgumentType.IntegerImmediate:
                         instruction |= (UInt32) GetIntegerImmediate(parameters[i + 1]) << (1 - i) * 8;
@@ -113,7 +81,7 @@ namespace FTG.Studios.BISC {
                 }
             }
 
-            return instruction;
+            return new UInt32[] { instruction };
         }
 
         /// <summary>
@@ -126,23 +94,6 @@ namespace FTG.Studios.BISC {
             return BitConverter.ToUInt32(bytes, 0);
         }
 
-        static Dictionary<string, byte> opcodes = new Dictionary<string, byte>() {
-            { "NOP", 0x00 },
-            { "HLT", 0x01 },
-            { "LLI", 0x05 },
-            { "LUI", 0x06 },
-            { "ADD", 0x07 },
-        };
-
-        static ArgumentType[][] argument_types = {
-            new ArgumentType[] { ArgumentType.None, ArgumentType.None, ArgumentType.None },
-            new ArgumentType[] {ArgumentType.None, ArgumentType.None, ArgumentType.None },
-            null, null, null,
-            new ArgumentType[] {ArgumentType.Register, ArgumentType.IntegerImmediate },
-            new ArgumentType[] {ArgumentType.Register, ArgumentType.IntegerImmediate },
-            new ArgumentType[] {ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }
-        };
-
         /// <summary>
         /// Parses a string instruction into a binary opcode.
         /// </summary>
@@ -154,18 +105,14 @@ namespace FTG.Studios.BISC {
             return 0xFF;
         }
 
-        static string[] registers = {
-            "pc", "sp", "ra", "rv", "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7"
-        };
-
         /// <summary>
         /// Parses a register name into its index into the register file.
         /// </summary>
         /// <param name="mneumonic">Register name.</param>
         /// <returns>Register index.</returns>
         static byte GetRegister(string mneumonic) {
-            for (byte i = 0; i < registers.Length; i++) {
-                if (mneumonic == registers[i]) return i;
+            for (byte i = 0; i < Specification.register_names.Length; i++) {
+                if (mneumonic == Specification.register_names[i]) return i;
             }
             return 0xFF;
         }
@@ -174,15 +121,31 @@ namespace FTG.Studios.BISC {
             return 0x00;
         }
 
+        /// <summary>
+        /// Parses a string into an unsigned 16-bit integer.
+        /// </summary>
+        /// <param name="mneumonic">String to parse. Can be a signed or unsigned integer, hexadecimal value prefixed with 0x, binary value prefixed with 0b, or single ASCII character wrapped in single quotes.</param>
+        /// <returns>Unsigned 16-bit integer.</returns>
         static UInt16 GetIntegerImmediate(string mneumonic) {
+
+            // Check for ASCII character
             if (mneumonic[0] == '\'') {
                 if (mneumonic.Length != 3 || mneumonic[2] != '\'') {
-                    InvalidValue(mneumonic);
+                    //InvalidValue(mneumonic);
                     return 0xFFF;
                 }
                 return mneumonic[1];
             }
 
+            // Check if value has prefix
+            if (mneumonic.Length >= 3 && mneumonic[0] == '0') {
+                // Check for hexadecimal value
+                if (mneumonic[1] == 'x' || mneumonic[1] == 'X') return Convert.ToUInt16(mneumonic.Substring(2), 16);
+                // Check for binary value
+                if (mneumonic[1] == 'b' || mneumonic[1] == 'B') return Convert.ToUInt16(mneumonic.Substring(2), 2);
+            }
+
+            // Check for negative value
             bool isNegative = false;
             if (mneumonic[0] == '-') {
                 isNegative = true;
@@ -196,7 +159,7 @@ namespace FTG.Studios.BISC {
                 return imm;
             }
 
-            InvalidValue(mneumonic);
+            //InvalidValue(mneumonic);
             return 0xFFFF;
         }
 

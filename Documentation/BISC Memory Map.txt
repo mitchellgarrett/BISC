@@ -1,0 +1,9 @@
+﻿BISC Memory Map
+---------------
+32-bit address space
+
+0    - 1kb  - metadata
+1kb  - 2kb  - keyboard input memory
+2kb  - 10kb - text display memory (2 bytes per character)
+10kb - 1mb  - video display memory (3 bytes per pixel)
+1mb+        - ram

@@ -39,6 +39,9 @@ load immediate
 load upper immediate
 sign extension?
 
+Pseudo-instructions
+li
+
 lli  dest (reg), arg0 (imm)
 lui dest (reg), arg0 (imm)
 
@@ -48,17 +51,20 @@ sub  dest (reg), arg0 (reg), arg1 (reg)
 mul  dest (reg), arg0 (reg), arg1 (reg)
 div  dest (reg), arg0 (reg), arg1 (reg)
 mod  dest (reg), arg0 (reg), arg1 (reg)
-inc  dest (reg)
-dec  dest (reg)
-neg  dest (reg)
 
+addi
+subi
+muli
+divi
+modi
+
+neg  dest (reg), arg0 (reg)
 not  dest (reg), arg0 (reg)
+inv  dest (reg), arg0 (reg)
+
 and  dest (reg), arg0 (reg), arg1 (reg)
 or   dest (reg), arg0 (reg), arg1 (reg)
 xor  dest (reg), arg0 (reg), arg1 (reg)
-nand dest (reg), arg0 (reg), arg1 (reg)
-nor  dest (reg), arg0 (reg), arg1 (reg)
-xnor dest (reg), arg0 (reg), arg1 (reg)
 bsl  dest (reg), arg0 (reg), arg1 (reg)
 bsr  dest (reg), arg0 (reg), arg1 (reg)
 

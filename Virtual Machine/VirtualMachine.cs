@@ -3,12 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 
 namespace FTG.Studios.BISC {
-    
-    public enum Opcode : byte { 
-        NOP = 0x00, HLT = 0x01, SYS = 0x02, CALL = 0x03, RET = 0x04,
-        LLI = 0x05, LUI = 0x06, ADD = 0x07, SUB = 0x08, MUL = 0x09, DIV = 0x0A, MOD = 0x0B, INC = 0x0C, DEC = 0x0D, NEG = 0x0E,
-        NOT = 0x0F, AND = 0x10, OR = 0x11, XOR = 0x12, NAND = 0x13, NOR = 0x14, XNOR = 0x15, BSL = 0x16, BSR = 0x17
-    };
 
     /// <summary>
     /// BISC virtual machine.
@@ -27,9 +21,39 @@ namespace FTG.Studios.BISC {
         UInt32 ra { get { return registers[2]; } set { registers[2] = value; } }
         UInt32 rv { get { return registers[3]; } set { registers[3] = value; } }
 
+        Program program;
+        bool isRunning;
+
         public VirtualMachine() {
             registers = new UInt32[NUM_REGISTERS];
-            instructions = new InstructionHandler[] { NOP, HLT, null ,null, null, LLI, LUI, ADD };
+            instructions = new InstructionHandler[] { 
+                NOP, HLT, SYS, CALL, RET, 
+                LLI, LUI, MOV, ADD, SUB, MUL, DIV, MOD, 
+                NOT, NEG, INV, AND, OR, XOR, BSL, BSR,
+                JMP, JZ, JNZ, JE, JNE, JGT, JLT, JGE, JLE
+            };
+        }
+
+        public void Execute(Program program) {
+            this.program = program;
+            isRunning = true;
+            pc = 0;
+
+            Console.Clear();
+            PrintRegisters();
+            while (isRunning) {
+                Console.SetCursorPosition(0, 21);
+                Console.Write("Continue execution...");
+                Console.ReadKey(false);
+                
+                UInt32 instruction = program.Instructions[pc / 4];
+                ExecuteInstruction(instruction);
+                pc += 4;
+                if (pc >= program.Instructions.Length * 4) isRunning = false;
+            }
+            Console.SetCursorPosition(0, 21);
+            Console.Write("Program complete...");
+            Console.ReadKey(false);
         }
 
         /// <summary>
@@ -90,6 +114,9 @@ namespace FTG.Studios.BISC {
             }
         }
 
+        #region Instructions
+
+        #region System Instructions
         bool NOP(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.NOP) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
             Console.WriteLine("nop");
@@ -99,6 +126,7 @@ namespace FTG.Studios.BISC {
         bool HLT(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.HLT) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
             Console.WriteLine("hlt");
+            isRunning = false;
             return true;
         }
 
@@ -119,7 +147,9 @@ namespace FTG.Studios.BISC {
             Console.WriteLine("ret");
             return true;
         }
+        #endregion
 
+        #region Load Instructions
         bool LLI(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.LLI) || arg0 >= NUM_REGISTERS) return false;
             UInt16 imm;
@@ -140,6 +170,15 @@ namespace FTG.Studios.BISC {
             return true;
         }
 
+        bool MOV(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.MOV) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 != 0) return false;
+            Console.WriteLine("mov {0}, {1} (0x{2:x8})", register_names[arg0], register_names[arg1], registers[arg1]);
+            registers[arg0] = registers[arg1];
+            return true;
+        }
+        #endregion
+
+        #region Arithmetic Instructions
         bool ADD(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.ADD) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
             Console.WriteLine("add {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
@@ -163,16 +202,144 @@ namespace FTG.Studios.BISC {
 
         bool DIV(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.DIV) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
-            Console.WriteLine("add {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            Console.WriteLine("div {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] / registers[arg2];
             return true;
         }
 
         bool MOD(byte opcode, byte arg0, byte arg1, byte arg2) {
-            if (opcode != ((byte)Opcode.ADD) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            if (opcode != ((byte)Opcode.MOD) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
             Console.WriteLine("mod {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] % registers[arg2];
             return true;
         }
+        #endregion
+
+        #region Negation Instructions
+        bool NOT(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.NEG) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 != 0) return false;
+            Console.WriteLine("not {0}, {1} ({2:x8})", register_names[arg0], register_names[arg1], registers[arg1]);
+            registers[arg0] = registers[arg1] != 0 ? 0u : 1u;
+            return true;
+        }
+
+        bool NEG(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.NEG) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 != 0) return false;
+            Console.WriteLine("neg {0}, {1} ({2:x8})", register_names[arg0], register_names[arg1], registers[arg1]);
+            registers[arg0] = (registers[arg1] ^ 0xFFFFFFFF) + 1;
+            return true;
+        }
+
+        bool INV(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.INV) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 != 0) return false;
+            Console.WriteLine("inv {0}, {1} ({2:x8})", register_names[arg0], register_names[arg1], registers[arg1]);
+            registers[arg0] = registers[arg1] ^ 0xFFFFFFFF;
+            return true;
+        }
+        #endregion
+
+        #region Logical Instructions
+        bool AND(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.AND) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("and {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            registers[arg0] = registers[arg1] & registers[arg2];
+            return true;
+        }
+
+        bool OR(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.OR) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("or {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            registers[arg0] = registers[arg1] | registers[arg2];
+            return true;
+        }
+
+        bool XOR(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.XOR) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("xor {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            registers[arg0] = registers[arg1] ^ registers[arg2];
+            return true;
+        }
+
+        bool BSL(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.BSL) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("bsl {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            registers[arg0] = registers[arg1] << (Int32) registers[arg2];
+            return true;
+        }
+
+        bool BSR(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.BSR) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("bsr {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", register_names[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            registers[arg0] = registers[arg1] >> (Int32)registers[arg2];
+            return true;
+        }
+        #endregion
+
+        #region Jump Instructions
+        bool JMP(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JMP) || arg0 >= NUM_REGISTERS || arg1 != 0 || arg2 != 0) return false;
+            Console.WriteLine("jmp {0} (0x{1:x8})", register_names[arg0], registers[arg0]);
+            pc = registers[arg0];
+            return true;
+        }
+
+        bool JZ(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JZ) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 != 0) return false;
+            Console.WriteLine("jz {0} (0x{1:x8}), {2} (3x{1:x8})", register_names[arg0], registers[arg0], register_names[arg1], registers[arg1]);
+            if (registers[arg1] == 0) pc = registers[arg0] - 4;
+            return true;
+        }
+
+        bool JNZ(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JNZ) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 != 0) return false;
+            Console.WriteLine("jnz {0} (0x{1:x8}), {2} (0x{3:x8})", register_names[arg0], registers[arg0], register_names[arg1], registers[arg1]);
+            if (registers[arg1] != 0) pc = registers[arg0] - 4;
+            return true;
+        }
+
+        bool JE(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JE) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("je {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", register_names[arg0], registers[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            if (registers[arg1] == registers[arg2]) pc = registers[arg0] - 4;
+            return true;
+        }
+
+        bool JNE(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JNE) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("jne {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", register_names[arg0], registers[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            if (registers[arg1] != registers[arg2]) pc = registers[arg0] - 4;
+            return true;
+        }
+
+        bool JGT(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JGT) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("jgt {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", register_names[arg0], registers[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            if (registers[arg1] > registers[arg2]) pc = registers[arg0] - 4;
+            return true;
+        }
+
+        bool JLT(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JLT) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("jlt {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", register_names[arg0], registers[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            if (registers[arg1] < registers[arg2]) pc = registers[arg0] - 4;
+            return true;
+        }
+
+        bool JGE(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JGE) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("jge {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", register_names[arg0], registers[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            if (registers[arg1] >= registers[arg2]) pc = registers[arg0] - 4;
+            return true;
+        }
+
+        bool JLE(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JLE) || arg0 >= NUM_REGISTERS || arg1 >= NUM_REGISTERS || arg2 >= NUM_REGISTERS) return false;
+            Console.WriteLine("jle {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", register_names[arg0], registers[arg0], register_names[arg1], registers[arg1], register_names[arg2], registers[arg2]);
+            if (registers[arg1] <= registers[arg2]) pc = registers[arg0] - 4;
+            return true;
+        }
+        #endregion
+
+        #endregion
     }
 }

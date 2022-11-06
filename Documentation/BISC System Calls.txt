@@ -1,0 +1,53 @@
+﻿BISC System Calls
+-----------------
+0 - clear terminal
+
+1 - set video mode
+  - r0 = 0 (text mode)
+  - r0 = 1 (graphics mode)
+
+2 - set cursor size
+  - r0 = 0 (cursor small)
+  - r0 = 1 (cursor medium)
+  - r0 = 2 (cursor large)
+
+3 - set cursor blink
+  - r0 = 0 (cursor off)
+  - r0 = 1 (cursor on)
+  - r0 = 2 (cursor blink)
+
+4 - set cursor position
+  - r0 = row
+  - r1 = column
+
+5 - set background color
+  - r0 = rgb color
+
+6 - set foreground color
+  - r0 = rgb color
+
+7 - write character
+  - r0 = character
+
+8 - write string
+  - r0 = string address
+  - r1 = string length
+
+9 - write pixel
+  - r0 = y
+  - r1 = x
+  - r2 = rgb color
+
+A - read character
+ - r0 - character
+ - r1 - shift, control, alt
+
+B - read mouse position
+  - r0 - x
+  - r1 - y
+
+C - read mouse button press
+  - r0 - mouse button 0, 1, 2 pressed
+
+D - read mouse buttom release
+  - r0 - mouse button 0, 1, 2 released
