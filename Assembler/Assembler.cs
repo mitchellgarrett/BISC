@@ -41,9 +41,9 @@ namespace FTG.Studios.BISC {
             return program;
         }
 
-        static UInt32[] ResolvePseudoInstruction(string line) {
+        /*static UInt32[] ResolvePseudoInstruction(string line) {
 
-        }
+        }*/
 
         /// <summary>
         /// Parses a line of BISC code into a single binary instruction.
