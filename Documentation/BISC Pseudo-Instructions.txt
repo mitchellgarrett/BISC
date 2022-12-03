@@ -1,0 +1,42 @@
+BISC Pseudo-Instructions
+------------------------
+li dest (reg), arg0 (imm)
+	lli dest, arg0[0-15]
+	lui dest, arg0[16-31]
+
+la dest (reg), arg0 (label/mem)
+	li dest, arg0 ; Loads address of arg0 as immediate value
+
+addi dest (reg), arg0 (reg), arg1 (imm)
+	li dest, arg1
+	add dest, dest, arg0
+
+addi dest (reg), arg0 (imm), arg1 (reg)
+	addi dest, arg1, arg0
+
+subi dest (reg), arg0 (reg), arg1 (imm)
+	li dest, arg1
+	sub dest, arg0, dest
+
+subi dest (reg), arg0 (imm), arg1 (reg)
+	li dest, arg0
+	sub dest, dest, arg1
+
+muli dest (reg), arg0 (reg), arg1 (imm)
+	li dest, arg1
+	mul dest, dest, arg0
+
+muli dest (reg), arg0 (imm), arg1 (reg)
+	muli dest, arg1, arg0
+
+divi dest (reg), arg0 (reg), arg1 (imm)
+	li dest, arg1
+	div dest, arg0, dest
+
+divi dest (reg), arg0 (imm), arg1 (reg)
+	li dest, arg0
+	div dest, dest, arg1
+
+modi dest (reg), arg0 (reg), arg1 (imm)
+	li dest, arg1
+	mod dest, dest, arg0

@@ -1,0 +1,6 @@
+BISC Preprocessor
+-----------------
+
+- Resolves all #defines
+- Resolves all %includes
+- Resolves pseudo-instructions

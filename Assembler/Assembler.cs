@@ -11,6 +11,7 @@ namespace FTG.Studios.BISC {
     public static class Assembler {
 
         static Dictionary<string, byte> opcodes;
+		static Dictionary<string, PseudoOpcode> pseudo_opcodes;
         static Dictionary<string, UInt32> symbols;
 
         /// <summary>
@@ -25,7 +26,15 @@ namespace FTG.Studios.BISC {
                     opcodes[opcode.ToString()] = (byte)opcode;
                 }
             }
-
+			
+			if (pseudo_opcodes == null) {
+                pseudo_opcodes = new Dictionary<string, PseudoOpcode>();
+                foreach (PseudoOpcode opcode in Enum.GetValues(typeof(PseudoOpcode))) {
+                    pseudo_opcodes[opcode.ToString()] = opcode;
+                }
+            }
+			
+			//source = Preprocessor.Preprocess(source);
             List<UInt32> instructions = new List<UInt32>();
             using (StringReader reader = new StringReader(source)) {
                 string line;
@@ -33,7 +42,14 @@ namespace FTG.Studios.BISC {
                     int comment_index = line.IndexOf(Specification.COMMENT);
                     if (comment_index >= 0) line = line.Substring(0, comment_index);
                     if (string.IsNullOrEmpty(line)) continue;
-                    instructions.AddRange(ParseInstruction(line));
+					string[] pseudo = ResolvePseudoInstruction(line);
+					if (pseudo != null) {
+						for	(int i = 0; i < pseudo.Length; i++) {
+							instructions.Add(ParseInstruction(pseudo[i]));
+						}
+					} else {
+                    	instructions.Add(ParseInstruction(line));
+					}
                 }
             }
 
@@ -41,25 +57,26 @@ namespace FTG.Studios.BISC {
             return program;
         }
 
-        /*static UInt32[] ResolvePseudoInstruction(string line) {
-
-        }*/
+        static string[] ResolvePseudoInstruction(string line) {
+			string[] parameters = line.Split(' ', '\t', ',').Where(s => !string.IsNullOrEmpty(s)).ToArray();
+			if (!pseudo_opcodes.TryGetValue(parameters[0].ToUpper(), out PseudoOpcode opcode)) return null;
+			string[] instructions = Specification.pseudo_instructions[(int) opcode];
+			for (int i = 0; i < instructions.Length; i++) {
+				instructions[i] = string.Format(instructions[i].ToLower(), parameters);
+			}
+			return instructions;
+        }
 
         /// <summary>
         /// Parses a line of BISC code into a single binary instruction.
         /// </summary>
         /// <param name="line">Line to parse.</param>
         /// <returns>A single BISC instruction in binary form.</returns>
-        static UInt32[] ParseInstruction(string line) {
+        static UInt32 ParseInstruction(string line) {
 
             Console.WriteLine(line);
             string[] parameters = line.Split(' ', '\t', ',').Where(s => !string.IsNullOrEmpty(s)).ToArray();
             UInt32 instruction = 0x00000000;
-
-            // Check for pseudo instructions
-            if (parameters[0].ToUpper() == "LI") {
-
-            }
 
             byte opcode = GetOpcode(parameters[0]);
             instruction |= (UInt32) opcode << 24;
@@ -81,7 +98,7 @@ namespace FTG.Studios.BISC {
                 }
             }
 
-            return new UInt32[] { instruction };
+            return instruction;
         }
 
         /// <summary>

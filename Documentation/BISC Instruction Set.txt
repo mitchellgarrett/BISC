@@ -31,32 +31,25 @@ pop  arg0 (reg)
 
 // all dem loads ld lh lb, st sh sb
 ld   dest (reg), arg0 (label/mem)
-la   dest (reg), arg0 (label/mem)
 st   dest (mem), arg0 (reg)
-
-// figure out how to use all 32 bits
-load immediate
-load upper immediate
-sign extension?
-
-Pseudo-instructions
-li
+la   dest (reg), arg0 (label/mem)*
 
 lli  dest (reg), arg0 (imm)
-lui dest (reg), arg0 (imm)
-
+lui  dest (reg), arg0 (imm)
+li   dest (reg), arg0 (imm)*
 mov  dest (reg), arg0 (reg)
+
+addi dest (reg), arg0 (reg), arg1 (imm)*
+subi dest (reg), arg0 (reg), arg1 (imm)*
+muli dest (reg), arg0 (reg), arg1 (imm)*
+divi dest (reg), arg0 (reg), arg1 (imm)*
+modi dest (reg), arg0 (reg), arg1 (imm)*
+
 add  dest (reg), arg0 (reg), arg1 (reg)
 sub  dest (reg), arg0 (reg), arg1 (reg)
 mul  dest (reg), arg0 (reg), arg1 (reg)
 div  dest (reg), arg0 (reg), arg1 (reg)
 mod  dest (reg), arg0 (reg), arg1 (reg)
-
-addi
-subi
-muli
-divi
-modi
 
 neg  dest (reg), arg0 (reg)
 not  dest (reg), arg0 (reg)

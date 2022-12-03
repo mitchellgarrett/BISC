@@ -18,7 +18,7 @@ namespace FTG.Studios.BISC {
             new ArgumentType[] { ArgumentType.Register, ArgumentType.IntegerImmediate },                // LLI
             new ArgumentType[] { ArgumentType.Register, ArgumentType.IntegerImmediate },                // LUI
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.None },     // MOV
-
+			
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // ADD
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // SUB
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // MUL
@@ -45,5 +45,10 @@ namespace FTG.Studios.BISC {
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // JGE
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // JLE
         };
+		
+		public readonly static string[][] pseudo_instructions = {
+			new string[] { "LLI {1}, {2}", "LUI {1}, {2}" },
+			new string[] { "LI {1}, {2}" }
+		};
     }
 }
