@@ -13,6 +13,12 @@ VM_SRC = $(wildcard $(VM_DIR)/*.cs) $(CMN_SRC) $(ASM_DIR)/Assembler.cs
 .PHONY: all
 all: $(ASM_EXE) $(VM_EXE)
 
+.PHONY: help
+help:
+	@echo "make     : build all make targets"
+	@echo "make asm : run assembler"
+	@echo "make vm  : run virtual machine"
+
 $(ASM_EXE): $(ASM_SRC)
 	mkdir -p $(BUILD_DIR)
 	csc $(ASM_SRC) -out:$(BUILD_DIR)/$(ASM_EXE)
