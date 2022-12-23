@@ -12,6 +12,6 @@
     };
 	
 	public enum PseudoOpcode : byte {
-		LI, LA, ADDI, SUBI, MULI, DIVI, MODI
+		LI, LA, ADDI, SUBI, MULI, DIVI, MODI, INC, DEC
 	}
 }

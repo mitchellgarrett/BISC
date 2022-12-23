@@ -1,42 +1,75 @@
 BISC Pseudo-Instructions
 ------------------------
 li dest (reg), arg0 (imm)
-	lli dest, arg0[0-15]
-	lui dest, arg0[16-31]
+	lli dest, arg0[0:15]
+	lui dest, arg0[16:31]
 
 la dest (reg), arg0 (label/mem)
 	li dest, arg0 ; Loads address of arg0 as immediate value
 
 addi dest (reg), arg0 (reg), arg1 (imm)
-	li dest, arg1
-	add dest, dest, arg0
+	li rt, arg1
+	add dest, arg0, rt
 
 addi dest (reg), arg0 (imm), arg1 (reg)
-	addi dest, arg1, arg0
+	li rt, arg0
+	add dest, rt, arg1
 
 subi dest (reg), arg0 (reg), arg1 (imm)
-	li dest, arg1
-	sub dest, arg0, dest
+	li rt, arg1
+	sub dest, arg0, rt
 
 subi dest (reg), arg0 (imm), arg1 (reg)
-	li dest, arg0
-	sub dest, dest, arg1
+	li rt, arg0
+	sub dest, rt, arg01
 
 muli dest (reg), arg0 (reg), arg1 (imm)
-	li dest, arg1
-	mul dest, dest, arg0
+	li rt, arg1
+	mul dest, arg0, rt
 
 muli dest (reg), arg0 (imm), arg1 (reg)
-	muli dest, arg1, arg0
+	li rt, arg0
+	mul dest, rt, arg01
 
 divi dest (reg), arg0 (reg), arg1 (imm)
-	li dest, arg1
-	div dest, arg0, dest
+	li rt, arg0
+	div dest, rt, arg01
 
 divi dest (reg), arg0 (imm), arg1 (reg)
-	li dest, arg0
-	div dest, dest, arg1
+	li rt, arg0
+	div dest, rt, arg01
 
 modi dest (reg), arg0 (reg), arg1 (imm)
-	li dest, arg1
-	mod dest, dest, arg0
+	li rt, arg0
+	mod dest, rt, arg01
+
+modi dest (reg), arg0 (imm), arg1 (reg)
+	li rt, arg0
+	mod dest, rt, arg01
+	
+inc dest (reg)
+	addi dest, dest, 1
+
+dec dest (reg)
+	addi dest, dest, -1
+
+push arg0 (reg)
+	subi sp, sp, 4
+	st arg0, sp[0]
+
+push arg0 (imm)
+	subi sp, sp, 4
+	st arg0, sp[0]
+
+pop arg0 (reg)
+	ld arg0, sp[0]
+	add sp, sp, 4
+
+call addr (label)
+	addi ra, pc, 4
+	push ra
+	jmp addr
+
+ret
+	pop ra
+	jmp ra[0]

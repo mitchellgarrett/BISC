@@ -3,10 +3,13 @@ namespace FTG.Studios.BISC {
     public static class Specification {
 
         public const char COMMENT = ';';
+		public const char LABEL_DELIMETER = ':';
 
-        public static readonly string[] register_names = {
-            "pc", "sp", "ra", "rv", "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7"
+        public static readonly string[] REGISTER_NAMES = {
+            "pc", "sp", "ra", "rv", "rt", "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7"
         };
+
+		public static int NUM_REGISTERS { get {return REGISTER_NAMES.Length; } }
 
         public readonly static ArgumentType[][] argument_types = {
             new ArgumentType[] { ArgumentType.None, ArgumentType.None, ArgumentType.None },             // NOP
@@ -47,8 +50,15 @@ namespace FTG.Studios.BISC {
         };
 		
 		public readonly static string[][] pseudo_instructions = {
-			new string[] { "LLI {1}, {2}", "LUI {1}, {2}" },
-			new string[] { "LI {1}, {2}" }
+			new string[] { "LLI {1}, {2}[0]", "LUI {1}, {2}[1]" }, // LI
+			new string[] { "LI {1}, {2}" },                        // LA
+			new string[] { "LI rt, {3}", "ADD {1}, {2}, rt" },     // ADDI
+			new string[] { "LI rt, {3}", "SUB {1}, {2}, rt " },    // SUBI
+			new string[] { "LI rt, {3}", "MUL {1}, {1}, rt" },     // MULI
+			new string[] { "LI rt, {3}", "DIV {1}, {2}, rt" },     // DIVI
+			new string[] { "LI rt, {3}", "MOD {1}, {2}, rt" },     // MODI
+			new string[] { "ADDI {1}, {1}, 1" },                   // INC
+			new string[] { "SUBI {1}, {1}, 1" }                    // DEC
 		};
     }
 }

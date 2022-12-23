@@ -8,6 +8,7 @@ pc - program counter
 sp - stack pointer
 ra - return address
 rv - return value
+rt - temporary register
 r0-r7 - general-purpose registers
 f0-f7 - floating-point registers
 
@@ -18,16 +19,16 @@ Instructions
 comment ::= ;
 reg ::= register
 mem ::= reg[0]
-imm ::= 0 | 0x0 | '0'
+imm ::= 0 | 0x0 | 0b0 | '0'
 
 nop
 hlt
 sys  arg0 (reg/imm)
-call addr (label)
-ret
+call addr (label)*
+ret*
 
-push arg0 (reg/imm)
-pop  arg0 (reg)
+push arg0 (reg/imm)*
+pop  arg0 (reg)*
 
 // all dem loads ld lh lb, st sh sb
 ld   dest (reg), arg0 (label/mem)
@@ -110,14 +111,11 @@ int c = example_function(1, 2);
 
 push 2
 push 1
-//add ra, pc, 1 // ?? wherever return address is
 call example_function
 
 example_function:
-	sub sp, sp, 8  // put 8 bytes of space on stack
-	st r0, sp[0]  // first argument
-	st r1, sp[4]  // second argument
-	add r2, r0, r1 // c = a + b
-	mov rv, r2     // move result to return value
-	add sp, sp, 8  // restore stack pointer
-	ret            // return from function
+	pop r1         ; second argument
+	pop r0         ; first argument
+	add r2, r0, r1 ; c = a + b
+	mov rv, r2     ; move result to return value
+	ret            ; return from function
