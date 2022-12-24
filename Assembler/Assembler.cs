@@ -12,6 +12,7 @@ namespace FTG.Studios.BISC {
 
         static Dictionary<string, byte> opcodes;
         static Dictionary<string, UInt32> symbols;
+		static Dictionary<UInt32, string> unresolved_symbols;
 		
 		static int lineno;
 		
@@ -62,7 +63,6 @@ namespace FTG.Studios.BISC {
         /// <param name="line">Line to parse.</param>
         /// <returns>A single BISC instruction in binary form.</returns>
         static UInt32? ParseInstruction(string line) {
-
             Console.WriteLine(line);
             string[] parameters = line.Split(' ', '\t', ',').Where(s => !string.IsNullOrEmpty(s)).ToArray();
             UInt32 instruction = 0x00000000;
@@ -70,7 +70,7 @@ namespace FTG.Studios.BISC {
             byte? opcode = ParseOpcode(parameters[0]);
 			if (!opcode.HasValue) return null;
             instruction |= (UInt32) opcode.Value << 24;
-
+			
             ArgumentType[] arg_types = Specification.argument_types[opcode.Value];
             for (int i = 0; i < arg_types.Length; i++) {
                 switch (arg_types[i]) {
@@ -82,16 +82,16 @@ namespace FTG.Studios.BISC {
 						}
                         instruction |= (UInt32) reg.Value << (2 - i) * 8;
                         break;
-                    case ArgumentType.Address:
-						byte? addr = ParseAddress(parameters[i + 1]);
-						if (!addr.HasValue) {
+                    case ArgumentType.Memory:
+						UInt16? mem = ParseMemory(parameters[i + 1]);
+						if (!mem.HasValue) {
 							InvalidValue(parameters[i + 1]);
 							return null;
 						}
-                        instruction |= (UInt32) addr.Value << (1 - i) * 8;
+                        instruction |= (UInt32) mem.Value << (1 - i) * 8;
                         break;
                     case ArgumentType.IntegerImmediate:
-						UInt16? imm = ParseInteger(parameters[i + 1]);
+						UInt16? imm = ParseInteger16(parameters[i + 1]);
 						if (!imm.HasValue) {
 							InvalidValue(parameters[i + 1]);
 							return null;
@@ -141,11 +141,30 @@ namespace FTG.Studios.BISC {
 		
 		static UInt32? ParseLabel(string mneumonic) {
 			if (symbols.TryGetValue(mneumonic, out UInt32 value)) return value;
+			//unresolved_symbols[address] = mneumonic;
 			return null;
 		}
 		
-        static byte? ParseAddress(string mneumonic) {
-            return null;
+        static UInt16? ParseMemory(string mneumonic) {
+			byte? reg = ParseRegister(mneumonic.Substring(0, 2));
+			if (!reg.HasValue) return null;
+			
+			string val = mneumonic.Substring(mneumonic.IndexOf('[') + 1, mneumonic.IndexOf(']') - mneumonic.IndexOf('[') - 1);
+			
+			// Check for negative value
+            bool isNegative = false;
+            if (val[0] == '-') {
+                isNegative = true;
+                val = val.Substring(1);
+            }
+            if (byte.TryParse(val, out byte imm)) {
+                if (isNegative) {
+                    imm--;
+                    imm |= 0xFF;
+                }
+            }
+			
+            return Specification.AssembleInteger16(reg.Value, imm);
         }
 
         /// <summary>
@@ -153,7 +172,7 @@ namespace FTG.Studios.BISC {
         /// </summary>
         /// <param name="mneumonic">String to parse. Can be a signed or unsigned integer, hexadecimal value prefixed with 0x, binary value prefixed with 0b, or single ASCII character wrapped in single quotes.</param>
         /// <returns>Unsigned 16-bit integer.</returns>
-        static UInt16? ParseInteger(string mneumonic) {
+        static UInt16? ParseInteger16(string mneumonic) {
 			
 			// Check for label or symbol
 			if (symbols.ContainsKey(mneumonic)) {

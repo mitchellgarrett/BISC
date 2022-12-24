@@ -21,7 +21,7 @@ namespace FTG.Studios.BISC {
 				for (int i = 0; i < parameters.Length; i++) {
 					if (parameters[i].IndexOf('[') >= 0) {
 						string[] tokens = parameters[i].Split('[', ']');
-						UInt32 value = UInt32.Parse(tokens[0]);
+						if (!UInt32.TryParse(tokens[0], out UInt32 value)) continue;
 						int index = int.Parse(tokens[1]);
 						value = (value >> 16 * index) & 0xFFFF;
 						parameters[i] = "0x" + value.ToString("x4");

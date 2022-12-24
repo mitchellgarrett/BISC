@@ -51,25 +51,63 @@ inc dest (reg)
 	addi dest, dest, 1
 
 dec dest (reg)
-	addi dest, dest, -1
+	subi dest, dest, 1
 
 push arg0 (reg)
 	subi sp, sp, 4
 	st arg0, sp[0]
 
 push arg0 (imm)
+	li rt, imm
 	subi sp, sp, 4
-	st arg0, sp[0]
+	st rt, sp[0]
 
 pop arg0 (reg)
 	ld arg0, sp[0]
 	add sp, sp, 4
 
 call addr (label)
-	addi ra, pc, 4
-	push ra
-	jmp addr
+	addi rt, pc, 4
+	push rt
+	la rt, addr
+	jmp rt
 
 ret
-	pop ra
-	jmp ra[0]
+	pop rt
+	jmp rt
+
+jmp addr (label)
+	la rt, addr
+	jmp rt
+
+jez addr (label), arg0 (reg)
+	la rt, addr
+	jez rt, arg0
+
+jnz addr (label), arg0 (reg)
+	la rt, addr
+	jnz rt, arg0
+
+jeq addr (label), arg0 (reg), arg1 (reg)
+	la rt, addr
+	jeq rt, arg0, arg1
+
+jne addr (label), arg0 (reg), arg1 (reg)
+	la rt, addr
+	jne rt, arg0, arg1
+
+jgt addr (label), arg0 (reg), arg1 (reg)
+	la rt, addr
+	jgt rt, arg0, arg1
+
+jlt addr (label), arg0 (reg), arg1 (reg)
+	la rt, addr
+	jlt rt, arg0, arg1
+
+jge addr (label), arg0 (reg), arg1 (reg)
+	la rt, addr
+	jge rt, arg0, arg1
+
+jle addr (label), arg0 (reg), arg1 (reg)
+	la rt, addr
+	jle rt, arg0, arg1

@@ -6,7 +6,7 @@ nop       | 00000000
 hlt       | 01000000
 sys       | 0200iiii
 sys       | 020100rr
-call      | 03mmmm00
+call      | 03rr0000
 ret       | 04000000
 lli       | 05rriiii
 lui       | 06rriiii
@@ -25,11 +25,18 @@ xor       | 12rrrrrr
 bsl       | 13rrrrrr
 bsr       | 14rrrrrr
 jmp       | 15rr0000
-jz        | 16rrrr00
+jez       | 16rrrr00
 jnz       | 17rrrr00
-je        | 18rrrrrr
+jeq       | 18rrrrrr
 jne       | 19rrrrrr
 jgt       | 1Arrrrrr
 jlt       | 1Brrrrrr
 jge       | 1Crrrrrr
 jle       | 1Drrrrrr
+
+ld        | XXrrrrii
+lh        | XXrrrrii
+lb        | XXrrrrii
+st        | XXrrrrii
+sh        | XXrrrrii
+sb        | XXrrrrii
