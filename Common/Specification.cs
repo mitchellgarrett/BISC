@@ -89,7 +89,9 @@ namespace FTG.Studios.BISC {
 			new string[] { "LI rt, {3}", "DIV {1}, {2}, rt" },     // DIVI
 			new string[] { "LI rt, {3}", "MOD {1}, {2}, rt" },     // MODI
 			new string[] { "ADDI {1}, {1}, 1" },                   // INC
-			new string[] { "SUBI {1}, {1}, 1" }                    // DEC
+			new string[] { "SUBI {1}, {1}, 1" },                   // DEC
+			new string[] { "SUBI sp, sp, 4", "ST {1}, sp[0]" },    // PUSH
+			new string[] { "LD {1}, sp[0]", "ADDI sp, sp, 4" },    // POP
 		};
     }
 }

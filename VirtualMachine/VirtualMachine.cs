@@ -208,7 +208,7 @@ namespace FTG.Studios.BISC {
             if (opcode != ((byte)Opcode.RET) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
             Console.WriteLine("ret");
 			// addr = sp[0]
-			UInt32 addr = stack[STACK_END - sp];
+			UInt32 addr = stack[sp];
 			// sp += 4
 			sp += 4;
 			// pc = addr

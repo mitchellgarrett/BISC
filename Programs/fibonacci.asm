@@ -1,7 +1,7 @@
 ; Calculates nth Fibonacci number, set in r0
 ; Returns Fibonacci number in rv
 
-;fibonacci:
+fibonacci:
 	li r0, 7       ; Get 7th fibo number   
 	subi r0, r0, 2 ; Subtract 2 from r0 as we already have first 2 numbers
 	li r1, 0       ; Initialize first fibo number
