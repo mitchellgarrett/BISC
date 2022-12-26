@@ -81,17 +81,19 @@ namespace FTG.Studios.BISC {
         };
 		
 		public readonly static string[][] pseudo_instructions = {
-			new string[] { "LLI {1}, {2}[0]", "LUI {1}, {2}[1]" }, // LI  <- get better syntax
-			new string[] { "LI {1}, {2}" },                        // LA
-			new string[] { "LI rt, {3}", "ADD {1}, {2}, rt" },     // ADDI
-			new string[] { "LI rt, {3}", "SUB {1}, {2}, rt " },    // SUBI
-			new string[] { "LI rt, {3}", "MUL {1}, {1}, rt" },     // MULI
-			new string[] { "LI rt, {3}", "DIV {1}, {2}, rt" },     // DIVI
-			new string[] { "LI rt, {3}", "MOD {1}, {2}, rt" },     // MODI
-			new string[] { "ADDI {1}, {1}, 1" },                   // INC
-			new string[] { "SUBI {1}, {1}, 1" },                   // DEC
-			new string[] { "SUBI sp, sp, 4", "ST {1}, sp[0]" },    // PUSH
-			new string[] { "LD {1}, sp[0]", "ADDI sp, sp, 4" },    // POP
+			new string[] { "LLI {1}, {2}[0]", "LUI {1}, {2}[1]" },   // LI  <- get better syntax
+			new string[] { "LI {1}, {2}" },                          // LA
+			new string[] { "LI rt, {3}", "ADD {1}, {2}, rt" },       // ADDI
+			new string[] { "LI rt, {3}", "SUB {1}, {2}, rt " },      // SUBI
+			new string[] { "LI rt, {3}", "MUL {1}, {1}, rt" },       // MULI
+			new string[] { "LI rt, {3}", "DIV {1}, {2}, rt" },       // DIVI
+			new string[] { "LI rt, {3}", "MOD {1}, {2}, rt" },       // MODI
+			new string[] { "ADDI {1}, {1}, 1" },                     // INC
+			new string[] { "SUBI {1}, {1}, 1" },                     // DEC
+			new string[] { "SUBI sp, sp, 4", "ST {1}, sp[0]" },      // PUSH
+			new string[] { "LD {1}, sp[0]", "ADDI sp, sp, 4" },      // POP
+			new string[] { "ADDI rt, pc, 4", "PUSH rt", "JMP {1}" }, // CALL
+			new string[] { "POP rt", "JMP rt" }                      // RET
 		};
     }
 }

@@ -66,11 +66,26 @@ jez addr (reg), arg0 (reg)
 jnz addr (reg), arg0 (reg)
 jeq addr (reg), arg0 (reg), arg1 (reg)
 jne addr (reg), arg0 (reg), arg1 (reg)
-jgt addr (reg), arg0 (reg), arg1 (reg)
+jgt addr (reg), arg0 (reg), arg1 (reg)*
 jlt addr (reg), arg0 (reg), arg1 (reg)
-jge addr (reg), arg0 (reg), arg1 (reg)
+jge addr (reg), arg0 (reg), arg1 (reg)*
 jle addr (reg), arg0 (reg), arg1 (reg)
 
+Floating Point Instructions
+---------------------------
+fadd
+fsub
+fmul
+fdiv
+fabs
+fsqrt
+fpow
+fjez
+fjnz
+fjeq
+fjne
+fjlt
+fle
 
 Opcode Format
 -------------

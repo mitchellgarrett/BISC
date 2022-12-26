@@ -4,8 +4,11 @@ li dest (reg), arg0 (imm)
 	lli dest, arg0[0:15]
 	lui dest, arg0[16:31]
 
-la dest (reg), arg0 (label/mem)
+la dest (reg), arg0 (label)
 	li dest, arg0 ; Loads address of arg0 as immediate value
+
+la dest (reg), arg0 (mem)
+	ld reg, arg0
 
 addi dest (reg), arg0 (reg), arg1 (imm)
 	li rt, arg1
@@ -96,6 +99,9 @@ jne addr (label), arg0 (reg), arg1 (reg)
 	la rt, addr
 	jne rt, arg0, arg1
 
+jgt dest (reg), arg0 (reg), arg1 (reg)
+	jle dest, arg1, arg0
+
 jgt addr (label), arg0 (reg), arg1 (reg)
 	la rt, addr
 	jgt rt, arg0, arg1
@@ -103,6 +109,9 @@ jgt addr (label), arg0 (reg), arg1 (reg)
 jlt addr (label), arg0 (reg), arg1 (reg)
 	la rt, addr
 	jlt rt, arg0, arg1
+
+jge dest (reg), arg0 (reg), arg1 (reg)
+	jle dest, arg1, arg0
 
 jge addr (label), arg0 (reg), arg1 (reg)
 	la rt, addr
