@@ -33,30 +33,63 @@ namespace FTG.Studios.BISC {
 				symbols = new Dictionary<string, UInt32>();
 			}
 			
+			List<Instruction> insts = new List<Instruction>();
+			
             List<UInt32> instructions = new List<UInt32>();
 			List<string> lines = source.Split('\n').ToList<string>();
-			Preprocessor.ResolvePseudoInstructions(lines);
-			Preprocessor.Preprocess(lines);
 			
-			for (lineno = 0; lineno < lines.Count; lineno++) {
-				string line = lines[lineno];
-				int comment_index = line.IndexOf(Specification.COMMENT);
-				if (comment_index >= 0) line = line.Substring(0, comment_index);
-                if (string.IsNullOrEmpty(line)) continue;
-				
-				if (line.IndexOf(Specification.LABEL_DELIMETER) >= 0) {
-					string label = line.Substring(0, line.IndexOf(Specification.LABEL_DELIMETER));
-					symbols[label] = (UInt32) (instructions.Count * 4 + 4);
+			foreach (string line in lines) {
+				Instruction inst = new Instruction(line);
+				if (string.IsNullOrEmpty(inst.Mneumonic)) continue;
+				insts.Add(inst);
+			}
+			
+			for (int i = 0; i < insts.Count; i++) {
+				Instruction inst = insts[i];
+				Instruction[] reps = ResolvePseudoInstruction(inst);
+				if (reps != null) {
+					insts.RemoveAt(i);
+					insts.InsertRange(i, reps);
+					i--;
 				}
-				
-				UInt32? instruction = ParseInstruction(line);
-				if (instruction.HasValue) instructions.Add(instruction.Value);
+			}
+			
+			foreach (Instruction inst in insts) {
+				Console.WriteLine(inst);
+				instructions.Add(inst.Assemble());
 			}
 
             Program program = new Program(instructions.ToArray());
             return program;
         }
-
+		
+		static Instruction[] ResolvePseudoInstruction(Instruction inst) {
+			for (int i = 0; i < Specification.pseudo_instruction_names.Length; i++) {
+				if (inst.Mneumonic == Specification.pseudo_instruction_names[i]) {
+					bool valid = true;
+					for (int p = 0; p < inst.Parameters.Length; p++) {
+						if (inst.Parameters[p].Type != Specification.pseudo_instruction_arguments[i][p]) {
+							valid = false;
+							break;
+						}
+					}
+					if (valid) {
+						Instruction[] replacements = new Instruction[Specification.pseudo_instruction_definitions[i].Length];
+						for (int s = 0; s < replacements.Length; s++) {
+							string pseudo = Specification.pseudo_instruction_definitions[i][s];
+							string[] vals = new string[inst.Parameters.Length];
+							for (int v = 0; v < vals.Length; v++) {
+								vals[v] = inst.Parameters[v].Mneumonic;
+							}
+							replacements[s] = new Instruction(string.Format(pseudo, vals));
+						}
+						return replacements;
+					}
+				}
+			}
+			return null;
+		}
+		
         /// <summary>
         /// Parses a line of BISC code into a single binary instruction.
         /// </summary>
@@ -90,7 +123,7 @@ namespace FTG.Studios.BISC {
 						}
                         instruction |= (UInt32) mem.Value << (1 - i) * 8;
                         break;
-                    case ArgumentType.IntegerImmediate:
+                    case ArgumentType.Immediate16:
 						UInt16? imm = ParseInteger16(parameters[i + 1]);
 						if (!imm.HasValue) {
 							InvalidValue(parameters[i + 1]);
@@ -115,15 +148,15 @@ namespace FTG.Studios.BISC {
             if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
             return BitConverter.ToUInt32(bytes, 0);
         }
-
+		
         /// <summary>
         /// Parses a string instruction into a binary opcode.
         /// </summary>
         /// <param name="mneumonic">String to parse.</param>
         /// <returns>Opcode in binary form.</returns>
-        static byte? ParseOpcode(string mneumonic) {
+        public static byte? ParseOpcode(string mneumonic) {
             if (opcodes.TryGetValue(mneumonic.ToUpper(), out byte opcode)) return opcode;
-            InvalidInstruction(mneumonic);
+            //InvalidInstruction(mneumonic);
             return null;
         }
 
@@ -132,7 +165,7 @@ namespace FTG.Studios.BISC {
         /// </summary>
         /// <param name="mneumonic">Register name.</param>
         /// <returns>Register index.</returns>
-        static byte? ParseRegister(string mneumonic) {
+        public static byte? ParseRegister(string mneumonic) {
             for (byte i = 0; i < Specification.NUM_REGISTERS; i++) {
                 if (mneumonic == Specification.REGISTER_NAMES[i]) return i;
             }
@@ -145,7 +178,7 @@ namespace FTG.Studios.BISC {
 			return null;
 		}
 		
-        static UInt16? ParseMemory(string mneumonic) {
+        public static UInt16? ParseMemory(string mneumonic) {
 			byte? reg = ParseRegister(mneumonic.Substring(0, 2));
 			if (!reg.HasValue) return null;
 			
@@ -157,10 +190,11 @@ namespace FTG.Studios.BISC {
                 isNegative = true;
                 val = val.Substring(1);
             }
+
             if (byte.TryParse(val, out byte imm)) {
                 if (isNegative) {
                     imm--;
-                    imm |= 0xFF;
+                    imm ^= 0xFF;
                 }
             }
 			
@@ -172,7 +206,7 @@ namespace FTG.Studios.BISC {
         /// </summary>
         /// <param name="mneumonic">String to parse. Can be a signed or unsigned integer, hexadecimal value prefixed with 0x, binary value prefixed with 0b, or single ASCII character wrapped in single quotes.</param>
         /// <returns>Unsigned 16-bit integer.</returns>
-        static UInt16? ParseInteger16(string mneumonic) {
+        public static UInt16? ParseInteger16(string mneumonic) {
 			
 			// Check for label or symbol
 			if (symbols.ContainsKey(mneumonic)) {
@@ -205,7 +239,7 @@ namespace FTG.Studios.BISC {
             if (UInt16.TryParse(mneumonic, out UInt16 imm)) {
                 if (isNegative) {
                     imm--;
-                    imm |= 0xFFFF;
+                    imm ^= 0xFFFF;
                 }
                 return imm;
             }
@@ -213,7 +247,86 @@ namespace FTG.Studios.BISC {
             //InvalidValue(mneumonic);
             return null;
         }
+		
+		/// <summary>
+        /// Parses a string into an unsigned 32-bit integer.
+        /// </summary>
+        /// <param name="mneumonic">String to parse. Can be a signed or unsigned integer, hexadecimal value prefixed with 0x, binary value prefixed with 0b, or single ASCII character wrapped in single quotes.</param>
+        /// <returns>Unsigned 32-bit integer.</returns>
+        public static UInt32? ParseInteger32(string mneumonic) {
+			
+			// Check for label or symbol
+			if (symbols.ContainsKey(mneumonic)) {
+				return symbols[mneumonic];
+			}
+			
+            // Check for ASCII character
+            if (mneumonic[0] == '\'') {
+                if (mneumonic.Length != 3 || mneumonic[2] != '\'') {
+                    //InvalidValue(mneumonic);
+                    return null;
+                }
+                return mneumonic[1];
+            }
+			
+			// Check for byte indices
+			int byte_start = 0;
+			int byte_end = 3;
+			bool hasByteRange = false;
+			if (mneumonic.IndexOf('(') >= 0) {
+				string[] indices = mneumonic.Substring(mneumonic.IndexOf('(') + 1, mneumonic.IndexOf(')') - mneumonic.IndexOf('(') - 1).Split(':');
+				byte_start = int.Parse(indices[0]);
+				byte_end = int.Parse(indices[1]);
+				
+				mneumonic = mneumonic.Substring(0, mneumonic.IndexOf('('));
+				hasByteRange = true;
+			}
+			
+            // Check if value has prefix
+			UInt32 value = 0;
+            if (mneumonic.Length >= 3 && mneumonic[0] == '0') {
+                // Check for hexadecimal value
+                if (mneumonic[1] == 'x' || mneumonic[1] == 'X') value = Convert.ToUInt32(mneumonic.Substring(2), 16);
+                // Check for binary value
+                if (mneumonic[1] == 'b' || mneumonic[1] == 'B') value = Convert.ToUInt32(mneumonic.Substring(2), 2);
+				if (hasByteRange) {
+					value = GetByteRange(value, byte_start, byte_end);
+				}
+				return value;
+            }
 
+            // Check for negative value
+            bool isNegative = false;
+            if (mneumonic[0] == '-') {
+                isNegative = true;
+                mneumonic = mneumonic.Substring(1);
+            }
+            if (UInt32.TryParse(mneumonic, out UInt32 imm)) {
+                if (isNegative) {
+                    imm--;
+                    imm ^= 0xFFFFFFFF;
+                }
+                value = imm;
+				if (hasByteRange) {
+					value = GetByteRange(value, byte_start, byte_end);
+				}
+				return value;
+            }
+
+            //InvalidValue(mneumonic);
+            return null;
+        }
+		
+		static UInt32 GetByteRange(UInt32 value, int byte_start, int byte_end) {
+			int num_bytes = byte_end - byte_start;
+			UInt32 mask = 0;
+			while (num_bytes >= 0) {
+				mask |= (UInt32) (0xFF << 8 * num_bytes);
+				num_bytes--;
+			} 
+			return (value >> byte_start * 8) & mask;
+		}
+		
         static byte? GetSignedImmediate(string mneumonic) {
             return null;
         }

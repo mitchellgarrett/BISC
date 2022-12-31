@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace FTG.Studios.BISC {
 
@@ -35,15 +36,15 @@ namespace FTG.Studios.BISC {
             return bytes;
 		}
 		
-        public readonly static ArgumentType[][] argument_types = {
+        public static readonly ArgumentType[][] argument_types = {
             new ArgumentType[] { ArgumentType.None, ArgumentType.None, ArgumentType.None },             // NOP
             new ArgumentType[] { ArgumentType.None, ArgumentType.None, ArgumentType.None },             // HLT
-            new ArgumentType[] { ArgumentType.None, ArgumentType.IntegerImmediate },                    // SYS
-            new ArgumentType[] { ArgumentType.Register, ArgumentType.None },                            // CALL
+            new ArgumentType[] { ArgumentType.Register, ArgumentType.None, ArgumentType.None },         // SYS
+            new ArgumentType[] { ArgumentType.Register, ArgumentType.None, ArgumentType.None },         // CALL
             new ArgumentType[] { ArgumentType.None, ArgumentType.None, ArgumentType.None },             // RET
 
-            new ArgumentType[] { ArgumentType.Register, ArgumentType.IntegerImmediate },                // LLI
-            new ArgumentType[] { ArgumentType.Register, ArgumentType.IntegerImmediate },                // LUI
+            new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate16 },                     // LLI
+            new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate16 },                     // LUI
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.None },     // MOV
 			
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Memory },                          // LD
@@ -80,187 +81,85 @@ namespace FTG.Studios.BISC {
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // JLE
         };
 		
-		public readonly static string[][] pseudo_instructions = {
+		public static readonly string[] pseudo_instruction_names = new string[] {
+			"LI", "LA",
+			"SYS", "CALL",
+			"PUSH", "PUSH", "PUSHH", "PUSHH", "PUSHB", "PUSHB",
+			"POP", "POPH", "POPB",
+			"ADDI", "ADDI", "SUBI", "SUBI", "MULI", "MULI", "DIVI", "DIVI", "MODI",
+			"INC", "DEC"
+		};
+		
+		public static readonly ArgumentType[][] pseudo_instruction_arguments = new ArgumentType[][] {
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // LI {imm}
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // LA {imm}
 			
-			// CALL {imm}
-			new string[] {
-				"CALL {imm}",
-				"LA rt", "CALL rt"
-			},
+			new ArgumentType[] { ArgumentType.Immediate32 },                                               // SYS {imm}
+			new ArgumentType[] { ArgumentType.Immediate32 },                                               // CALL {imm}
 			
-			// PUSH {reg}
-			new string[] { 
-				"PUSH {reg}",
-				"ST {1}, sp[-4]", "SUBI sp, sp, 4"
-			},
+			new ArgumentType[] { ArgumentType.Register },                                                  // PUSH {reg}
+			new ArgumentType[] { ArgumentType.Immediate32 },                                               // PUSH {imm}
+			new ArgumentType[] { ArgumentType.Register },                                                  // PUSHH {reg}
+			new ArgumentType[] { ArgumentType.Immediate32 },                                               // PUSHH {imm}
+			new ArgumentType[] { ArgumentType.Register },                                                  // PUSHB {reg}
+			new ArgumentType[] { ArgumentType.Immediate32 },                                               // PUSHB {imm}
 			
-			// PUSHH {reg}
-			new string[] { 
-				"PUSHH {reg}",
-				"SH {1}, sp[-2]", "SUBI sp, sp, 2"
-			},
+			new ArgumentType[] { ArgumentType.Register },                                                  // POP {reg}
+			new ArgumentType[] { ArgumentType.Register },                                                  // POPH {reg}
+			new ArgumentType[] { ArgumentType.Register },                                                  // POPB {reg}
 			
-			// PUSHB {reg}
-			new string[] {
-				"PUSHB {reg}",
-				"SB {1}, sp[-1]", "DEC sp"
-			},
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Immediate32 }, // ADDI {reg}, {reg}, {imm}
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32, ArgumentType.Register }, // ADDI {reg}, {imm}, {reg}
 			
-			// POP {reg}
-			new string[] { 
-				"POP {reg}",
-				"ADDI sp, sp, 4", "LD {1}, sp[-4]"
-			},
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Immediate32 }, // SUBI {reg}, {reg}, {imm}
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32, ArgumentType.Register }, // SUBI {reg}, {imm}, {reg}
 			
-			// POPH {reg}
-			new string[] {
-				"POPH {reg}",
-				"ADDI sp, sp, 2", "LD {1}, sp[-2]"
-			},
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Immediate32 }, // MULI {reg}, {reg}, {imm}
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32, ArgumentType.Register }, // MULI {reg}, {imm}, {reg}
 			
-			// POPB {reg}
-			new string[] { 
-				"OPB {reg}",
-				"INC sp", "LB {1}, sp[-1]"
-			},
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Immediate32 }, // DIVI {reg}, {reg}, {imm}
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32, ArgumentType.Register }, // DIVI {reg}, {imm}, {reg}
 			
-			// LI {imm}
-			new string[] { 
-				"LI {imm}",
-				"LLI {1}, {2}(0:15)", "LUI {1}, {2}(16:31)"
-			},
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Immediate32 }, // MODI {reg}, {reg}, {imm}
 			
-			// LA {imm}
-			new string[] { 
-				"LA {imm}",
-				"LI {1}, {2}"
-			},
+			new ArgumentType[] { ArgumentType.Register },                                                  // INC {reg}
+			new ArgumentType[] { ArgumentType.Register },                                                  // DEC {reg}
+		};
+		
+		public static readonly string[][] pseudo_instruction_definitions = new string[][] {
+			new string[] { "LLI {0}, {1}(0:1)", "LUI {0}, {1}(2:3)" }, // LI {imm}
+			new string[] { "LI {0}, {1}" },                            // LA {imm}
 			
-			// ADDI {reg}, {reg}, {imm}
-			new string[] { 
-				"ADDI {reg}, {reg}, {imm}",
-				"LI rt, {3}", "ADD {1}, {2}, rt"
-			},
+			new string[] { "LI rt, {0}", "SYS rt" },                   // SYS {imm}
+			new string[] { "LI rt, {0}", "CALL rt" },                  // CALL {imm}
 			
-			// ADDI {reg}, {imm}, {reg}
-			new string[] { 
-				"ADDI {reg}, {imm}, {reg}",
-				"LI rt, {2}", "ADD {1}, rt, {3}"
-			},
+			new string[] { "ST {0}, sp[-4]", "SUBI sp, sp, 4" },       // PUSH {reg}
+			new string[] { "LI rt, {0}", "PUSH rt" },                  // PUSH {imm}
+			new string[] { "ST {0}, sp[-2]", "SUBI sp, sp, 4" },       // PUSHH {reg}
+			new string[] { "LI rt, {0}", "PUSHH rt" },                 // PUSHH {imm}
+			new string[] { "ST {0}, sp[-1]", "DEC sp" },               // PUSHB {reg}
+			new string[] { "LI rt, {0}", "PUSHB rt" },                 // PUSHB {imm}
 			
-			// SUBI {reg}, {reg}, {imm}
-			new string[] { 
-				"SUBI {reg}, {reg}, {imm}",
-				"LI rt, {3}", "SUB {1}, {2}, rt"
-			},
+			new string[] { "ADDI sp, sp, 4", "LD {0}, sp[-4]" },        // POP {reg}
+			new string[] { "ADDI sp, sp, 2", "LD {0}, sp[-2]" },        // POPH {reg}
+			new string[] { "INC sp", "LB {0}, sp[-1]" },                // POPB {reg}
 			
-			// SUBI {reg}, {imm}, {reg}
-			new string[] { 
-				"SUBI {reg}, {imm}, {reg}",
-				"LI rt, {2}", "SUB {1}, rt, {3}"
-			},
+			new string[] { "LI rt, {2}", "ADD {0}, {1}, rt" },         // ADDI {reg}, {reg}, {imm}
+			new string[] { "LI rt, {1}", "ADD {0}, rt, {2}" },         // ADDI {reg}, {imm}, {reg}
 			
-			// MULI {reg}, {reg}, {imm}
-			new string[] { 
-				"MULI {reg}, {reg}, {imm}",
-				"LI rt, {3}", "MUL {1}, {2}, rt"
-			},
+ 			new string[] { "LI rt, {2}", "SUB {0}, {1}, rt" },        // SUBI {reg}, {reg}, {imm}
+			new string[] { "LI rt, {1}", "SUB {0}, rt, {2}" },        // SUBI {reg}, {imm}, {reg}
 			
-			// MULI {reg}, {imm}, {reg}
-			new string[] { 
-				"MULI {reg}, {imm}, {reg}",
-				"LI rt, {2}", "MUL {1}, rt, {3}"
-			},
+ 			new string[] { "LI rt, {2}", "MUL {0}, {1}, rt" },         // MULI {reg}, {reg}, {imm}
+			new string[] { "LI rt, {1}", "MUL {0}, rt, {2}" },         // MULI {reg}, {imm}, {reg}
 			
-			// DIVI {reg}, {reg}, {imm}
-			new string[] { 
-				"DIVI {reg}, {reg}, {imm}",
-				"LI rt, {3}", "DIV {1}, {2}, rt"
-			},
+ 			new string[] { "LI rt, {2}", "DIV {0}, {1}, rt" },         // DIVI {reg}, {reg}, {imm}
+			new string[] { "LI rt, {1}", "DIV {0}, rt, {2}" },         // DIVI {reg}, {imm}, {reg}
 			
-			// DIVI {reg}, {imm}, {reg}
-			new string[] { 
-				"DIVI {reg}, {imm}, {reg}",
-				"LI rt, {2}", "DIV {1}, rt, {3}"
-			},
+ 			new string[] { "LI rt, {2}", "MOD {0}, {1}, rt" },         // MODI {reg}, {reg}, {imm}
 			
-			// MODI {reg}, {reg}, {imm}
-			new string[] { 
-				"MODI {reg}, {reg}, {imm}",
-				"LI rt, {3}", "MOD {1}, {2}, rt"
-			},
-			
-			// MODI {reg}, {imm}, {reg}
-			new string[] { 
-				"MODI {reg}, {imm}, {reg}",
-				"LI rt, {2}", "MOD {1}, rt, {3}"
-			},
-			
-			// INC {reg}
-			new string[] { 
-				"INC {reg}",
-				"ADDI {1}, {1}, 1"
-			},
-			
-			// DEC {reg}
-			new string[] { 
-				"DEC {reg}",
-				"SUBI {1}, {1}, 1"
-			},
-			
-			// JMP {imm}
-			new string[] { 
-				"JMP {imm}",
-				"LA rt, {1}", "JMP rt"
-			},
-			
-			// JEZ {imm}, {reg}
-			new string[] { 
-				"JEZ {imm}, {reg}",
-				"LA rt, {1}", "JEZ rt, {2}, {3}"
-			},
-			
-			// JEZ {imm}, {reg}
-			new string[] { 
-				"JEZ {imm}, {reg}",
-				"LA rt, {1}", "JNZ rt, {2}, {3]"
-			},
-			
-			// JEQ {imm}, {reg}, {reg}
-			new string[] { 
-				"JEQ {imm}, {reg}, {reg}",
-				"LA rt, {1}", "JEQ rt, {2}, {3]"
-			},
-			
-			// JNE {imm}, {reg}, {reg}
-			new string[] { 
-				"JNE {imm}, {reg}, {reg}",
-				"LA rt, {1}", "JNE rt, {2}, {3]"
-			},
-			
-			// JLT {imm}, {reg}, {reg}
-			new string[] { 
-				"JLT {imm}, {reg}, {reg}",
-				"LA rt, {1}", "JLT rt, {2}, {3]"
-			},
-			
-			// JGT {imm}, {reg}, {reg}
-			new string[] { 
-				"JGT {imm}, {reg}, {reg}",
-				"LA rt, {1}", "JGT rt, {2}, {3]"
-			},
-			
-			// JLE {imm}, {reg}, {reg}
-			new string[] { 
-				"JLE {imm}, {reg}, {reg}",
-				"LA rt, {1}", "JLE rt, {2}, {3]"
-			},
-			
-			// JGE {imm}, {reg}, {reg}
-			new string[] { 
-				"JGE {imm}, {reg}, {reg}",
-				"LA rt, {1}", "JGE rt, {2}, {3]"
-			}
+			new string[] { "ADDI {0}, {-}, 1" },                       // INC {reg}
+ 			new string[] { "SUBI {0}, {0}, 1" },                       // DEC {reg}
 		};
     }
 }

@@ -10,6 +10,51 @@ la dest (reg), arg0 (label)
 la dest (reg), arg0 (mem)
 	ld reg, arg0
 
+sys arg0 (imm)
+	li rt, imm
+	sys rt
+
+call arg0 (imm)
+	li rt, imm
+	call rt
+
+push arg0 (reg)
+	st arg0, sp[-4]
+	subi sp, sp, 4
+
+push arg0 (imm)
+	li rt, arg0
+	st rt, sp[-4]
+	subi sp, sp, 4
+
+pushh arg0 (reg)
+	sh arg0, sp[-2]
+	subi sp, sp, 2
+
+pushh arg0 (imm)
+	li rt, imm
+	pushh rt
+
+pushb arg0 (reg)
+	sh arg0, sp[-1]
+	dec sp
+
+pushb arg0 (imm)
+	li rt, imm
+	pushb rt
+
+pop arg0 (reg)
+	addi sp, sp, 4
+	ld arg0, sp[-4]
+
+poph arg0 (reg)
+	addi sp, sp, 2
+	lh arg0, sp[-2]
+
+popb arg0 (reg)
+	inc sp
+	lb arg0, sp[-1]
+
 addi dest (reg), arg0 (reg), arg1 (imm)
 	li rt, arg1
 	add dest, arg0, rt
@@ -55,35 +100,6 @@ inc dest (reg)
 
 dec dest (reg)
 	subi dest, dest, 1
-
-push arg0 (reg)
-	st arg0, sp[-4]
-	subi sp, sp, 4
-
-push arg0 (imm)
-	li rt, arg0
-	st rt, sp[-4]
-	subi sp, sp, 4
-
-pushh arg0 (reg)
-	sh arg0, sp[-1]
-	dec sp
-
-pushb arg0 (reg)
-	sh arg0, sp[-2]
-	subi sp, sp, 2
-
-pop arg0 (reg)
-	addi sp, sp, 4
-	ld arg0, sp[-4]
-
-poph arg0 (reg)
-	addi sp, sp, 2
-	lh arg0, sp[-2]
-
-popb arg0 (reg)
-	inc sp
-	lb arg0, sp[-1]
 
 jmp addr (label)
 	la rt, addr
