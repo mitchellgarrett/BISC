@@ -33,33 +33,31 @@ namespace FTG.Studios.BISC {
 				symbols = new Dictionary<string, UInt32>();
 			}
 			
-			List<Instruction> insts = new List<Instruction>();
-			
-            List<UInt32> instructions = new List<UInt32>();
+			List<Instruction> instructions = new List<Instruction>();
 			List<string> lines = source.Split('\n').ToList<string>();
-			
 			foreach (string line in lines) {
 				Instruction inst = new Instruction(line);
 				if (string.IsNullOrEmpty(inst.Mneumonic)) continue;
-				insts.Add(inst);
+				instructions.Add(inst);
 			}
 			
-			for (int i = 0; i < insts.Count; i++) {
-				Instruction inst = insts[i];
-				Instruction[] reps = ResolvePseudoInstruction(inst);
-				if (reps != null) {
-					insts.RemoveAt(i);
-					insts.InsertRange(i, reps);
-					i--;
+			for (int i = 0; i < instructions.Count; i++) {
+				Instruction[] pseudo = ResolvePseudoInstruction(instructions[i]);
+				if (pseudo != null) {
+					instructions.RemoveAt(i);
+					instructions.InsertRange(i--, pseudo);
 				}
 			}
 			
-			foreach (Instruction inst in insts) {
+			Optimizer.Optimize(instructions);
+			
+			List<UInt32> machine_code = new List<UInt32>();
+			foreach (Instruction inst in instructions) {
 				Console.WriteLine(inst);
-				instructions.Add(inst.Assemble());
+				machine_code.Add(inst.Assemble());
 			}
 
-            Program program = new Program(instructions.ToArray());
+            Program program = new Program(machine_code.ToArray());
             return program;
         }
 		
@@ -96,7 +94,6 @@ namespace FTG.Studios.BISC {
         /// <param name="line">Line to parse.</param>
         /// <returns>A single BISC instruction in binary form.</returns>
         static UInt32? ParseInstruction(string line) {
-            Console.WriteLine(line);
             string[] parameters = line.Split(' ', '\t', ',').Where(s => !string.IsNullOrEmpty(s)).ToArray();
             UInt32 instruction = 0x00000000;
 
