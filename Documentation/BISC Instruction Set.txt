@@ -2,8 +2,10 @@
 
 
 
+---------
 Registers
 ---------
+
 pc - program counter
 sp - stack pointer
 rv - return value
@@ -13,19 +15,30 @@ f0-f7 - floating-point registers
 
 
 
-Instructions
-------------
+------------------
+General Formatting
+------------------
+
 comment ::= ;
 reg ::= register
 mem ::= reg[0]
 imm ::= 0 | 0x0 | 0b0 | '0'
 
+------------
+Instructions
+------------
+
+General
+-------
 nop
 hlt
 sys  arg0 (reg)
 call addr (reg)
 ret
 
+
+Stack Operations
+----------------
 push arg0 (reg)*
 push arg0 (imm)*
 pushw arg0 (reg)*
@@ -37,6 +50,8 @@ pop  arg0 (reg)*
 popw  arg0 (reg)*
 popb  arg0 (reg)*
 
+Loading and Storing
+-------------------
 // all dem loads ld lh lb, st sh sb
 ld   dest (reg), arg0 (label/mem)
 st   dest (mem), arg0 (reg)
@@ -47,6 +62,8 @@ lui  dest (reg), arg0 (imm)
 li   dest (reg), arg0 (imm)*
 mov  dest (reg), arg0 (reg)
 
+Arithmetic and Logic
+--------------------
 addi dest (reg), arg0 (reg), arg1 (imm)*
 subi dest (reg), arg0 (reg), arg1 (imm)*
 muli dest (reg), arg0 (reg), arg1 (imm)*
@@ -69,6 +86,8 @@ xor  dest (reg), arg0 (reg), arg1 (reg)
 bsl  dest (reg), arg0 (reg), arg1 (reg)
 bsr  dest (reg), arg0 (reg), arg1 (reg)
 
+Jumping and branching
+---------------------
 jmp addr (reg)
 jez addr (reg), arg0 (reg)
 jnz addr (reg), arg0 (reg)
