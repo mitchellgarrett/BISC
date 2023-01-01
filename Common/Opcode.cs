@@ -12,8 +12,4 @@
 		AND = 0x16, OR = 0x17, XOR = 0x18, BSL = 0x19, BSR = 0x1A,
         JMP = 0x1B, JEZ = 0x1C, JNZ = 0x1D, JEQ = 0x1E, JNE = 0x1F, JGT = 0x20, JLT = 0x21, JGE = 0x22, JLE = 0x23
     };
-	
-	public enum PseudoOpcode : byte {
-		LI, LA, PUSH, POP, ADDI, SUBI, MULI, DIVI, MODI, INC, DEC
-	}
 }

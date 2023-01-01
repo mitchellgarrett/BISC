@@ -23,6 +23,7 @@ namespace FTG.Studios.BISC {
 		const UInt32 STACK_END = STACK_SIZE;
 		const UInt32 STACK_START = STACK_END - STACK_SIZE;
 		Dictionary<UInt32, byte> memory;
+		Queue<UInt32> return_address_stack;
 		
         Program program;
         public bool IsRunning { get; private set; }
@@ -31,6 +32,7 @@ namespace FTG.Studios.BISC {
         public VirtualMachine() {
             registers = new UInt32[Specification.NUM_REGISTERS];
 			memory = new Dictionary<UInt32, byte>();
+			return_address_stack = new Queue<UInt32>();
             instructions = new InstructionHandler[] { 
                 NOP, HLT, SYS, CALL, RET, 
                 LLI, LUI, MOV, 
@@ -205,17 +207,28 @@ namespace FTG.Studios.BISC {
         bool CALL(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.CALL) || !ValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
             Console.WriteLine("call {0} (0x{1:x8})", Specification.REGISTER_NAMES[arg0], arg0);
-			sp -= 4;
-			SetMemory32(sp, pc + 4);
-			pc = registers[arg0];
+			
+			// Push address of next instruction to stack
+			// pc is not increment by 4 to get next address because that is done automatically by the VM after this instruction runs
+			//sp -= 4;
+			//SetMemory32(sp, pc);
+			
+			// pc has to be set to address 4 before called address
+			// because pc is automatically incremented by 4 after each instruction
+			return_address_stack.Enqueue(pc);
+			pc = registers[arg0] - 4;
             return true;
         }
-
+		
         bool RET(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.RET) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
             Console.WriteLine("ret");
-			UInt32 addr = GetMemory32(sp);
-			sp += 4;
+			
+			// Pop return address from stack and set pc to it
+			//UInt32 addr = GetMemory32(sp);
+			//sp += 4;
+			if (return_address_stack.Count <= 0) return false;
+			UInt32 addr = return_address_stack.Dequeue();
 			pc = addr;
             return true;
         }
@@ -248,52 +261,58 @@ namespace FTG.Studios.BISC {
 		
 		#region Memory Instructions
 		bool LD(byte opcode, byte arg0, byte arg1, byte arg2) {
-            if (opcode != ((byte)Opcode.LD) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-			UInt32 addr = registers[arg1] + arg2;
+            if (opcode != ((byte)Opcode.LD) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
+			sbyte offset = (sbyte) arg2;
+			UInt32 addr = (UInt32) (registers[arg1] + offset);
 			UInt32 value = GetMemory32(addr);
-            Console.WriteLine("ld {0}, {1}[{2}] (0x{3:x8}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], arg2, value, addr);
+            Console.WriteLine("ld {0}, {1}[{2}] (0x{3:x8}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], offset, value, addr);
             registers[arg0] = value;
             return true;
         }
 		
 		bool LH(byte opcode, byte arg0, byte arg1, byte arg2) {
-            if (opcode != ((byte)Opcode.LH) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-			UInt32 addr = registers[arg1] + arg2;
+            if (opcode != ((byte)Opcode.LH) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
+			sbyte offset = (sbyte) arg2;
+			UInt32 addr = (UInt32) (registers[arg1] + offset);
 			UInt16 value = GetMemory16(addr);
-            Console.WriteLine("ld {0}, {1}[{2}] (0x{3:x4}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], arg2, value, addr);
+            Console.WriteLine("ld {0}, {1}[{2}] (0x{3:x4}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], offset, value, addr);
             registers[arg0] = value;
             return true;
         }
 		
 		bool LB(byte opcode, byte arg0, byte arg1, byte arg2) {
-            if (opcode != ((byte)Opcode.LB) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-			UInt32 addr = registers[arg1] + arg2;
+            if (opcode != ((byte)Opcode.LB) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
+			sbyte offset = (sbyte) arg2;
+			UInt32 addr = (UInt32) (registers[arg1] + offset);
 			byte value = GetMemory8(addr);
-            Console.WriteLine("ld {0}, {1}[{2}] (0x{3:x2}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], arg2, value, addr);
+            Console.WriteLine("ld {0}, {1}[{2}] (0x{3:x2}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], offset, value, addr);
             registers[arg0] = value;
             return true;
         }
 		
 		bool ST(byte opcode, byte arg0, byte arg1, byte arg2) {
-            if (opcode != ((byte)Opcode.ST) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-			UInt32 addr = registers[arg1] + arg2;
-            Console.WriteLine("st {0} (0x{1:x8}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], arg2, addr);
+            if (opcode != ((byte)Opcode.ST) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
+			sbyte offset = (sbyte) arg2;
+			UInt32 addr = (UInt32) (registers[arg1] + offset);
+            Console.WriteLine("st {0} (0x{1:x8}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], offset, addr);
 			SetMemory32(addr, registers[arg0]);
             return true;
         }
 		
 		bool SH(byte opcode, byte arg0, byte arg1, byte arg2) {
-            if (opcode != ((byte)Opcode.SH) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-			UInt32 addr = registers[arg1] + arg2;
-            Console.WriteLine("sh {0} (0x{1:x4}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0] & 0xFFFF, Specification.REGISTER_NAMES[arg1], arg2, addr);
+            if (opcode != ((byte)Opcode.SH) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
+			sbyte offset = (sbyte) arg2;
+			UInt32 addr = (UInt32) (registers[arg1] + offset);
+            Console.WriteLine("sh {0} (0x{1:x4}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0] & 0xFFFF, Specification.REGISTER_NAMES[arg1], offset, addr);
 			SetMemory16(addr, registers[arg0]);
             return true;
         }
 		
 		bool SB(byte opcode, byte arg0, byte arg1, byte arg2) {
-            if (opcode != ((byte)Opcode.SB) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-			UInt32 addr = registers[arg1] + arg2;
-            Console.WriteLine("sb {0} (0x{1:x2}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0] & 0xFF, Specification.REGISTER_NAMES[arg1], arg2, addr);
+            if (opcode != ((byte)Opcode.SB) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
+			sbyte offset = (sbyte) arg2;
+			UInt32 addr = (UInt32) (registers[arg1] + offset);
+            Console.WriteLine("sb {0} (0x{1:x2}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0] & 0xFF, Specification.REGISTER_NAMES[arg1], offset, addr);
 			SetMemory8(addr, registers[arg0]);
             return true;
         }
@@ -400,7 +419,7 @@ namespace FTG.Studios.BISC {
         bool JMP(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JMP) || !ValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
             Console.WriteLine("jmp {0} (0x{1:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0]);
-            pc = registers[arg0];
+            pc = registers[arg0] - 4;
             return true;
         }
 

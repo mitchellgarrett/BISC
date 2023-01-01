@@ -22,12 +22,20 @@ imm ::= 0 | 0x0 | 0b0 | '0'
 
 nop
 hlt
-sys  arg0 (reg/imm)
-call addr (reg)*
-ret*
+sys  arg0 (reg)
+call addr (reg)
+ret
 
-push arg0 (reg/imm)*
+push arg0 (reg)*
+push arg0 (imm)*
+pushw arg0 (reg)*
+pushw arg0 (imm)*
+pushb arg0 (reg)*
+pushb arg0 (imm)*
+
 pop  arg0 (reg)*
+popw  arg0 (reg)*
+popb  arg0 (reg)*
 
 // all dem loads ld lh lb, st sh sb
 ld   dest (reg), arg0 (label/mem)

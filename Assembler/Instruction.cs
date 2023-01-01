@@ -18,6 +18,14 @@ namespace FTG.Studios.BISC {
             if (string.IsNullOrEmpty(source)) return;
 			string[] parameters = source.Split(' ', '\t', ',').Where(s => !string.IsNullOrEmpty(s)).ToArray();
 			
+			if (parameters[0].IndexOf(':') > 0) {
+				Mneumonic = "SYMBOL";
+				Parameters = new Parameter[1];
+				Parameters[0].Type = ArgumentType.Symbol;
+				Parameters[0].Mneumonic = parameters[0].Substring(0, parameters[0].IndexOf(':'));
+				return;
+			}
+			
 			Mneumonic = parameters[0].ToUpper();
 			Opcode = (Opcode?) Assembler.ParseOpcode(Mneumonic);
 			
@@ -47,6 +55,9 @@ namespace FTG.Studios.BISC {
 					Parameters[i].Value = mem.Value;
 					continue;
 				}
+				
+				Parameters[i].Type = ArgumentType.Symbol;
+				Parameters[i].Value = 0xFFFFFFFF;
 			}
 		}
 		
@@ -82,6 +93,9 @@ namespace FTG.Studios.BISC {
 						break;
 					case ArgumentType.Immediate32:
 						value += $" {Parameters[i].Mneumonic} ({Parameters[i].Type}, 0x{Parameters[i].Value:x8})";
+						break;
+					case ArgumentType.Symbol:
+						value += $" {Parameters[i].Mneumonic} ({Parameters[i].Type})";
 						break;
 				}
 				if (i < Parameters.Length - 1) value += ",";

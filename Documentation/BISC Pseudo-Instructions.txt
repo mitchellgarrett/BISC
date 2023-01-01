@@ -27,13 +27,13 @@ push arg0 (imm)
 	st rt, sp[-4]
 	subi sp, sp, 4
 
-pushh arg0 (reg)
+pushw arg0 (reg)
 	sh arg0, sp[-2]
 	subi sp, sp, 2
 
-pushh arg0 (imm)
+pushw arg0 (imm)
 	li rt, imm
-	pushh rt
+	pushw rt
 
 pushb arg0 (reg)
 	sh arg0, sp[-1]
@@ -47,7 +47,7 @@ pop arg0 (reg)
 	addi sp, sp, 4
 	ld arg0, sp[-4]
 
-poph arg0 (reg)
+popw arg0 (reg)
 	addi sp, sp, 2
 	lh arg0, sp[-2]
 

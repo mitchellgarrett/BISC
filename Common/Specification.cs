@@ -71,7 +71,7 @@ namespace FTG.Studios.BISC {
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // BSR
 
             new ArgumentType[] { ArgumentType.Register, ArgumentType.None, ArgumentType.None },         // JMP
-            new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.None },     // JZ
+            new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.None },     // JEZ
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.None },     // JNZ
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // JE
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // JNE
@@ -84,10 +84,11 @@ namespace FTG.Studios.BISC {
 		public static readonly string[] pseudo_instruction_names = new string[] {
 			"LI", "LA",
 			"SYS", "CALL",
-			"PUSH", "PUSH", "PUSHH", "PUSHH", "PUSHB", "PUSHB",
-			"POP", "POPH", "POPB",
+			"PUSH", "PUSH", "PUSHW", "PUSHW", "PUSHB", "PUSHB",
+			"POP", "POPW", "POPB",
 			"ADDI", "ADDI", "SUBI", "SUBI", "MULI", "MULI", "DIVI", "DIVI", "MODI",
-			"INC", "DEC"
+			"INC", "DEC",
+			"JMP", "JEZ", "JNZ", "JEQ", "JNE", "JGT", "JLT", "JGE", "JLE"
 		};
 		
 		public static readonly ArgumentType[][] pseudo_instruction_arguments = new ArgumentType[][] {
@@ -99,13 +100,13 @@ namespace FTG.Studios.BISC {
 			
 			new ArgumentType[] { ArgumentType.Register },                                                  // PUSH {reg}
 			new ArgumentType[] { ArgumentType.Immediate32 },                                               // PUSH {imm}
-			new ArgumentType[] { ArgumentType.Register },                                                  // PUSHH {reg}
-			new ArgumentType[] { ArgumentType.Immediate32 },                                               // PUSHH {imm}
+			new ArgumentType[] { ArgumentType.Register },                                                  // PUSHW {reg}
+			new ArgumentType[] { ArgumentType.Immediate32 },                                               // PUSHW {imm}
 			new ArgumentType[] { ArgumentType.Register },                                                  // PUSHB {reg}
 			new ArgumentType[] { ArgumentType.Immediate32 },                                               // PUSHB {imm}
 			
 			new ArgumentType[] { ArgumentType.Register },                                                  // POP {reg}
-			new ArgumentType[] { ArgumentType.Register },                                                  // POPH {reg}
+			new ArgumentType[] { ArgumentType.Register },                                                  // POPW {reg}
 			new ArgumentType[] { ArgumentType.Register },                                                  // POPB {reg}
 			
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Immediate32 }, // ADDI {reg}, {reg}, {imm}
@@ -124,6 +125,19 @@ namespace FTG.Studios.BISC {
 			
 			new ArgumentType[] { ArgumentType.Register },                                                  // INC {reg}
 			new ArgumentType[] { ArgumentType.Register },                                                  // DEC {reg}
+			
+			new ArgumentType[] { ArgumentType.Immediate32 },                                               // JMP {imm}
+			new ArgumentType[] { ArgumentType.Immediate32, ArgumentType.Register },                        // JEZ {imm}, {reg}
+			new ArgumentType[] { ArgumentType.Immediate32, ArgumentType.Register },                        // JNZ {imm}, {reg}
+			
+			new ArgumentType[] { ArgumentType.Immediate32, ArgumentType.Register, ArgumentType.Register }, // JEQ {imm}, {reg}, {reg}
+			new ArgumentType[] { ArgumentType.Immediate32, ArgumentType.Register, ArgumentType.Register }, // JNQ {imm}, {reg}, {reg}
+			
+			new ArgumentType[] { ArgumentType.Immediate32, ArgumentType.Register, ArgumentType.Register }, // JGT {imm}, {reg}, {reg}
+			new ArgumentType[] { ArgumentType.Immediate32, ArgumentType.Register, ArgumentType.Register }, // JLT {imm}, {reg}, {reg}
+			
+			new ArgumentType[] { ArgumentType.Immediate32, ArgumentType.Register, ArgumentType.Register }, // JGE {imm}, {reg}, {reg}
+			new ArgumentType[] { ArgumentType.Immediate32, ArgumentType.Register, ArgumentType.Register }, // JLE {imm}, {reg}, {reg}
 		};
 		
 		public static readonly string[][] pseudo_instruction_definitions = new string[][] {
@@ -131,24 +145,24 @@ namespace FTG.Studios.BISC {
 			new string[] { "LI {0}, {1}" },                            // LA {imm}
 			
 			new string[] { "LI rt, {0}", "SYS rt" },                   // SYS {imm}
-			new string[] { "LI rt, {0}", "CALL rt" },                  // CALL {imm}
+			new string[] { "LA rt, {0}", "CALL rt" },                  // CALL {imm}
 			
 			new string[] { "ST {0}, sp[-4]", "SUBI sp, sp, 4" },       // PUSH {reg}
 			new string[] { "LI rt, {0}", "PUSH rt" },                  // PUSH {imm}
-			new string[] { "ST {0}, sp[-2]", "SUBI sp, sp, 4" },       // PUSHH {reg}
-			new string[] { "LI rt, {0}", "PUSHH rt" },                 // PUSHH {imm}
+			new string[] { "ST {0}, sp[-2]", "SUBI sp, sp, 4" },       // PUSHW {reg}
+			new string[] { "LI rt, {0}", "PUSHW rt" },                 // PUSHW {imm}
 			new string[] { "ST {0}, sp[-1]", "DEC sp" },               // PUSHB {reg}
 			new string[] { "LI rt, {0}", "PUSHB rt" },                 // PUSHB {imm}
 			
-			new string[] { "ADDI sp, sp, 4", "LD {0}, sp[-4]" },        // POP {reg}
-			new string[] { "ADDI sp, sp, 2", "LD {0}, sp[-2]" },        // POPH {reg}
-			new string[] { "INC sp", "LB {0}, sp[-1]" },                // POPB {reg}
+			new string[] { "ADDI sp, sp, 4", "LD {0}, sp[-4]" },       // POP {reg}
+			new string[] { "ADDI sp, sp, 2", "LD {0}, sp[-2]" },       // POPW {reg}
+			new string[] { "INC sp", "LB {0}, sp[-1]" },               // POPB {reg}
 			
 			new string[] { "LI rt, {2}", "ADD {0}, {1}, rt" },         // ADDI {reg}, {reg}, {imm}
 			new string[] { "LI rt, {1}", "ADD {0}, rt, {2}" },         // ADDI {reg}, {imm}, {reg}
 			
- 			new string[] { "LI rt, {2}", "SUB {0}, {1}, rt" },        // SUBI {reg}, {reg}, {imm}
-			new string[] { "LI rt, {1}", "SUB {0}, rt, {2}" },        // SUBI {reg}, {imm}, {reg}
+ 			new string[] { "LI rt, {2}", "SUB {0}, {1}, rt" },         // SUBI {reg}, {reg}, {imm}
+			new string[] { "LI rt, {1}", "SUB {0}, rt, {2}" },         // SUBI {reg}, {imm}, {reg}
 			
  			new string[] { "LI rt, {2}", "MUL {0}, {1}, rt" },         // MULI {reg}, {reg}, {imm}
 			new string[] { "LI rt, {1}", "MUL {0}, rt, {2}" },         // MULI {reg}, {imm}, {reg}
@@ -160,6 +174,19 @@ namespace FTG.Studios.BISC {
 			
 			new string[] { "ADDI {0}, {-}, 1" },                       // INC {reg}
  			new string[] { "SUBI {0}, {0}, 1" },                       // DEC {reg}
+			
+			new string[] { "LA rt, {0}", "JMP rt" },                   // JMP {imm}
+			new string[] { "LA rt, {0}", "JEZ rt, {1}" },              // JEZ {imm}, {reg}
+			new string[] { "LA rt, {0}", "JNZ rt, {1}" },              // JNZ {imm}, {reg}
+			
+			new string[] { "LA rt, {0}", "JEQ rt, {1}, {2}" },         // JEQ {imm}, {reg}, {reg}
+			new string[] { "LA rt, {0}", "JNQ rt, {1}, {2}" },         // JNQ {imm}, {reg}, {reg}
+			
+			new string[] { "LA rt, {0}", "JGT rt, {1}, {2}" },         // JGT {imm}, {reg}, {reg}
+			new string[] { "LA rt, {0}", "JLT rt, {1}, {2}" },         // JLT {imm}, {reg}, {reg}
+			
+			new string[] { "LA rt, {0}", "JGE rt, {1}, {2}" },         // JGE {imm}, {reg}, {reg}
+			new string[] { "LA rt, {0}", "JLE rt, {1}, {2}" },         // JLE {imm}, {reg}, {reg}
 		};
     }
 }

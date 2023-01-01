@@ -12,7 +12,7 @@ namespace FTG.Studios.BISC {
 
         static Dictionary<string, byte> opcodes;
         static Dictionary<string, UInt32> symbols;
-		static Dictionary<UInt32, string> unresolved_symbols;
+		static List<Instruction> unresolved_symbols;
 		
 		static int lineno;
 		
@@ -28,10 +28,9 @@ namespace FTG.Studios.BISC {
                     opcodes[opcode.ToString()] = (byte)opcode;
                 }
             }
-			
-			if (symbols == null) {
-				symbols = new Dictionary<string, UInt32>();
-			}
+
+			symbols = new Dictionary<string, UInt32>();
+			unresolved_symbols = new List<Instruction>();
 			
 			List<Instruction> instructions = new List<Instruction>();
 			List<string> lines = source.Split('\n').ToList<string>();
@@ -51,7 +50,44 @@ namespace FTG.Studios.BISC {
 			
 			Optimizer.Optimize(instructions);
 			
+			UInt32 address = 0;
 			List<UInt32> machine_code = new List<UInt32>();
+			for (int i = 0; i < instructions.Count; i++) {
+				Instruction inst = instructions[i];
+				inst.Address = address;
+				if (inst.Mneumonic == "SYMBOL" && inst.Parameters[0].Type == ArgumentType.Symbol) {
+					symbols[inst.Parameters[0].Mneumonic] = inst.Address;
+					instructions.RemoveAt(i--);
+				} else {
+					for (int p = 0; p < inst.Parameters.Length; p++) {
+						if (inst.Parameters[p].Type == ArgumentType.Symbol) {
+							if (symbols.TryGetValue(inst.Parameters[p].Mneumonic, out UInt32 value)) {
+								inst.Parameters[p].Value = value;
+								inst.Parameters[p].Type = ArgumentType.Immediate32;
+							} else {
+								unresolved_symbols.Add(inst);
+							}
+						}
+					}
+					address += 4;
+				}
+			}
+			
+			foreach (Instruction inst in unresolved_symbols) {
+				for (int p = 0; p < inst.Parameters.Length; p++) {
+						if (inst.Parameters[p].Type == ArgumentType.Symbol) {
+							inst.Parameters[p].Value = ResolveSymbol(inst.Parameters[p].Mneumonic);
+							inst.Parameters[p].Type = ArgumentType.Immediate32;
+							/*if (symbols.TryGetValue(inst.Parameters[p].Mneumonic, out UInt32 value)) {
+								inst.Parameters[p].Value = value;
+								inst.Parameters[p].Type = ArgumentType.Immediate32;
+							} else {
+								Console.WriteLine($"Unresolved symbol: {inst.Parameters[p].Mneumonic}");
+							}*/
+						}
+					}
+			}
+			
 			foreach (Instruction inst in instructions) {
 				Console.WriteLine(inst);
 				machine_code.Add(inst.Assemble());
@@ -66,11 +102,13 @@ namespace FTG.Studios.BISC {
 				if (inst.Mneumonic == Specification.pseudo_instruction_names[i]) {
 					bool valid = true;
 					for (int p = 0; p < inst.Parameters.Length; p++) {
-						if (inst.Parameters[p].Type != Specification.pseudo_instruction_arguments[i][p]) {
+						if (!inst.Parameters[p].Type.IsEquivalent(Specification.pseudo_instruction_arguments[i][p])) {
 							valid = false;
 							break;
 						}
 					}
+					if (inst.Parameters.Length != Specification.pseudo_instruction_arguments[i].Length) valid = false;
+					
 					if (valid) {
 						Instruction[] replacements = new Instruction[Specification.pseudo_instruction_definitions[i].Length];
 						for (int s = 0; s < replacements.Length; s++) {
@@ -175,9 +213,30 @@ namespace FTG.Studios.BISC {
 			return null;
 		}
 		
+		static UInt32 ResolveSymbol(string symbol) {
+			// Check for byte indices
+			int byte_start = 0;
+			int byte_end = 3;
+			bool hasByteRange = false;
+			if (symbol.IndexOf('(') >= 0) {
+				string[] indices = symbol.Substring(symbol.IndexOf('(') + 1, symbol.IndexOf(')') - symbol.IndexOf('(') - 1).Split(':');
+				byte_start = int.Parse(indices[0]);
+				byte_end = int.Parse(indices[1]);
+				
+				symbol = symbol.Substring(0, symbol.IndexOf('('));
+				hasByteRange = true;
+			}
+			
+			if (!symbols.TryGetValue(symbol, out UInt32 value)) return 0xFFFFFFFF;
+			if (hasByteRange) {
+					value = GetByteRange(value, byte_start, byte_end);
+			}
+			return value;
+		}
+		
         public static UInt16? ParseMemory(string mneumonic) {
 			byte? reg = ParseRegister(mneumonic.Substring(0, 2));
-			if (!reg.HasValue) return null;
+			if (!reg.HasValue || mneumonic.IndexOf('[') <= 0) return null;
 			
 			string val = mneumonic.Substring(mneumonic.IndexOf('[') + 1, mneumonic.IndexOf(']') - mneumonic.IndexOf('[') - 1);
 			
