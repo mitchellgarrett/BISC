@@ -141,7 +141,7 @@ namespace FTG.Studios.BISC {
 		};
 		
 		public static readonly string[][] pseudo_instruction_definitions = new string[][] {
-			new string[] { "LLI {0}, {1}(0:1)", "LUI {0}, {1}(2:3)" }, // LI {imm}
+			new string[] { "LLI {0}, {1}(0:1)", "LUI {0}, {1}(2:3)" }, // LI {imm} change to %hi(val), %lo(val) syntax
 			new string[] { "LI {0}, {1}" },                            // LA {imm}
 			
 			new string[] { "LI rt, {0}", "SYS rt" },                   // SYS {imm}

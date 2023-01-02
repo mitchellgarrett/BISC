@@ -11,10 +11,10 @@ lli       | 05rriiii
 lui       | 06rriiii
 mov       | 07rrrr00
 ld        | 08rrrrii
-lh        | 09rrrrii
+lw        | 09rrrrii
 lb        | 0Arrrrii
 st        | 0Brrrrii
-sh        | 0Crrrrii
+sw        | 0Crrrrii
 sb        | 0Drrrrii
 add       | 0Errrrrr
 sub       | 0Frrrrrr

@@ -1,5 +1,6 @@
-﻿Basic Instruction Set Computer (BISC)
-
+﻿-------------------------------------
+Basic Instruction Set Computer (BISC)
+-------------------------------------
 
 
 ---------
@@ -13,7 +14,16 @@ rt - temporary register
 r0-r7 - general-purpose registers
 f0-f7 - floating-point registers
 
+------------------------
+Control Status Registers [WIP]
+------------------------
 
+0x00, model - model number of this CPU
+0x01, cycle - CPU cycle count
+0x02, cycleh - upper 32-bits of cycle
+0x03, etype - exception type
+0x04, epc - exception PC
+0x05, eval - exception value
 
 ------------------
 General Formatting
@@ -50,17 +60,22 @@ pop  arg0 (reg)*
 popw  arg0 (reg)*
 popb  arg0 (reg)*
 
+
 Loading and Storing
 -------------------
-// all dem loads ld lh lb, st sh sb
-ld   dest (reg), arg0 (label/mem)
-st   dest (mem), arg0 (reg)
-la   dest (reg), arg0 (label/mem)*
-
 lli  dest (reg), arg0 (imm)
 lui  dest (reg), arg0 (imm)
-li   dest (reg), arg0 (imm)*
 mov  dest (reg), arg0 (reg)
+li   dest (reg), arg0 (imm)*
+la   dest (reg), arg0 (imm)*
+
+ld   dest (reg), arg0 (mem)
+lw   dest (reg), arg0 (mem)
+lb   dest (reg), arg0 (mem)
+st   dest (mem), arg0 (reg)
+sw   dest (mem), arg0 (reg)
+sb   dest (mem), arg0 (reg)
+
 
 Arithmetic and Logic
 --------------------
@@ -70,11 +85,16 @@ muli dest (reg), arg0 (reg), arg1 (imm)*
 divi dest (reg), arg0 (reg), arg1 (imm)*
 modi dest (reg), arg0 (reg), arg1 (imm)*
 
-add  dest (reg), arg0 (reg), arg1 (reg)
-sub  dest (reg), arg0 (reg), arg1 (reg)
-mul  dest (reg), arg0 (reg), arg1 (reg)
-div  dest (reg), arg0 (reg), arg1 (reg)
-mod  dest (reg), arg0 (reg), arg1 (reg)
+add   dest (reg), arg0 (reg), arg1 (reg)
+sub   dest (reg), arg0 (reg), arg1 (reg)
+mul   dest (reg), arg0 (reg), arg1 (reg)
+mulh  dest (reg), arg0 (reg), arg1 (reg)
+mulhu dest (reg), arg0 (reg), arg1 (reg)
+div   dest (reg), arg0 (reg), arg1 (reg)
+divh  dest (reg), arg0 (reg), arg1 (reg)
+divhu dest (reg), arg0 (reg), arg1 (reg)
+mod   dest (reg), arg0 (reg), arg1 (reg)
+modu  dest (reg), arg0 (reg), arg1 (reg)
 
 neg  dest (reg), arg0 (reg)
 not  dest (reg), arg0 (reg)
@@ -86,6 +106,7 @@ xor  dest (reg), arg0 (reg), arg1 (reg)
 bsl  dest (reg), arg0 (reg), arg1 (reg)
 bsr  dest (reg), arg0 (reg), arg1 (reg)
 
+
 Jumping and branching
 ---------------------
 jmp addr (reg)
@@ -93,10 +114,11 @@ jez addr (reg), arg0 (reg)
 jnz addr (reg), arg0 (reg)
 jeq addr (reg), arg0 (reg), arg1 (reg)
 jne addr (reg), arg0 (reg), arg1 (reg)
-jgt addr (reg), arg0 (reg), arg1 (reg)*
+jgt addr (reg), arg0 (reg), arg1 (reg)
 jlt addr (reg), arg0 (reg), arg1 (reg)
-jge addr (reg), arg0 (reg), arg1 (reg)*
+jge addr (reg), arg0 (reg), arg1 (reg)
 jle addr (reg), arg0 (reg), arg1 (reg)
+
 
 Floating Point Instructions
 ---------------------------
@@ -114,6 +136,8 @@ fjne
 fjlt
 fle
 
+
+-------------
 Opcode Format
 -------------
 
@@ -142,6 +166,8 @@ Register-Register-Register Format
 |------|-------|-------|-------|
 31     24      16      8       0
 
+
+------------------
 Calling Convention
 ------------------
 int example_function(int a, int b) {
@@ -160,3 +186,18 @@ example_function:
 	add r2, r0, r1 ; c = a + b
 	mov rv, r2     ; move result to return value
 	ret            ; return from function
+
+
+--------
+Sections [WIP]
+--------
+section .text
+section .data
+section .rodata
+
+global main
+var_name .string "This is a string\0"
+var_name .byte 'A'
+var_name .word 16
+var_name .dword 32
+var_name .float 32
