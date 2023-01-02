@@ -5,6 +5,7 @@ namespace FTG.Studios.BISC {
 	
 	public class Instruction {
 		
+		public int Line;
 		public UInt32 Address;
 		public string Mneumonic;
 		public Opcode? Opcode;

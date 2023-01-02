@@ -36,7 +36,7 @@ namespace FTG.Studios.BISC {
             instructions = new InstructionHandler[] { 
                 NOP, HLT, SYS, CALL, RET, 
                 LLI, LUI, MOV, 
-				LD, LH, LB, ST, SH, SB,
+				LD, LW, LB, ST, SW, SB,
 				ADD, SUB, MUL, DIV, MOD, 
                 NOT, NEG, INV, AND, OR, XOR, BSL, BSR,
                 JMP, JEZ, JNZ, JEQ, JNE, JGT, JLT, JGE, JLE
@@ -270,8 +270,8 @@ namespace FTG.Studios.BISC {
             return true;
         }
 		
-		bool LH(byte opcode, byte arg0, byte arg1, byte arg2) {
-            if (opcode != ((byte)Opcode.LH) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
+		bool LW(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.LW) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
 			sbyte offset = (sbyte) arg2;
 			UInt32 addr = (UInt32) (registers[arg1] + offset);
 			UInt16 value = GetMemory16(addr);
@@ -299,8 +299,8 @@ namespace FTG.Studios.BISC {
             return true;
         }
 		
-		bool SH(byte opcode, byte arg0, byte arg1, byte arg2) {
-            if (opcode != ((byte)Opcode.SH) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
+		bool SW(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.SW) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
 			sbyte offset = (sbyte) arg2;
 			UInt32 addr = (UInt32) (registers[arg1] + offset);
             Console.WriteLine("sh {0} (0x{1:x4}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0] & 0xFFFF, Specification.REGISTER_NAMES[arg1], offset, addr);

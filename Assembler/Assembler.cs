@@ -34,9 +34,12 @@ namespace FTG.Studios.BISC {
 			
 			List<Instruction> instructions = new List<Instruction>();
 			List<string> lines = source.Split('\n').ToList<string>();
+			lineno = -1;
 			foreach (string line in lines) {
+				lineno++;
 				Instruction inst = new Instruction(line);
 				if (string.IsNullOrEmpty(inst.Mneumonic)) continue;
+				inst.Line = lineno;
 				instructions.Add(inst);
 			}
 			

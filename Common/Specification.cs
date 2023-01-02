@@ -149,13 +149,13 @@ namespace FTG.Studios.BISC {
 			
 			new string[] { "ST {0}, sp[-4]", "SUBI sp, sp, 4" },       // PUSH {reg}
 			new string[] { "LI rt, {0}", "PUSH rt" },                  // PUSH {imm}
-			new string[] { "ST {0}, sp[-2]", "SUBI sp, sp, 4" },       // PUSHW {reg}
+			new string[] { "SW {0}, sp[-2]", "SUBI sp, sp, 4" },       // PUSHW {reg}
 			new string[] { "LI rt, {0}", "PUSHW rt" },                 // PUSHW {imm}
-			new string[] { "ST {0}, sp[-1]", "DEC sp" },               // PUSHB {reg}
+			new string[] { "SB {0}, sp[-1]", "DEC sp" },               // PUSHB {reg}
 			new string[] { "LI rt, {0}", "PUSHB rt" },                 // PUSHB {imm}
 			
 			new string[] { "ADDI sp, sp, 4", "LD {0}, sp[-4]" },       // POP {reg}
-			new string[] { "ADDI sp, sp, 2", "LD {0}, sp[-2]" },       // POPW {reg}
+			new string[] { "ADDI sp, sp, 2", "LW {0}, sp[-2]" },       // POPW {reg}
 			new string[] { "INC sp", "LB {0}, sp[-1]" },               // POPB {reg}
 			
 			new string[] { "LI rt, {2}", "ADD {0}, {1}, rt" },         // ADDI {reg}, {reg}, {imm}
