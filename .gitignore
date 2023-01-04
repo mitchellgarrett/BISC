@@ -5,8 +5,6 @@
 
 *.exe
 *.bin
-*.csproj
-*.sln
 Properties/
 
 # User-specific files
