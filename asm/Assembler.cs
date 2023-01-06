@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace FTG.Studios.BISC {
@@ -12,7 +11,6 @@ namespace FTG.Studios.BISC {
 
         static Dictionary<string, byte> opcodes;
         static Dictionary<string, UInt32> symbols;
-		static List<Instruction> unresolved_symbols;
 		
 		static int lineno;
 		
@@ -22,6 +20,8 @@ namespace FTG.Studios.BISC {
         /// <param name="source">Source code.</param>
         /// <returns>An executable program.</returns>
         public static Program Assemble(string source) {
+			
+			// Initialize opcodes dictionary to convert string mneumonic to byte value
             if (opcodes == null) {
                 opcodes = new Dictionary<string, byte>();
                 foreach (Opcode opcode in Enum.GetValues(typeof(Opcode))) {
@@ -29,94 +29,115 @@ namespace FTG.Studios.BISC {
                 }
             }
 
+			// Initialize dictionaries for known symbol values and instructions with unresolved symbols
 			symbols = new Dictionary<string, UInt32>();
-			unresolved_symbols = new List<Instruction>();
+			List<Instruction> unresolved_symbols = new List<Instruction>();
 			
+			// Split source on all possible newlines
 			List<Instruction> instructions = new List<Instruction>();
 			List<string> lines = source.Split(new string[] { "\r\n", "\n", "\r" }, StringSplitOptions.None).ToList<string>();
-			lineno = -1;
-			foreach (string line in lines) {
-				lineno++;
-				Instruction inst = new Instruction(line);
+
+			// Loop over all lines
+			for (lineno = 0; lineno < lines.Count; lineno++) {
+				// Create an Instruction object from line which the string into its instruction and arguments
+				Instruction inst = new Instruction(lines[lineno]);
+				
+				// Only add the instruction if it has a valid instruction mneumonic
 				if (string.IsNullOrEmpty(inst.Mneumonic)) continue;
+
 				inst.Line = lineno;
 				instructions.Add(inst);
 			}
 			
+			// Loop over all instructions and resolve pseudo-instructions if possible
 			for (int i = 0; i < instructions.Count; i++) {
 				Instruction[] pseudo = ResolvePseudoInstruction(instructions[i]);
+				// If the instruction was a pseudo, remove it from the list and add its replacements
 				if (pseudo != null) {
 					instructions.RemoveAt(i);
 					instructions.InsertRange(i--, pseudo);
 				}
 			}
 			
+			// First-pass optimizations
 			Optimizer.Optimize(instructions);
 			
+			// Loop over instructions to assign addresses to instructions/labels
 			UInt32 address = 0;
-			List<UInt32> machine_code = new List<UInt32>();
 			for (int i = 0; i < instructions.Count; i++) {
 				Instruction inst = instructions[i];
 				inst.Address = address;
+
+				// Check if instruction is actuall a symbol, if so remove it since it won't be compiled into machine code
+				// and add it to the symbols dictionary instead
 				if (inst.Mneumonic == "SYMBOL" && inst.Parameters[0].Type == ArgumentType.Symbol) {
 					symbols[inst.Parameters[0].Mneumonic] = inst.Address;
 					instructions.RemoveAt(i--);
 				} else {
+					// Check if instruction references a symbol and add to the list to be resolved later
 					for (int p = 0; p < inst.Parameters.Length; p++) {
 						if (inst.Parameters[p].Type == ArgumentType.Symbol) {
-							if (symbols.TryGetValue(inst.Parameters[p].Mneumonic, out UInt32 value)) {
-								inst.Parameters[p].Value = value;
-								inst.Parameters[p].Type = ArgumentType.Immediate32;
-							} else {
-								unresolved_symbols.Add(inst);
-							}
+							unresolved_symbols.Add(inst);
 						}
 					}
 					address += 4;
 				}
 			}
 			
+			// Loop over unresolved symbols and get their values
 			foreach (Instruction inst in unresolved_symbols) {
 				for (int p = 0; p < inst.Parameters.Length; p++) {
 						if (inst.Parameters[p].Type == ArgumentType.Symbol) {
 							inst.Parameters[p].Value = ResolveSymbol(inst.Parameters[p].Mneumonic);
 							inst.Parameters[p].Type = ArgumentType.Immediate32;
-							/*if (symbols.TryGetValue(inst.Parameters[p].Mneumonic, out UInt32 value)) {
-								inst.Parameters[p].Value = value;
-								inst.Parameters[p].Type = ArgumentType.Immediate32;
-							} else {
-								Console.WriteLine($"Unresolved symbol: {inst.Parameters[p].Mneumonic}");
-							}*/
 						}
 					}
 			}
 			
+			// Convert instructions into binary machine code
+			List<UInt32> machine_code = new List<UInt32>();
 			foreach (Instruction inst in instructions) {
 				Console.WriteLine(inst);
 				machine_code.Add(inst.Assemble());
 			}
 
+			// Create program object from machine code
             Program program = new Program(machine_code.ToArray());
             return program;
         }
 		
+		/// <summary>
+		/// Parses a BISC pseudo-instruction into its opcode replacements.
+		/// </summary>
+		/// <param name="inst">Pseudo-instruction to resolve.</param>
+		/// <returns>Array of valid replacement instructions. Returns null if inst is not a pseudo-instruction.</returns>
 		static Instruction[] ResolvePseudoInstruction(Instruction inst) {
+			// Loop over all pseudo-instruction names to find match
 			for (int i = 0; i < Specification.pseudo_instruction_names.Length; i++) {
 				if (inst.Mneumonic == Specification.pseudo_instruction_names[i]) {
+					
+					// Once match is found, confirm that the parameter types match the expected values
 					bool valid = true;
 					for (int p = 0; p < inst.Parameters.Length; p++) {
+						// If parameter types are not equivalent, this instruction doesn't match the pseudo-instruction prototype
 						if (!inst.Parameters[p].Type.IsEquivalent(Specification.pseudo_instruction_arguments[i][p])) {
 							valid = false;
 							break;
 						}
 					}
+					// Confirm that number of parameters match too
 					if (inst.Parameters.Length != Specification.pseudo_instruction_arguments[i].Length) valid = false;
 					
+					// If inst does match this pseudo-instruction, then produce the replacement instructions
 					if (valid) {
 						Instruction[] replacements = new Instruction[Specification.pseudo_instruction_definitions[i].Length];
+						
+						// Loop over replacements and get their parameters
 						for (int s = 0; s < replacements.Length; s++) {
 							string pseudo = Specification.pseudo_instruction_definitions[i][s];
 							string[] vals = new string[inst.Parameters.Length];
+
+							// Loop over parameters to get their values from inst
 							for (int v = 0; v < vals.Length; v++) {
 								vals[v] = inst.Parameters[v].Mneumonic;
 							}
@@ -126,6 +147,8 @@ namespace FTG.Studios.BISC {
 					}
 				}
 			}
+
+			// If inst is not a pseudo-instruction, return null
 			return null;
 		}
 		
@@ -212,7 +235,6 @@ namespace FTG.Studios.BISC {
 		
 		static UInt32? ParseLabel(string mneumonic) {
 			if (symbols.TryGetValue(mneumonic, out UInt32 value)) return value;
-			//unresolved_symbols[address] = mneumonic;
 			return null;
 		}
 		

@@ -22,8 +22,9 @@ namespace FTG.Studios.BISC {
 		const UInt32 STACK_SIZE = 256;
 		const UInt32 STACK_END = STACK_SIZE;
 		const UInt32 STACK_START = STACK_END - STACK_SIZE;
+
 		Dictionary<UInt32, byte> memory;
-		Queue<UInt32> return_address_stack;
+		Queue<UInt32> call_stack;
 		
         Program program;
         public bool IsRunning { get; private set; }
@@ -32,7 +33,7 @@ namespace FTG.Studios.BISC {
         public VirtualMachine() {
             registers = new UInt32[Specification.NUM_REGISTERS];
 			memory = new Dictionary<UInt32, byte>();
-			return_address_stack = new Queue<UInt32>();
+			call_stack = new Queue<UInt32>();
             instructions = new InstructionHandler[] { 
                 NOP, HLT, SYS, CALL, RET, 
                 LLI, LUI, MOV, 
@@ -106,6 +107,7 @@ namespace FTG.Studios.BISC {
         public void ExecuteInstruction(UInt32 instruction) {
             //Console.WriteLine("Executing instruction: 0x{0:x8}", instruction);
 
+            // Decompose instruction into its byte parameters
             byte[] bytes = BitConverter.GetBytes(instruction);
             if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
 
@@ -215,7 +217,7 @@ namespace FTG.Studios.BISC {
 			
 			// pc has to be set to address 4 before called address
 			// because pc is automatically incremented by 4 after each instruction
-			return_address_stack.Enqueue(pc);
+			call_stack.Enqueue(pc);
 			pc = registers[arg0] - 4;
             return true;
         }
@@ -227,8 +229,8 @@ namespace FTG.Studios.BISC {
 			// Pop return address from stack and set pc to it
 			//UInt32 addr = GetMemory32(sp);
 			//sp += 4;
-			if (return_address_stack.Count <= 0) return false;
-			UInt32 addr = return_address_stack.Dequeue();
+			if (call_stack.Count <= 0) return false;
+			UInt32 addr = call_stack.Dequeue();
 			pc = addr;
             return true;
         }
