@@ -8,12 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="asm\**" />
     <Compile Remove="Assembler\**" />
     <Compile Remove="Virtual Machine\**" />
+    <Compile Remove="vm\**" />
+    <EmbeddedResource Remove="asm\**" />
     <EmbeddedResource Remove="Assembler\**" />
     <EmbeddedResource Remove="Virtual Machine\**" />
+    <EmbeddedResource Remove="vm\**" />
+    <None Remove="asm\**" />
     <None Remove="Assembler\**" />
     <None Remove="Virtual Machine\**" />
+    <None Remove="vm\**" />
   </ItemGroup>
 
 </Project>

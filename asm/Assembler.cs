@@ -33,7 +33,7 @@ namespace FTG.Studios.BISC {
 			unresolved_symbols = new List<Instruction>();
 			
 			List<Instruction> instructions = new List<Instruction>();
-			List<string> lines = source.Split('\n').ToList<string>();
+			List<string> lines = source.Split(new string[] { "\r\n", "\n", "\r" }, StringSplitOptions.None).ToList<string>();
 			lineno = -1;
 			foreach (string line in lines) {
 				lineno++;
