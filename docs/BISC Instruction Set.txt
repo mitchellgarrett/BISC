@@ -72,9 +72,16 @@ la   dest (reg), arg0 (imm)*
 ld   dest (reg), arg0 (mem)
 lw   dest (reg), arg0 (mem)
 lb   dest (reg), arg0 (mem)
-st   dest (mem), arg0 (reg)
-sw   dest (mem), arg0 (reg)
-sb   dest (mem), arg0 (reg)
+st   arg0 (reg), dest (mem)
+sw   arg0 (reg), dest (mem)
+sb   arg0 (reg), dest (mem)
+
+ld   dest (reg), arg0 (imm)*
+lw   dest (reg), arg0 (imm)*
+lb   dest (reg), arg0 (imm)*
+st   arg0 (reg), dest (imm)*
+sw   arg0 (reg), dest (imm)*
+sb   arg0 (reg), dest (imm)*
 
 
 Arithmetic and Logic

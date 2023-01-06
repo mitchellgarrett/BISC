@@ -18,6 +18,30 @@ call arg0 (imm)
 	li rt, imm
 	call rt
 
+ld dest (reg), arg0 (label)
+	li rt, arg0
+	ld dest, rt[0]
+
+lw dest (reg), arg0 (label)
+	li rt, arg0
+	lw dest, rt[0]
+
+lb dest (reg), arg0 (label)
+	li rt, arg0
+	lb dest, rt[0]
+
+st arg0 (reg), dest (label)
+	li rt, dest
+	sw arg0, rt[0]
+
+sw arg0 (reg), dest (label)
+	li rt, dest
+	sw arg0, rt[0]
+
+sb arg0 (reg), dest (label)
+	li rt, dest
+	sw arg0, rt[0]
+
 push arg0 (reg)
 	st arg0, sp[-4]
 	subi sp, sp, 4
