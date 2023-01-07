@@ -15,9 +15,9 @@ namespace FTG.Studios.BISC {
 
         UInt32 pc { get { return registers[0]; } set { registers[0] = value; } }
         UInt32 sp { get { return registers[1]; } set { registers[1] = value; } }
-        UInt32 ra { get { return registers[2]; } set { registers[1] = value; } }
-        UInt32 rv { get { return registers[3]; } set { registers[2] = value; } }
-		UInt32 rt { get { return registers[4]; } set { registers[3] = value; } }
+        UInt32 ra { get { return registers[2]; } set { registers[2] = value; } }
+        UInt32 rv { get { return registers[3]; } set { registers[3] = value; } }
+		UInt32 rt { get { return registers[4]; } set { registers[4] = value; } }
 		
 		const UInt32 STACK_SIZE = 256;
 		const UInt32 STACK_END = STACK_SIZE;
@@ -59,7 +59,7 @@ namespace FTG.Studios.BISC {
 			PrintStack();
             while (IsRunning) {
 				if (SingleStep) {
-					Console.SetCursorPosition(0, 21);
+					Console.SetCursorPosition(0, Specification.NUM_REGISTERS + 1);
                 	Console.Write("Continue execution...");
                 	Console.ReadKey();
 				}
@@ -69,7 +69,7 @@ namespace FTG.Studios.BISC {
                 pc += 4;
                 if (pc >= program.Instructions.Length * 4) IsRunning = false;
             }
-            Console.SetCursorPosition(0, 21);
+            Console.SetCursorPosition(0, Specification.NUM_REGISTERS + 1);
             Console.Write("Program complete...");
             Console.ReadKey(false);
 			Console.WriteLine();
@@ -131,7 +131,7 @@ namespace FTG.Studios.BISC {
         void PrintRegisters() {
             Console.SetCursorPosition(0, 0);
             for (int i = 0; i < Specification.NUM_REGISTERS; i++) {
-                Console.WriteLine("{0}: 0x{1:x8}", Specification.REGISTER_NAME(i), registers[i]);
+                Console.WriteLine("{0}: 0x{1:x8}", Specification.REGISTER_NAMES[i], registers[i]);
             }
         }
 		
@@ -206,7 +206,7 @@ namespace FTG.Studios.BISC {
 
         bool CALL(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.CALL) || !ValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
-            Console.WriteLine("call {0} (0x{1:x8})", Specification.REGISTER_NAMES[arg0], arg0);
+            Console.WriteLine("call {0} (0x{1:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0]);
 
             // Set return address to next instruction
             ra = pc + 4;
@@ -217,7 +217,7 @@ namespace FTG.Studios.BISC {
 		
         bool RET(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.RET) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
-            Console.WriteLine("ret");
+            Console.WriteLine("ret (0x{0:x8})", ra);
 			
 			// Jump to return address (subtracted by 4 because VM increments pc by 4)
 			pc = ra - 4;

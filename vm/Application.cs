@@ -17,7 +17,7 @@ namespace FTG.Studios.BISC {
             Program program = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
             Program.Write(file_name + ".bin", program);
             VirtualMachine vm = new VirtualMachine();
-			vm.SingleStep = true;
+			vm.SingleStep = false;
             vm.Execute(program);
         }
 		

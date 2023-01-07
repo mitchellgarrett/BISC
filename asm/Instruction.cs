@@ -18,7 +18,8 @@ namespace FTG.Studios.BISC {
 			if (comment_index >= 0) source = source.Substring(0, comment_index);
             if (string.IsNullOrEmpty(source)) return;
 			string[] parameters = source.Split(' ', '\t', ',').Where(s => !string.IsNullOrEmpty(s)).ToArray();
-			
+			if (parameters.Length == 0) return;
+
 			if (parameters[0].IndexOf(':') > 0) {
 				Mneumonic = "SYMBOL";
 				Parameters = new Parameter[1];
