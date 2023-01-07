@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace FTG.Studios.BISC {
 
@@ -9,10 +8,12 @@ namespace FTG.Studios.BISC {
 		public const char LABEL_DELIMETER = ':';
 
         public static readonly string[] REGISTER_NAMES = {
-            "pc", "sp", "rv", "rt", "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7"
+            "pc", "sp", "ra", "rv", "rt", 
+			"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", 
+			"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7"
         };
 
-		public static int NUM_REGISTERS { get {return REGISTER_NAMES.Length; } }
+		public static int NUM_REGISTERS { get { return REGISTER_NAMES.Length; } }
 		
 		public static UInt16 AssembleInteger16(byte a, byte b) {
             if (BitConverter.IsLittleEndian) return BitConverter.ToUInt16(new byte[] { b, a }, 0);

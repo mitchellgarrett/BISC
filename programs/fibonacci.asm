@@ -3,10 +3,11 @@
 
 push 5         ; get nth fibo number
 call fibonacci ; call fibonacci function
+addi sp, 4
 hlt            ; exit program
 
 fibonacci:
-	pop r0 
+	pop r0
 	dec r0         ; Subtract 1 from r0 as we already have first 2 numbers
 	li r7, 0
 	jle fibonacci_done, r0, r7 ; if n <= 0, return

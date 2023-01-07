@@ -171,27 +171,6 @@ Register-Register-Register Format
 31     24      16      8       0
 
 
-------------------
-Calling Convention
-------------------
-int example_function(int a, int b) {
-	return a + b;
-}
-
-int c = example_function(1, 2);
-
-push 2
-push 1
-call example_function
-
-example_function:
-	pop r1         ; second argument
-	pop r0         ; first argument
-	add r2, r0, r1 ; c = a + b
-	mov rv, r2     ; move result to return value
-	ret            ; return from function
-
-
 --------
 Sections [WIP]
 --------

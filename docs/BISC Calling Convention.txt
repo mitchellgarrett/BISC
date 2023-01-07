@@ -1,0 +1,119 @@
+﻿-----------------------
+BISC Calling Convention
+-----------------------
+The CALL instruction sets ra (return address) to the address of the next instruction
+	and sets pc (program counter) to the address to jump to.
+CALL:
+	ra = pc + 4
+	pc = addr
+
+The RET instruction sets pc to ra. Whatever is stored in rv (return value)
+	is considered the result of the function.
+RET:
+	pc = ra
+
+In the case where a function (callee) is called inside of another function (caller),
+	it is the caller's responsibility to properly store its own ra value before calling
+	the callee, and then restore it after the callee has returned. This is usually done
+	with PUSH and POP instructions.
+
+Example:
+	push ra
+	call another_function
+	ret ra
+
+Therefore it is assumed that ra will always refer to the current function's return address.
+	Since registers are preserved across function calls, things can be made simpler by passing arguments
+	via registers rather than through the stack. You will still have to make sure ra is restored properly
+	if calling another function inside of the current function.
+
+PUSH and POP can be used to pass arguments to functions, but be sure to clean up any stack space used.
+
+Keep in mind that functions can override register values, so if you want to keep the same value of a register
+	after a function is called, the function should PUSH it before making any modifications, then POP it at
+	the end of the function to restore its old value.
+
+The following things must be maintained by a function call:
+	- The sp will have the same value exiting from a function as it did entering it.
+	- Registers will be restored to their previous values
+	- The pc will be set to ra.
+
+Example function prologue:
+	- Decrement sp by number of modified registers * 4 + space needed for local variables
+	- Store any modified registers that need to be saved
+	- Store ra if a function call is made
+
+Example function epilogue:
+	- Reload any saved registers
+	- Reload ra, if necessary
+	- Increment sp back to previous value
+	- Call RET (jump to return address)
+
+Simple Example (C)
+------------------
+int simple_function(int a, int b) {
+	return a + b;
+}
+
+int c = simple_function(1, 2);
+
+Simple Example (BISC)
+---------------------
+push 2
+push 1
+call simple_function
+
+simple_function:
+	pop r1         ; second argument
+	pop r0         ; first argument
+	add r2, r0, r1 ; c = a + b
+	mov rv, r2     ; move result to return value
+	ret            ; return from function
+
+
+Complex Example (C)
+-------------------
+int complex_function1(int a, int b) {
+	int c = simple_function(b, a) + 1;
+}
+
+Complex Example (BISC)
+----------------------
+push 2
+push 1
+call complex_function
+
+complex_function:
+	pop r1
+	pop r0
+
+	push ra
+	push r0
+	push r1
+	call simple_function
+	addi r2, rv, 1
+
+	pop ra
+	mov rv, r2
+	ret
+
+
+Safe Example (BISC)
+-------------------
+push 2
+push 1
+call safe_example
+
+safe_example:
+	push r1 ; push old value of r0/r1
+	push r0
+
+	lw r1, sp[0] ; grab function arguments
+	lw r0, sp[4] ; these can't be popped since we just pushed r0/r1
+
+	add rv, r0, r1 ; do the function
+
+	pop r0 ; restore r0/r1
+	pop r1
+	addi sp, sp, 8 ; restore sp to "delete" function arguments
+	ret
