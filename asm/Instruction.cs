@@ -17,6 +17,8 @@ namespace FTG.Studios.BISC {
 			int comment_index = source.IndexOf(Specification.COMMENT);
 			if (comment_index >= 0) source = source.Substring(0, comment_index);
             if (string.IsNullOrEmpty(source)) return;
+
+			// TODO: Known bug where this doesn't work when loading ',', ' ', or '\t' chars 
 			string[] parameters = source.Split(' ', '\t', ',').Where(s => !string.IsNullOrEmpty(s)).ToArray();
 			if (parameters.Length == 0) return;
 

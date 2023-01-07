@@ -8,6 +8,8 @@ namespace FTG.Studios.BISC {
     /// </summary>
     public class VirtualMachine {
 
+        public enum Flags { None = 0x0, SingleStep = 0x1, Debug = 0x2 };
+
         delegate bool InstructionHandler(byte opcode, byte arg0, byte arg1, byte arg2);
         InstructionHandler[] instructions;
 
@@ -23,20 +25,29 @@ namespace FTG.Studios.BISC {
 		const UInt32 STACK_END = STACK_SIZE;
 		const UInt32 STACK_START = STACK_END - STACK_SIZE;
 
-        readonly Dictionary<UInt32, byte> memory;
+        Dictionary<UInt32, byte> memory;
 		
         Program program;
         public bool IsRunning { get; private set; }
-		public bool SingleStep = false;
+        public Flags Options;
 
         public VirtualMachine() {
+            Initialize();
+        }
+
+        public VirtualMachine(Flags options) {
+            this.Options = options;
+            Initialize();
+        }
+
+        void Initialize() {
             registers = new UInt32[Specification.NUM_REGISTERS];
-			memory = new Dictionary<UInt32, byte>();
-            instructions = new InstructionHandler[] { 
-                NOP, HLT, SYS, CALL, RET, 
-                LLI, LUI, MOV, 
-				LW, LH, LB, SW, SH, SB,
-				ADD, SUB, MUL, DIV, MOD, 
+            memory = new Dictionary<UInt32, byte>();
+            instructions = new InstructionHandler[] {
+                NOP, HLT, SYS, CALL, RET,
+                LLI, LUI, MOV,
+                LW, LH, LB, SW, SH, SB,
+                ADD, SUB, MUL, DIV, MOD,
                 NOT, NEG, INV, AND, OR, XOR, BSL, BSR,
                 JMP, JEZ, JNZ, JEQ, JNE, JGT, JLT, JGE, JLE
             };
@@ -55,23 +66,35 @@ namespace FTG.Studios.BISC {
 			sp = STACK_END;
 
             Console.Clear();
-            PrintRegisters();
-			PrintStack();
+            if (Options.HasFlag(Flags.Debug)) {
+                PrintRegisters();
+                PrintStack();
+            }
+
             while (IsRunning) {
-				if (SingleStep) {
-					Console.SetCursorPosition(0, Specification.NUM_REGISTERS + 1);
-                	Console.Write("Continue execution...");
-                	Console.ReadKey();
+				if (Options.HasFlag(Flags.SingleStep)) {
+                    if (Options.HasFlag(Flags.Debug)) {
+                        Console.SetCursorPosition(0, Specification.NUM_REGISTERS + 1);
+                        Console.Write("Continue execution...");
+                    }
+                	Console.ReadKey(true);
 				}
                 
                 UInt32 instruction = program.Instructions[pc / 4];
                 ExecuteInstruction(instruction);
                 pc += 4;
                 if (pc >= program.Instructions.Length * 4) IsRunning = false;
+
+                if (!Options.HasFlag(Flags.Debug)) {
+                    //PrintConsole();
+                }
             }
-            Console.SetCursorPosition(0, Specification.NUM_REGISTERS + 1);
-            Console.Write("Program complete...");
-            Console.ReadKey(false);
+
+            if (Options.HasFlag(Flags.Debug)) {
+                Console.SetCursorPosition(0, Specification.NUM_REGISTERS + 1);
+                Console.Write("Program complete...");
+            }
+            Console.ReadKey(true);
 			Console.WriteLine();
         }
 
@@ -114,18 +137,45 @@ namespace FTG.Studios.BISC {
             byte arg1 = bytes[2];
             byte arg2 = bytes[3];
 
-            Console.Clear();
-            Console.SetCursorPosition(0, Specification.NUM_REGISTERS);
-            if (opcode >= 0 && opcode < instructions.Length) {
-                Console.Write("inst: ");
-                if (!instructions[opcode](opcode, arg0, arg1, arg2)) {
-                    Console.WriteLine("Illegal execution: 0x{0:x8}", instruction);
-                }
-            } else { 
-                Console.WriteLine("Illegal instruction: 0x{0:x8}", instruction);
+            if (Options.HasFlag(Flags.Debug)) {
+                Console.Clear();
+                Console.SetCursorPosition(0, Specification.NUM_REGISTERS);
             }
-            PrintRegisters();
-			PrintStack();
+
+            if (opcode >= 0 && opcode < instructions.Length) {
+                Debug("inst: ");
+                if (!instructions[opcode](opcode, arg0, arg1, arg2)) {
+                    Debug("Illegal execution: 0x{0:x8}", instruction);
+                }
+            } else {
+                Debug("Illegal instruction: 0x{0:x8}", instruction);
+            }
+
+            if (Options.HasFlag(Flags.Debug)) {
+                PrintRegisters();
+                PrintStack();
+            }
+        }
+
+        void Debug(string format, params object[] args) {
+            if (Options.HasFlag(Flags.Debug)) Console.Write(format, args);
+        }
+
+        void PrintConsole() {
+            char[] line = new char[Console.WindowWidth];
+            for (int y = 0; y < Console.WindowHeight; y++) {
+                for (int x = 0; x < Console.WindowWidth; x++) {
+                    if (memory.TryGetValue((UInt32)(y * Console.WindowWidth + x), out byte value)) {
+                        
+                        //if (value != 0) line[x] = (char)value;
+                        //else line[x] = ' ';
+                    } else {
+                        //line[x] = ' ';
+                    }
+                }
+                Console.SetCursorPosition(0, y);
+                Console.Write(line);
+            }
         }
 
         void PrintRegisters() {
@@ -166,6 +216,10 @@ namespace FTG.Studios.BISC {
 		
 		void SetMemory8(UInt32 addr, UInt32 value) {
 			memory[addr] = (byte) (value & 0xFF);
+            if (addr < Console.WindowWidth * Console.WindowHeight) {
+                Console.SetCursorPosition((int)(addr % Console.WindowWidth), (int)(addr / Console.WindowWidth));
+                Console.Write((char)value);
+            }
 		}
 		
 		void SetMemory16(UInt32 addr, UInt32 value) {
@@ -187,26 +241,26 @@ namespace FTG.Studios.BISC {
         #region System Instructions
         bool NOP(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.NOP) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
-            Console.WriteLine("nop");
+            Debug("nop");
             return true;
         }
 
         bool HLT(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.HLT) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
-            Console.WriteLine("hlt");
+            Debug("hlt");
             IsRunning = false;
             return true;
         }
 
         bool SYS(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.SYS) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
-            Console.WriteLine("sys");
+            Debug("sys");
             return true;
         }
 
         bool CALL(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.CALL) || !ValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
-            Console.WriteLine("call {0} (0x{1:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0]);
+            Debug("call {0} (0x{1:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0]);
 
             // Set return address to next instruction
             ra = pc + 4;
@@ -217,7 +271,7 @@ namespace FTG.Studios.BISC {
 		
         bool RET(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.RET) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
-            Console.WriteLine("ret (0x{0:x8})", ra);
+            Debug("ret (0x{0:x8})", ra);
 			
 			// Jump to return address (subtracted by 4 because VM increments pc by 4)
 			pc = ra - 4;
@@ -229,7 +283,7 @@ namespace FTG.Studios.BISC {
         bool LLI(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.LLI) || !ValidRegister(arg0)) return false;
             UInt16 imm = Specification.AssembleInteger16(arg1, arg2);
-            Console.WriteLine("lli {0}, 0x{1:x4}", Specification.REGISTER_NAMES[arg0], imm);
+            Debug("lli {0}, 0x{1:x4}", Specification.REGISTER_NAMES[arg0], imm);
             registers[arg0] = imm;
             return true;
         }
@@ -237,14 +291,14 @@ namespace FTG.Studios.BISC {
         bool LUI(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.LUI) || !ValidRegister(arg0)) return false;
             UInt16 imm = Specification.AssembleInteger16(arg1, arg2);
-            Console.WriteLine("lui {0}, 0x{1:x4}", Specification.REGISTER_NAMES[arg0], imm);
+            Debug("lui {0}, 0x{1:x4}", Specification.REGISTER_NAMES[arg0], imm);
             registers[arg0] = (UInt32)((registers[arg0] & 0xFFFF) | (UInt32)(imm << 16));
             return true;
         }
 
         bool MOV(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.MOV) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-            Console.WriteLine("mov {0}, {1} (0x{2:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
+            Debug("mov {0}, {1} (0x{2:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
             registers[arg0] = registers[arg1];
             return true;
         }
@@ -256,7 +310,7 @@ namespace FTG.Studios.BISC {
 			sbyte offset = (sbyte) arg2;
 			UInt32 addr = (UInt32) (registers[arg1] + offset);
 			UInt32 value = GetMemory32(addr);
-            Console.WriteLine("ld {0}, {1}[{2}] (0x{3:x8}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], offset, value, addr);
+            Debug("ld {0}, {1}[{2}] (0x{3:x8}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], offset, value, addr);
             registers[arg0] = value;
             return true;
         }
@@ -266,7 +320,7 @@ namespace FTG.Studios.BISC {
 			sbyte offset = (sbyte) arg2;
 			UInt32 addr = (UInt32) (registers[arg1] + offset);
 			UInt16 value = GetMemory16(addr);
-            Console.WriteLine("ld {0}, {1}[{2}] (0x{3:x4}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], offset, value, addr);
+            Debug("ld {0}, {1}[{2}] (0x{3:x4}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], offset, value, addr);
             registers[arg0] = value;
             return true;
         }
@@ -276,7 +330,7 @@ namespace FTG.Studios.BISC {
 			sbyte offset = (sbyte) arg2;
 			UInt32 addr = (UInt32) (registers[arg1] + offset);
 			byte value = GetMemory8(addr);
-            Console.WriteLine("ld {0}, {1}[{2}] (0x{3:x2}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], offset, value, addr);
+            Debug("ld {0}, {1}[{2}] (0x{3:x2}, @0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], offset, value, addr);
             registers[arg0] = value;
             return true;
         }
@@ -285,7 +339,7 @@ namespace FTG.Studios.BISC {
             if (opcode != ((byte)Opcode.SW) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
 			sbyte offset = (sbyte) arg2;
 			UInt32 addr = (UInt32) (registers[arg1] + offset);
-            Console.WriteLine("st {0} (0x{1:x8}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], offset, addr);
+            Debug("st {0} (0x{1:x8}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], offset, addr);
 			SetMemory32(addr, registers[arg0]);
             return true;
         }
@@ -294,7 +348,7 @@ namespace FTG.Studios.BISC {
             if (opcode != ((byte)Opcode.SH) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
 			sbyte offset = (sbyte) arg2;
 			UInt32 addr = (UInt32) (registers[arg1] + offset);
-            Console.WriteLine("sh {0} (0x{1:x4}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0] & 0xFFFF, Specification.REGISTER_NAMES[arg1], offset, addr);
+            Debug("sh {0} (0x{1:x4}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0] & 0xFFFF, Specification.REGISTER_NAMES[arg1], offset, addr);
 			SetMemory16(addr, registers[arg0]);
             return true;
         }
@@ -303,7 +357,7 @@ namespace FTG.Studios.BISC {
             if (opcode != ((byte)Opcode.SB) || !ValidRegister(arg0) || !ValidRegister(arg1)) return false;
 			sbyte offset = (sbyte) arg2;
 			UInt32 addr = (UInt32) (registers[arg1] + offset);
-            Console.WriteLine("sb {0} (0x{1:x2}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0] & 0xFF, Specification.REGISTER_NAMES[arg1], offset, addr);
+            Debug("sb {0} (0x{1:x2}), {2}[{3}] (@0x{4:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0] & 0xFF, Specification.REGISTER_NAMES[arg1], offset, addr);
 			SetMemory8(addr, registers[arg0]);
             return true;
         }
@@ -312,35 +366,35 @@ namespace FTG.Studios.BISC {
         #region Arithmetic Instructions
         bool ADD(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.ADD) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("add {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("add {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] + registers[arg2];
             return true;
         }
 
         bool SUB(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.SUB) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("sub {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("sub {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] - registers[arg2];
             return true;
         }
 
         bool MUL(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.MUL) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("mul {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("mul {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] * registers[arg2];
             return true;
         }
 
         bool DIV(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.DIV) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("div {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("div {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] / registers[arg2];
             return true;
         }
 
         bool MOD(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.MOD) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("mod {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("mod {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] % registers[arg2];
             return true;
         }
@@ -349,21 +403,21 @@ namespace FTG.Studios.BISC {
         #region Negation Instructions
         bool NOT(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.NEG) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-            Console.WriteLine("not {0}, {1} ({2:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
+            Debug("not {0}, {1} ({2:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
             registers[arg0] = registers[arg1] != 0 ? 0u : 1u;
             return true;
         }
 
         bool NEG(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.NEG) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-            Console.WriteLine("neg {0}, {1} ({2:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
+            Debug("neg {0}, {1} ({2:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
             registers[arg0] = (registers[arg1] ^ 0xFFFFFFFF) + 1;
             return true;
         }
 
         bool INV(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.INV) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-            Console.WriteLine("inv {0}, {1} ({2:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
+            Debug("inv {0}, {1} ({2:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
             registers[arg0] = registers[arg1] ^ 0xFFFFFFFF;
             return true;
         }
@@ -372,35 +426,35 @@ namespace FTG.Studios.BISC {
         #region Logical Instructions
         bool AND(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.AND) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("and {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("and {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] & registers[arg2];
             return true;
         }
 
         bool OR(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.OR) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("or {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("or {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] | registers[arg2];
             return true;
         }
 
         bool XOR(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.XOR) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("xor {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("xor {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] ^ registers[arg2];
             return true;
         }
 
         bool BSL(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.BSL) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("bsl {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("bsl {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] << (Int32) registers[arg2];
             return true;
         }
 
         bool BSR(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.BSR) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("bsr {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("bsr {0}, {1} (0x{2:x8}), {3} (0x{4:x8})", Specification.REGISTER_NAMES[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             registers[arg0] = registers[arg1] >> (Int32)registers[arg2];
             return true;
         }
@@ -409,63 +463,63 @@ namespace FTG.Studios.BISC {
         #region Jump Instructions
         bool JMP(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JMP) || !ValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
-            Console.WriteLine("jmp {0} (0x{1:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0]);
+            Debug("jmp {0} (0x{1:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0]);
             pc = registers[arg0] - 4;
             return true;
         }
 
         bool JEZ(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JEZ) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-            Console.WriteLine("jz {0} (0x{1:x8}), {2} (3x{1:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
+            Debug("jz {0} (0x{1:x8}), {2} (3x{1:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
             if (registers[arg1] == 0) pc = registers[arg0] - 4;
             return true;
         }
 
         bool JNZ(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JNZ) || !ValidRegister(arg0) || !ValidRegister(arg1) || arg2 != 0) return false;
-            Console.WriteLine("jnz {0} (0x{1:x8}), {2} (0x{3:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
+            Debug("jnz {0} (0x{1:x8}), {2} (0x{3:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1]);
             if (registers[arg1] != 0) pc = registers[arg0] - 4;
             return true;
         }
 
         bool JEQ(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JEQ) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("je {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("je {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             if (registers[arg1] == registers[arg2]) pc = registers[arg0] - 4;
             return true;
         }
 
         bool JNE(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JNE) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("jne {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("jne {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             if (registers[arg1] != registers[arg2]) pc = registers[arg0] - 4;
             return true;
         }
 
         bool JGT(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JGT) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("jgt {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("jgt {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             if (registers[arg1] > registers[arg2]) pc = registers[arg0] - 4;
             return true;
         }
 
         bool JLT(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JLT) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("jlt {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("jlt {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             if (registers[arg1] < registers[arg2]) pc = registers[arg0] - 4;
             return true;
         }
 
         bool JGE(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JGE) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("jge {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("jge {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             if (registers[arg1] >= registers[arg2]) pc = registers[arg0] - 4;
             return true;
         }
 
         bool JLE(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JLE) || !ValidRegister(arg0) || !ValidRegister(arg1) || !ValidRegister(arg2)) return false;
-            Console.WriteLine("jle {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
+            Debug("jle {0} (0x{1:x8}), {2} (0x{3:x8}), {4} (0x{5:x8})", Specification.REGISTER_NAMES[arg0], registers[arg0], Specification.REGISTER_NAMES[arg1], registers[arg1], Specification.REGISTER_NAMES[arg2], registers[arg2]);
             if (registers[arg1] <= registers[arg2]) pc = registers[arg0] - 4;
             return true;
         }

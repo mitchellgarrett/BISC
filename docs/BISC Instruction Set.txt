@@ -8,6 +8,7 @@ Registers
 ---------
 pc - program counter
 sp - stack pointer
+ra - return address
 rv - return value
 rt - temporary register
 r0-r7 - general-purpose registers

@@ -6,7 +6,7 @@ call fibonacci ; call fibonacci function
 hlt            ; exit program
 
 fibonacci:
-	subi sp, 16  ; allocate space of stack for stored registers
+	subi sp, sp, 16  ; allocate space of stack for stored registers
 	sw r0, sp[0] ; save registers modified by this function
 	sw r1, sp[4]
 	sw r2, sp[8]
@@ -27,9 +27,9 @@ fibonacci_loop:
 	jgt fibonacci_loop, r0, r7 ; loop if not zero
 
 fibonacci_done:
-	ld r0, sp[0] ; restore modified registers to original values
-	ld r1, sp[0]
-	ld r2, sp[0]
-	ld r7, sp[0]
-	addi sp, 16 ; deallocate stack space
+	lw r0, sp[0] ; restore modified registers to original values
+	lw r1, sp[0]
+	lw r2, sp[0]
+	lw r7, sp[0]
+	addi sp, sp, 16 ; deallocate stack space
 	ret         ; return from function, result in rv
