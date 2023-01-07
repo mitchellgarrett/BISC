@@ -6,6 +6,7 @@
 *.exe
 *.bin
 Properties/
+.*.swp
 
 # User-specific files
 *.rsuser

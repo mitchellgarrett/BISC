@@ -1,17 +1,17 @@
-CMN_DIR = Common
+CMN_DIR = common
 CMN_SRC = $(wildcard $(CMN_DIR)/*.cs)
-BUILD_DIR = Build
+BUILD_DIR = build
 
-ASM_DIR = Assembler
+ASM_DIR = asm
 ASM_EXE = bisc-asm.exe
 ASM_SRC = $(wildcard $(ASM_DIR)/*.cs) $(CMN_SRC)
 
-VM_DIR = VirtualMachine
+VM_DIR = vm
 VM_EXE = bisc-vm.exe
 VM_SRC = $(wildcard $(VM_DIR)/*.cs) $(CMN_SRC) $(filter-out $(ASM_DIR)/Application.cs, $(wildcard $(ASM_DIR)/*.cs))
 
 CSC_FLAGS = -errorendlocation
-FILE ?= Programs/fibonacci
+FILE ?= programs/console
 
 .PHONY: all
 all: $(ASM_EXE) $(VM_EXE)
