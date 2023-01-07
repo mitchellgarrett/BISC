@@ -6,7 +6,6 @@ Basic Instruction Set Computer (BISC)
 ---------
 Registers
 ---------
-
 pc - program counter
 sp - stack pointer
 rv - return value
@@ -17,7 +16,6 @@ f0-f7 - floating-point registers
 ------------------------
 Control Status Registers [WIP]
 ------------------------
-
 0x00, model - model number of this CPU
 0x01, cycle - CPU cycle count
 0x02, cycleh - upper 32-bits of cycle
@@ -28,7 +26,6 @@ Control Status Registers [WIP]
 ------------------
 General Formatting
 ------------------
-
 comment ::= ;
 reg ::= register
 mem ::= reg[0]
@@ -69,18 +66,18 @@ mov  dest (reg), arg0 (reg)
 li   dest (reg), arg0 (imm)*
 la   dest (reg), arg0 (imm)*
 
-ld   dest (reg), arg0 (mem)
 lw   dest (reg), arg0 (mem)
+lh   dest (reg), arg0 (mem)
 lb   dest (reg), arg0 (mem)
-st   arg0 (reg), dest (mem)
 sw   arg0 (reg), dest (mem)
+sh   arg0 (reg), dest (mem)
 sb   arg0 (reg), dest (mem)
 
-ld   dest (reg), arg0 (imm)*
 lw   dest (reg), arg0 (imm)*
+lh   dest (reg), arg0 (imm)*
 lb   dest (reg), arg0 (imm)*
-st   arg0 (reg), dest (imm)*
 sw   arg0 (reg), dest (imm)*
+sh   arg0 (reg), dest (imm)*
 sb   arg0 (reg), dest (imm)*
 
 

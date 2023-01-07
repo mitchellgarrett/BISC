@@ -47,11 +47,11 @@ namespace FTG.Studios.BISC {
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate16 },                     // LUI
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.None },     // MOV
 			
-			new ArgumentType[] { ArgumentType.Register, ArgumentType.Memory },                          // LD
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Memory },                          // LW
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Memory },                          // LH
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Memory },                          // LB
-			new ArgumentType[] { ArgumentType.Register, ArgumentType.Memory },                          // ST
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Memory },                          // SW
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Memory },                          // SH
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Memory },                          // SB
 			
             new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // ADD
@@ -84,7 +84,7 @@ namespace FTG.Studios.BISC {
 		public static readonly string[] pseudo_instruction_names = new string[] {
 			"LI", "LA",
 			"SYS", "CALL",
-			"LD", "LW", "LB", "ST", "SW", "SB",
+			"LW", "LH", "LB", "SW", "SH", "SB",
 			"PUSH", "PUSH", "PUSHW", "PUSHW", "PUSHB", "PUSHB",
 			"POP", "POPW", "POPB",
 			"ADDI", "ADDI", "SUBI", "SUBI", "MULI", "MULI", "DIVI", "DIVI", "MODI",
@@ -99,11 +99,11 @@ namespace FTG.Studios.BISC {
 			new ArgumentType[] { ArgumentType.Immediate32 },                                               // SYS {imm}
 			new ArgumentType[] { ArgumentType.Immediate32 },                                               // CALL {imm}
 			
-			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // LD {reg}, {imm}
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // LW {reg}, {imm}
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // LH {reg}, {imm}
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // LB {reg}, {imm}
-			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // ST {reg}, {imm}
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // SW {reg}, {imm}
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // SH {reg}, {imm}
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // SB {reg}, {imm}
 
 			new ArgumentType[] { ArgumentType.Register },                                                  // PUSH {reg}
@@ -155,22 +155,22 @@ namespace FTG.Studios.BISC {
 			new string[] { "LI rt, {0}", "SYS rt" },                   // SYS {imm}
 			new string[] { "LA rt, {0}", "CALL rt" },                  // CALL {imm}
 			
-			new string[] { "LA rt, {1}", "LD {0}, rt[0]" },            // LD {reg}, {imm}
 			new string[] { "LA rt, {1}", "LW {0}, rt[0]" },            // LW {reg}, {imm}
+			new string[] { "LA rt, {1}", "LH {0}, rt[0]" },            // LH {reg}, {imm}
 			new string[] { "LA rt, {1}", "LB {0}, rt[0]" },            // LB {reg}, {imm}
-			new string[] { "LA rt, {1}", "ST {0}, rt[0]" },            // ST {reg}, {imm}
 			new string[] { "LA rt, {1}", "SW {0}, rt[0]" },            // SW {reg}, {imm}
+			new string[] { "LA rt, {1}", "SH {0}, rt[0]" },            // SH {reg}, {imm}
 			new string[] { "LA rt, {1}", "SB {0}, rt[0]" },            // SB {reg}, {imm}
 
-			new string[] { "ST {0}, sp[-4]", "SUBI sp, sp, 4" },       // PUSH {reg}
+			new string[] { "SW {0}, sp[-4]", "SUBI sp, sp, 4" },       // PUSH {reg}
 			new string[] { "LI rt, {0}", "PUSH rt" },                  // PUSH {imm}
-			new string[] { "SW {0}, sp[-2]", "SUBI sp, sp, 4" },       // PUSHW {reg}
+			new string[] { "SH {0}, sp[-2]", "SUBI sp, sp, 4" },       // PUSHW {reg}
 			new string[] { "LI rt, {0}", "PUSHW rt" },                 // PUSHW {imm}
 			new string[] { "SB {0}, sp[-1]", "DEC sp" },               // PUSHB {reg}
 			new string[] { "LI rt, {0}", "PUSHB rt" },                 // PUSHB {imm}
 			
-			new string[] { "ADDI sp, sp, 4", "LD {0}, sp[-4]" },       // POP {reg}
-			new string[] { "ADDI sp, sp, 2", "LW {0}, sp[-2]" },       // POPW {reg}
+			new string[] { "ADDI sp, sp, 4", "LW {0}, sp[-4]" },       // POP {reg}
+			new string[] { "ADDI sp, sp, 2", "LH {0}, sp[-2]" },       // POPW {reg}
 			new string[] { "INC sp", "LB {0}, sp[-1]" },               // POPB {reg}
 			
 			new string[] { "LI rt, {2}", "ADD {0}, {1}, rt" },         // ADDI {reg}, {reg}, {imm}
