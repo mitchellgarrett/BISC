@@ -34,3 +34,4 @@ lli r0, 'C'
 sb r0, sp[14]
 lli r0, '!'
 sb r0, sp[15]
+hlt
