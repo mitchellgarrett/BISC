@@ -34,19 +34,23 @@ Keep in mind that functions can override register values, so if you want to keep
 	the end of the function to restore its old value.
 
 The following things must be maintained by a function call:
-	- The sp will have the same value exiting from a function as it did entering it.
-	- Registers will be restored to their previous values
+	- Registers sp, fp, and ra will have the same value exiting from a function as they did entering it.
+	- Non-temporary registers will be restored to their previous values (including ra if a function call is made).
 	- The pc will be set to ra.
 
 Example function prologue:
-	- Decrement sp by number of modified registers * 4 + space needed for local variables
-	- Store any modified registers that need to be saved
-	- Store ra if a function call is made
+	- Push fp
+	- Set fp to sp
+	- Allocate stack space for clobbered registers
+	- Allocate stack space for local variables
+	- Store any clobbered registers
 
 Example function epilogue:
-	- Reload any saved registers
-	- Reload ra, if necessary
-	- Increment sp back to previous value
+	- Load any clobbered registers
+	- Deallocate stack space for clobbered registers
+	- Deallocate stack space for local variables
+	- Pop fp
+	- Deallocate stack space for function arguments
 	- Call RET (jump to return address)
 
 Simple Example (C)

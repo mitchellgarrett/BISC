@@ -8,11 +8,14 @@ Registers
 ---------
 pc - program counter
 sp - stack pointer
+fp - frame pointer
 ra - return address
 rv - return value
-rt - temporary register
+ri - temporary register
 r0-r7 - general-purpose registers
-f0-f7 - floating-point registers
+t0-t7 - temporary registers
+f0-f7 - general-purpose floating-point registers
+ft0-ft7 - temporary floating-point registers
 
 ------------------------
 Control Status Registers [WIP]
@@ -140,36 +143,6 @@ fjeq
 fjne
 fjlt
 fle
-
-
--------------
-Opcode Format
--------------
-
-Instruction Format
- opcode          null        
-|------|-----------------------|
-31     24                      0
-
-Register-Immediate Format
- opcode   dest        imm
-|------|-------|---------------|
-31     24      16              0
-
-Register Format
- opcode   dest        null
-|------|-------|---------------|
-31     24      16              0
-
-Register-Register Format
- opcode   dest   arg0    null
-|------|-------|-------|-------|
-31     24      16      8       0
-
-Register-Register-Register Format
- opcode   dest   arg0    arg1
-|------|-------|-------|-------|
-31     24      16      8       0
 
 
 --------

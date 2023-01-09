@@ -1,40 +1,40 @@
 ﻿***VERY SUBJECT TO CHANGE***
 
-Mneumonic | Opcode
----------------------
-nop       | 00000000
-hlt       | 01000000
-sys       | 02rr0000
-call      | 03rr0000
-ret       | 04000000
-lli       | 05rriiii
-lui       | 06rriiii
-mov       | 07rrrr00
-lw        | 08rrrrii
-lh        | 09rrrrii
-lb        | 0Arrrrii
-sw        | 0Brrrrii
-sh        | 0Crrrrii
-sb        | 0Drrrrii
-add       | 0Errrrrr
-sub       | 0Frrrrrr
-mul       | 10rrrrrr
-div       | 11rrrrrr
-mod       | 12rrrrrr
-not       | 13rrrr00
-neg       | 14rrrr00
-inv       | 15rrrr00
-and       | 16rrrrrr
-or        | 17rrrrrr
-xor       | 18rrrrrr
-bsl       | 19rrrrrr
-bsr       | 1Arrrrrr
-jmp       | 1Brr0000
-jez       | 1Crrrr00
-jnz       | 1Drrrr00
-jeq       | 1Errrrrr
-jne       | 1Frrrrrr
-jgt       | 20rrrrrr
-jlt       | 21rrrrrr
-jge       | 22rrrrrr
-jle       | 23rrrrrr
+Mneumonic |  Opcode  | Format
+-----------------------------
+nop       | 00000000 |   I
+hlt       | 01000000 |   I
+sys       | 02rr0000 |   R
+call      | 03rr0000 |   R
+ret       | 04000000 |   I
+lli       | 05rriiii |  RI
+lui       | 06rriiii |  RI
+mov       | 07rrrr00 |  RD
+lw        | 08rrrrii |   M
+lh        | 09rrrrii |   M
+lb        | 0Arrrrii |   M
+sw        | 0Brrrrii |   M
+sh        | 0Crrrrii |   M
+sb        | 0Drrrrii |   M
+add       | 0Errrrrr |  RRD
+sub       | 0Frrrrrr |  RRD
+mul       | 10rrrrrr |  RRD
+div       | 11rrrrrr |  RRD
+mod       | 12rrrrrr |  RRD
+not       | 13rrrr00 |  RD
+neg       | 14rrrr00 |  RD
+inv       | 15rrrr00 |  RD
+and       | 16rrrrrr |  RRD
+or        | 17rrrrrr |  RRD
+xor       | 18rrrrrr |  RRD
+bsl       | 19rrrrrr |  RRD
+bsr       | 1Arrrrrr |  RRD
+jmp       | 1Brr0000 |   R
+jez       | 1Crrrr00 |  RD
+jnz       | 1Drrrr00 |  RD
+jeq       | 1Errrrrr |  RRD
+jne       | 1Frrrrrr |  RRD
+jgt       | 20rrrrrr |  RRD
+jlt       | 21rrrrrr |  RRD
+jge       | 22rrrrrr |  RRD
+jle       | 23rrrrrr |  RRD

@@ -1,0 +1,33 @@
+﻿------------------------
+BISC Instruction Formats
+------------------------
+
+Instruction (I) Format
+ opcode          null        
+|------|-----------------------|
+31     24                      0
+
+Register (R) Format
+ opcode   dest        null
+|------|-------|---------------|
+31     24      16              0
+
+Register-Immediate (RI) Format
+ opcode   dest        imm
+|------|-------|---------------|
+31     24      16              0
+
+Register-Register-Immediate (RRI) Format
+ opcode   dest   arg0     imm
+|------|-------|-------|-------|
+31     24      16      8       0
+
+Register-Register (RD) Format
+ opcode   dest   arg0    null
+|------|-------|-------|-------|
+31     24      16      8       0
+
+Register-Register-Register (RRD) Format
+ opcode   dest   arg0    arg1
+|------|-------|-------|-------|
+31     24      16      8       0

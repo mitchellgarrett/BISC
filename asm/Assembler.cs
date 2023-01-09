@@ -164,8 +164,8 @@ namespace FTG.Studios.BISC {
             byte? opcode = ParseOpcode(parameters[0]);
 			if (!opcode.HasValue) return null;
             instruction |= (UInt32) opcode.Value << 24;
-			
-            ArgumentType[] arg_types = Specification.argument_types[opcode.Value];
+
+			ArgumentType[] arg_types = Specification.instruction_format_definitions[(int) Specification.instruction_formats[opcode.Value]];
             for (int i = 0; i < arg_types.Length; i++) {
                 switch (arg_types[i]) {
                     case ArgumentType.Register:
@@ -199,16 +199,6 @@ namespace FTG.Studios.BISC {
 
             return instruction;
         }
-
-        /// <summary>
-        /// Assembles a 4-byte array into a 32-bit unsigned integer.
-        /// </summary>
-        /// <param name="bytes">Byte array to convert into intger. Must be 4 bytes.</param>
-        /// <returns>A single 32-bit unsigned integer.</returns>
-        static UInt32 AssembleInstruction(byte[] bytes) {
-            if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
-            return BitConverter.ToUInt32(bytes, 0);
-        }
 		
         /// <summary>
         /// Parses a string instruction into a binary opcode.
@@ -228,7 +218,7 @@ namespace FTG.Studios.BISC {
         /// <returns>Register index.</returns>
         public static byte? ParseRegister(string mneumonic) {
             for (byte i = 0; i < Specification.NUM_REGISTERS; i++) {
-                if (mneumonic == Specification.REGISTER_NAMES[i]) return i;
+                if (((Register)i).IsValid() && mneumonic == Specification.REGISTER_NAMES[i]) return i;
             }
             return null;
         }
