@@ -35,14 +35,19 @@ namespace FTG.Studios.BISC {
 		void Initialize() {
 			registers = new UInt32[Specification.NUM_REGISTERS];
 			memory = new Dictionary<UInt32, byte>();
-			instructions = new InstructionHandler[] {
-				NOP, HLT, SYS, CALL, RET,
-				LLI, LUI, MOV,
-				LW, LH, LB, SW, SH, SB,
-				ADD, SUB, MUL, DIV, MOD,
-				NOT, NEG, INV, AND, OR, XOR, BSL, BSR,
-				JMP, JEZ, JNZ, JEQ, JNE, JGT, JLT, JGE, JLE
-			};
+			
+			// Iterate over all opcodes, find instance method with its name,
+			// cast it to an InstructionHandler delegate and add to the instructions array
+			instructions = new InstructionHandler[Enum.GetValues(typeof(Opcode)).Length];
+			for (Opcode o = 0; o < (Opcode)instructions.Length; o++) {
+				InstructionHandler handler = Delegate.CreateDelegate(typeof(InstructionHandler), this, o.ToString()) as InstructionHandler;
+				if (handler == null) {
+					Console.Error.WriteLine($"No instruction handler for '{o}'");
+					continue;
+				}
+				instructions[(int)o] = handler;
+            }
+
 			Reset();
 		}
 
