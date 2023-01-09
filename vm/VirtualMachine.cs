@@ -24,17 +24,17 @@ namespace FTG.Studios.BISC {
 		public const UInt32 STACK_END = STACK_SIZE;
 		public const UInt32 STACK_START = STACK_END - STACK_SIZE;
 
-		Dictionary<UInt32, byte> memory;
+		IMemory memory;
 
 		public bool IsRunning { get; private set; }
 
-		public VirtualMachine() {
+		public VirtualMachine(IMemory memory) {
+			this.memory = memory;
 			Initialize();
 		}
 
 		void Initialize() {
 			registers = new UInt32[Specification.NUM_REGISTERS];
-			memory = new Dictionary<UInt32, byte>();
 			
 			// Iterate over all opcodes, find instance method with its name,
 			// cast it to an InstructionHandler delegate and add to the instructions array
@@ -63,8 +63,8 @@ namespace FTG.Studios.BISC {
 			}
 
 			// Zero out the stack.
-			for (UInt32 addr = STACK_START; addr < STACK_END; addr++) {
-				memory[addr] = 0;
+			for (UInt32 addr = STACK_START / 4; addr < (STACK_END / 4); addr++) {
+				memory.Write(addr, 0);
 			}
 
 			pc = 0;
@@ -109,37 +109,52 @@ namespace FTG.Studios.BISC {
 		}
 
 		public byte GetMemory8(UInt32 addr) {
-			return memory[addr];
+			return Specification.DisassembleInteger32(memory.Read(addr))[addr >> 30];
 		}
 
 		public UInt16 GetMemory16(UInt32 addr) {
-			return Specification.AssembleInteger16(memory[addr], memory[addr + 1]);
+			byte[] bytes = Specification.DisassembleInteger32(memory.Read(addr));
+			return Specification.AssembleInteger16(bytes[addr >> 30], bytes[(addr >> 30) + 1]);
 		}
 
 		public UInt32 GetMemory32(UInt32 addr) {
-			return Specification.AssembleInteger32(memory[addr], memory[addr + 1], memory[addr + 2], memory[addr + 3]);
+			return memory.Read(addr);
 		}
 
 		public void SetMemory8(UInt32 addr, UInt32 value) {
-			memory[addr] = (byte) (value & 0xFF);
-			/*if (!Options.HasFlag(Flags.Debug) && addr < Console.WindowWidth * Console.WindowHeight) {
-				Console.SetCursorPosition((int)(addr % Console.WindowWidth), (int)(addr / Console.WindowWidth));
-				Console.Write((char)value);
-			}*/
+			// Get the old data.
+			UInt32 data = memory.Read(addr);
+
+			// Zero out the chunk we want to set.
+			data = unchecked((UInt32)(unchecked((int)data) & (-1 & (0x00 << (8 * (unchecked((int)addr) >> 30))))));
+
+			// Apply our data to the section.
+			data = unchecked((UInt32) unchecked((int)data) | ((value & 0xFF) << (8 * (unchecked((int)addr) >> 30))));
+
+			// Write it back.
+			memory.Write(addr, data);
 		}
 
 		public void SetMemory16(UInt32 addr, UInt32 value) {
-			byte[] bytes = Specification.DisassembleInteger16((UInt16) value);
-			for	(UInt32 index = 0; index < bytes.Length; index++) {
-				memory[addr + index] = bytes[index];
+			// Safety:
+			value = (value >> 16) << 16;
+			// Get the old data.
+			UInt32 data = memory.Read(addr);
+
+			if((value >> 31) == 0) {
+				// Set the lower bytes.
+				data = (data >> 16) << 16;
+				data &= value;
+			} else {
+				// Set the upper bytes.
+				data = (data << 16) >> 16;
+				data &= (value << 16);
 			}
+
 		}
 
 		public void SetMemory32(UInt32 addr, UInt32 value) {
-			byte[] bytes = Specification.DisassembleInteger32(value);
-			for	(UInt32 index = 0; index < bytes.Length; index++) {
-				memory[addr + index] = bytes[index];
-			}
+			memory.Write(addr, value);
 		}
 
 #region Instructions
