@@ -37,7 +37,7 @@ namespace FTG.Studios.BISC.Assembler {
         }
 
         public static bool IsImmediate(this TokenType type) {
-            return type == TokenType.Label || type == TokenType.Integer;
+            return type == TokenType.Label || type == TokenType.Immediate;
         }
     }
 }

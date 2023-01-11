@@ -1,4 +1,4 @@
-lui sp, 0
+li sp, 0
 lui r0, 55 ; this is a comment
 lui r1, 0xff
 lui r2, 'A'

@@ -4,22 +4,22 @@ using System.Linq;
 
 namespace FTG.Studios.BISC.Assembler {
 
-    /// <summary>
-    /// BISC Assembler.
-    /// </summary>
-    public static class Assembler {
+	/// <summary>
+	/// BISC Assembler.
+	/// </summary>
+	public static class Assembler {
 
-        static Dictionary<string, byte> opcodes;
-        static Dictionary<string, UInt32> symbols;
+		static Dictionary<string, byte> opcodes;
+		static Dictionary<string, UInt32> symbols;
 		
 		static int lineno;
 		
-        /// <summary>
-        /// Assembles BISC source code into binary opcodes.
-        /// </summary>
-        /// <param name="source">Source code.</param>
-        /// <returns>An executable program.</returns>
-        public static UInt32[] Assemble(string source) {
+		/// <summary>
+		/// Assembles BISC source code into binary opcodes.
+		/// </summary>
+		/// <param name="source">Source code.</param>
+		/// <returns>An executable program.</returns>
+		public static UInt32[] Assemble(string source) {
 
 			// Initialize opcodes dictionary to convert string Mnemonic to byte value
 			if (opcodes == null) {
@@ -35,19 +35,19 @@ namespace FTG.Studios.BISC.Assembler {
 
 
 			List<Token> tokens = Lexer.Tokenize(source);
-            foreach (Token token in tokens) {
+			foreach (Token token in tokens) {
 				Console.WriteLine(token);
-            }
+			}
 
 			Program program = Parser.Parse(tokens);
-            foreach (Instruction inst in program.Instructions) {
+			foreach (Instruction inst in program.Instructions) {
 				Console.WriteLine(inst);
 			}
 
 			UInt32[] machine_code = new UInt32[program.Instructions.Count];
-            for (int i = 0; i < machine_code.Length; i++) {
+			for (int i = 0; i < machine_code.Length; i++) {
 				machine_code[i] = AssembleInstruction(program.Instructions[i]);
-            }
+			}
 
 			return machine_code;
 			
@@ -122,9 +122,9 @@ namespace FTG.Studios.BISC.Assembler {
 			}
 
 			// Create program object from machine code
-            Program program = new Program(machine_code.ToArray());
-            return program;*/
-        }
+			Program program = new Program(machine_code.ToArray());
+			return program;*/
+		}
 		
 		static UInt32 AssembleInstruction(Instruction inst) {
 			UInt32 machine_code = 0x00000000;
@@ -135,7 +135,7 @@ namespace FTG.Studios.BISC.Assembler {
 					case TokenType.Register:
 						machine_code |= arg.Value.Value << (2 - i) * 8;
 						break;
-					case TokenType.Integer:
+					case TokenType.Immediate:
 						if (inst.Parameters.Length == 3) machine_code |= arg.Value.Value << (2 - i) * 8;
 						else machine_code |= arg.Value.Value << (1 - i) * 8;
 						break;
@@ -191,77 +191,77 @@ namespace FTG.Studios.BISC.Assembler {
 			return null;
 		}
 		
-        /// <summary>
-        /// Parses a line of BISC code into a single binary instruction.
-        /// </summary>
-        /// <param name="line">Line to parse.</param>
-        /// <returns>A single BISC instruction in binary form.</returns>
-        static UInt32? ParseInstruction(string line) {
+		/// <summary>
+		/// Parses a line of BISC code into a single binary instruction.
+		/// </summary>
+		/// <param name="line">Line to parse.</param>
+		/// <returns>A single BISC instruction in binary form.</returns>
+		static UInt32? ParseInstruction(string line) {
 			/*string[] parameters = line.Split(' ', '\t', ',').Where(s => !string.IsNullOrEmpty(s)).ToArray();
-            UInt32 instruction = 0x00000000;
+			UInt32 instruction = 0x00000000;
 
-            byte? opcode = ParseOpcode(parameters[0]);
+			byte? opcode = ParseOpcode(parameters[0]);
 			if (!opcode.HasValue) return null;
-            instruction |= (UInt32) opcode.Value << 24;
+			instruction |= (UInt32) opcode.Value << 24;
 
 			ArgumentType[] arg_types = Specification.instruction_format_definitions[(int) Specification.instruction_formats[opcode.Value]];
-            for (int i = 0; i < arg_types.Length; i++) {
-                switch (arg_types[i]) {
-                    case ArgumentType.Register:
+			for (int i = 0; i < arg_types.Length; i++) {
+				switch (arg_types[i]) {
+					case ArgumentType.Register:
 						byte? reg = ParseRegister(parameters[i + 1]);
 						if (!reg.HasValue) {
 							InvalidValue(parameters[i + 1]);
 							return null;
 						}
-                        instruction |= (UInt32) reg.Value << (2 - i) * 8;
-                        break;
-                    case ArgumentType.Memory:
+						instruction |= (UInt32) reg.Value << (2 - i) * 8;
+						break;
+					case ArgumentType.Memory:
 						UInt16? mem = ParseMemory(parameters[i + 1]);
 						if (!mem.HasValue) {
 							InvalidValue(parameters[i + 1]);
 							return null;
 						}
-                        instruction |= (UInt32) mem.Value << (1 - i) * 8;
-                        break;
-                    case ArgumentType.Immediate16:
+						instruction |= (UInt32) mem.Value << (1 - i) * 8;
+						break;
+					case ArgumentType.Immediate16:
 						UInt16? imm = ParseInteger16(parameters[i + 1]);
 						if (!imm.HasValue) {
 							InvalidValue(parameters[i + 1]);
 							return null;
 						}
-                        instruction |= (UInt32) imm.Value << (1 - i) * 8;
-                        break;
-                    default:
-                        break;
-                }
-            }
+						instruction |= (UInt32) imm.Value << (1 - i) * 8;
+						break;
+					default:
+						break;
+				}
+			}
 			
-            return instruction;*/
+			return instruction;*/
 			return null;
-        }
+		}
 		
-        /// <summary>
-        /// Parses a string instruction into a binary opcode.
-        /// </summary>
-        /// <param name="Mnemonic">String to parse.</param>
-        /// <returns>Opcode in binary form.</returns>
-        public static byte? ParseOpcode(string Mnemonic) {
-            if (opcodes.TryGetValue(Mnemonic.ToUpper(), out byte opcode)) return opcode;
-            //InvalidInstruction(Mnemonic);
-            return null;
-        }
+		/// <summary>
+		/// Parses a string instruction into a binary opcode.
+		/// </summary>
+		/// <param name="Mnemonic">String to parse.</param>
+		/// <returns>Opcode in binary form.</returns>
+		public static byte? ParseOpcode(string Mnemonic) {
+			if (opcodes.TryGetValue(Mnemonic.ToUpper(), out byte opcode)) return opcode;
+			//InvalidInstruction(Mnemonic);
+			return null;
+		}
 
-        /// <summary>
-        /// Parses a register name into its index into the register file.
-        /// </summary>
-        /// <param name="Mnemonic">Register name.</param>
-        /// <returns>Register index.</returns>
-        public static byte? ParseRegister(string Mnemonic) {
-            for (byte i = 0; i < Specification.NUM_REGISTERS; i++) {
-                if (((Register)i).IsValid() && Mnemonic == Specification.REGISTER_NAMES[i]) return i;
-            }
-            return null;
-        }
+		/// <summary>
+		/// Parses a register name into its index into the register file.
+		/// </summary>
+		/// <param name="Mnemonic">Register name.</param>
+		/// <returns>Register index.</returns>
+		public static byte? ParseRegister(string Mnemonic) {
+			for (byte i = 0; i < Specification.NUM_REGISTERS; i++) {
+				if (((Register)i).IsValid() && Mnemonic == Specification.REGISTER_NAMES[i]) return i;
+			}
+			return null;
+		}
 		
 		static UInt32? ParseLabel(string Mnemonic) {
 			if (symbols.TryGetValue(Mnemonic, out UInt32 value)) return value;
@@ -295,28 +295,28 @@ namespace FTG.Studios.BISC.Assembler {
 			return Specification.AssembleInteger16(reg_val.Value, imm.Value);
 		}
 
-        public static UInt16? ParseMemory(string Mnemonic) {
+		public static UInt16? ParseMemory(string Mnemonic) {
 			byte? reg = ParseRegister(Mnemonic.Substring(0, 2));
 			if (!reg.HasValue || Mnemonic.IndexOf('[') <= 0) return null;
 			
 			string val = Mnemonic.Substring(Mnemonic.IndexOf('[') + 1, Mnemonic.IndexOf(']') - Mnemonic.IndexOf('[') - 1);
 			
 			// Check for negative value
-            bool isNegative = false;
-            if (val[0] == '-') {
-                isNegative = true;
-                val = val.Substring(1);
-            }
+			bool isNegative = false;
+			if (val[0] == '-') {
+				isNegative = true;
+				val = val.Substring(1);
+			}
 
-            if (byte.TryParse(val, out byte imm)) {
-                if (isNegative) {
-                    imm--;
-                    imm ^= 0xFF;
-                }
-            }
+			if (byte.TryParse(val, out byte imm)) {
+				if (isNegative) {
+					imm--;
+					imm ^= 0xFF;
+				}
+			}
 			
-            return Specification.AssembleInteger16(reg.Value, imm);
-        }
+			return Specification.AssembleInteger16(reg.Value, imm);
+		}
 
 		/// <summary>
 		/// Parses a string into an unsigned 8-bit integer.
@@ -377,61 +377,61 @@ namespace FTG.Studios.BISC.Assembler {
 				return (UInt16) symbols[Mnemonic];
 			}
 			
-            // Check for ASCII character
-            if (Mnemonic[0] == '\'') {
-                if (Mnemonic.Length != 3 || Mnemonic[2] != '\'') {
-                    //InvalidValue(Mnemonic);
-                    return null;
-                }
-                return Mnemonic[1];
-            }
+			// Check for ASCII character
+			if (Mnemonic[0] == '\'') {
+				if (Mnemonic.Length != 3 || Mnemonic[2] != '\'') {
+					//InvalidValue(Mnemonic);
+					return null;
+				}
+				return Mnemonic[1];
+			}
 
-            // Check if value has prefix
-            if (Mnemonic.Length >= 3 && Mnemonic[0] == '0') {
-                // Check for hexadecimal value
-                if (Mnemonic[1] == 'x' || Mnemonic[1] == 'X') return Convert.ToUInt16(Mnemonic.Substring(2), 16);
-                // Check for binary value
-                if (Mnemonic[1] == 'b' || Mnemonic[1] == 'B') return Convert.ToUInt16(Mnemonic.Substring(2), 2);
-            }
+			// Check if value has prefix
+			if (Mnemonic.Length >= 3 && Mnemonic[0] == '0') {
+				// Check for hexadecimal value
+				if (Mnemonic[1] == 'x' || Mnemonic[1] == 'X') return Convert.ToUInt16(Mnemonic.Substring(2), 16);
+				// Check for binary value
+				if (Mnemonic[1] == 'b' || Mnemonic[1] == 'B') return Convert.ToUInt16(Mnemonic.Substring(2), 2);
+			}
 
-            // Check for negative value
-            bool isNegative = false;
-            if (Mnemonic[0] == '-') {
-                isNegative = true;
-                Mnemonic = Mnemonic.Substring(1);
-            }
-            if (UInt16.TryParse(Mnemonic, out UInt16 imm)) {
-                if (isNegative) {
-                    imm--;
-                    imm ^= 0xFFFF;
-                }
-                return imm;
-            }
+			// Check for negative value
+			bool isNegative = false;
+			if (Mnemonic[0] == '-') {
+				isNegative = true;
+				Mnemonic = Mnemonic.Substring(1);
+			}
+			if (UInt16.TryParse(Mnemonic, out UInt16 imm)) {
+				if (isNegative) {
+					imm--;
+					imm ^= 0xFFFF;
+				}
+				return imm;
+			}
 
-            //InvalidValue(Mnemonic);
-            return null;
-        }
+			//InvalidValue(Mnemonic);
+			return null;
+		}
 		
 		/// <summary>
-        /// Parses a string into an unsigned 32-bit integer.
-        /// </summary>
-        /// <param name="Mnemonic">String to parse. Can be a signed or unsigned integer, hexadecimal value prefixed with 0x, binary value prefixed with 0b, or single ASCII character wrapped in single quotes.</param>
-        /// <returns>Unsigned 32-bit integer.</returns>
-        public static UInt32? ParseInteger32(string Mnemonic) {
+		/// Parses a string into an unsigned 32-bit integer.
+		/// </summary>
+		/// <param name="Mnemonic">String to parse. Can be a signed or unsigned integer, hexadecimal value prefixed with 0x, binary value prefixed with 0b, or single ASCII character wrapped in single quotes.</param>
+		/// <returns>Unsigned 32-bit integer.</returns>
+		public static UInt32? ParseInteger32(string Mnemonic) {
 			
 			// Check for label or symbol
 			if (symbols.ContainsKey(Mnemonic)) {
 				return symbols[Mnemonic];
 			}
 			
-            // Check for ASCII character
-            if (Mnemonic[0] == '\'') {
-                if (Mnemonic.Length != 3 || Mnemonic[2] != '\'') {
-                    //InvalidValue(Mnemonic);
-                    return null;
-                }
-                return Mnemonic[1];
-            }
+			// Check for ASCII character
+			if (Mnemonic[0] == '\'') {
+				if (Mnemonic.Length != 3 || Mnemonic[2] != '\'') {
+					//InvalidValue(Mnemonic);
+					return null;
+				}
+				return Mnemonic[1];
+			}
 			
 			// Check for byte indices
 			int byte_start = 0;
@@ -446,40 +446,40 @@ namespace FTG.Studios.BISC.Assembler {
 				hasByteRange = true;
 			}
 			
-            // Check if value has prefix
+			// Check if value has prefix
 			UInt32 value = 0;
-            if (Mnemonic.Length >= 3 && Mnemonic[0] == '0') {
-                // Check for hexadecimal value
-                if (Mnemonic[1] == 'x' || Mnemonic[1] == 'X') value = Convert.ToUInt32(Mnemonic.Substring(2), 16);
-                // Check for binary value
-                if (Mnemonic[1] == 'b' || Mnemonic[1] == 'B') value = Convert.ToUInt32(Mnemonic.Substring(2), 2);
+			if (Mnemonic.Length >= 3 && Mnemonic[0] == '0') {
+				// Check for hexadecimal value
+				if (Mnemonic[1] == 'x' || Mnemonic[1] == 'X') value = Convert.ToUInt32(Mnemonic.Substring(2), 16);
+				// Check for binary value
+				if (Mnemonic[1] == 'b' || Mnemonic[1] == 'B') value = Convert.ToUInt32(Mnemonic.Substring(2), 2);
 				if (hasByteRange) {
 					value = GetByteRange(value, byte_start, byte_end);
 				}
 				return value;
-            }
+			}
 
-            // Check for negative value
-            bool isNegative = false;
-            if (Mnemonic[0] == '-') {
-                isNegative = true;
-                Mnemonic = Mnemonic.Substring(1);
-            }
-            if (UInt32.TryParse(Mnemonic, out UInt32 imm)) {
-                if (isNegative) {
-                    imm--;
-                    imm ^= 0xFFFFFFFF;
-                }
-                value = imm;
+			// Check for negative value
+			bool isNegative = false;
+			if (Mnemonic[0] == '-') {
+				isNegative = true;
+				Mnemonic = Mnemonic.Substring(1);
+			}
+			if (UInt32.TryParse(Mnemonic, out UInt32 imm)) {
+				if (isNegative) {
+					imm--;
+					imm ^= 0xFFFFFFFF;
+				}
+				value = imm;
 				if (hasByteRange) {
 					value = GetByteRange(value, byte_start, byte_end);
 				}
 				return value;
-            }
+			}
 
-            //InvalidValue(Mnemonic);
-            return null;
-        }
+			//InvalidValue(Mnemonic);
+			return null;
+		}
 		
 		static UInt32 GetByteRange(UInt32 value, int byte_start, int byte_end) {
 			int num_bytes = byte_end - byte_start;
@@ -491,20 +491,20 @@ namespace FTG.Studios.BISC.Assembler {
 			return (value >> byte_start * 8) & mask;
 		}
 		
-        static byte? GetSignedImmediate(string Mnemonic) {
-            return null;
-        }
+		static byte? GetSignedImmediate(string Mnemonic) {
+			return null;
+		}
 
-        static byte? GetDecimalImmediate(string Mnemonic) {
-            return null;
-        }
+		static byte? GetDecimalImmediate(string Mnemonic) {
+			return null;
+		}
 
-        static void InvalidValue(string Mnemonic) {
-            Console.Error.WriteLine($"Invalid value at line {lineno}: {Mnemonic}");
-        }
+		static void InvalidValue(string Mnemonic) {
+			Console.Error.WriteLine($"Invalid value at line {lineno}: {Mnemonic}");
+		}
 
-        static void InvalidInstruction(string Mnemonic) {
-            Console.Error.WriteLine($"Invalid instruction at line {lineno}: {Mnemonic}");
-        }
-    }
+		static void InvalidInstruction(string Mnemonic) {
+			Console.Error.WriteLine($"Invalid instruction at line {lineno}: {Mnemonic}");
+		}
+	}
 }

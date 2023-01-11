@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace FTG.Studios.BISC.Assembler {
@@ -93,6 +92,11 @@ namespace FTG.Studios.BISC.Assembler {
                 return new Token(TokenType.Opcode, opcode.ToString(), (UInt32)opcode.Value, lineno, charno);
             }
 
+            for (int i = 0; i < Specification.pseudo_instruction_names.Length; i++) {
+                if (lexeme.ToUpper() == Specification.pseudo_instruction_names[i])
+                    return new Token(TokenType.PseudoOp, lexeme.ToUpper(), (UInt32)i, lineno, charno);
+            }
+
             Register? register;
             if ((register = Syntax.GetRegister(lexeme.ToUpper())).HasValue) {
                 return new Token(TokenType.Register, register.ToString(), (UInt32)register.Value, lineno, charno);
@@ -103,7 +107,7 @@ namespace FTG.Studios.BISC.Assembler {
                 Regex.IsMatch(lexeme, Syntax.binary_literal) ||
                 Regex.IsMatch(lexeme, Syntax.char_literal)
             ) {
-                return new Token(TokenType.Integer, lexeme, Assembler.ParseInteger32(lexeme), lineno, charno);
+                return new Token(TokenType.Immediate, lexeme, Assembler.ParseInteger32(lexeme), lineno, charno);
             }
 
             if (Regex.IsMatch(lexeme, Syntax.identifer)) {

@@ -1,5 +1,3 @@
-using System;
-
 namespace FTG.Studios.BISC.Assembler {
 	
 	public class Instruction {
@@ -7,7 +5,10 @@ namespace FTG.Studios.BISC.Assembler {
 		public Opcode Opcode;
 		public Token[] Parameters;
 
-		public Instruction() { }
+		public Instruction(params Token[] args) {
+			if (args != null) Parameters = args;
+			else Parameters = new Token[0];
+        }
 
 		public override string ToString() {
 			string value = $"{Opcode}";
@@ -17,7 +18,7 @@ namespace FTG.Studios.BISC.Assembler {
 					case TokenType.Register:
 						value += $" {arg.Mnemonic} ({arg.Type}, 0x{arg.Value:x2})";
 						break;
-					case TokenType.Integer:
+					case TokenType.Immediate:
 						if (Parameters.Length == 3)
 							value += $" {arg.Mnemonic} ({arg.Type}, 0x{arg.Value:x2})";
 						else 

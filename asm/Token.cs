@@ -2,7 +2,7 @@
 
 namespace FTG.Studios.BISC.Assembler {
 
-    public enum TokenType { Invalid, Opcode, PseudoOp, Label, Register, Integer, Character, Decimal, OpenBracket, CloseBracket, Seperator, LineSeperator, Comment, LabelDelimeter }
+    public enum TokenType { Invalid, Opcode, PseudoOp, Label, Register, Immediate, Seperator, LineSeperator, LabelDelimeter, OpenBracket, CloseBracket, Comment }
 
     public struct Token {
         
