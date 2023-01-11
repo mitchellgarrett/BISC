@@ -100,7 +100,9 @@ namespace FTG.Studios.BISC.Assembler {
 
             if (Regex.IsMatch(lexeme, Syntax.integer_literal) ||
                 Regex.IsMatch(lexeme, Syntax.hexadecimal_literal) ||
-                Regex.IsMatch(lexeme, Syntax.binary_literal)) {
+                Regex.IsMatch(lexeme, Syntax.binary_literal) ||
+                Regex.IsMatch(lexeme, Syntax.char_literal)
+            ) {
                 return new Token(TokenType.Integer, lexeme, Assembler.ParseInteger32(lexeme), lineno, charno);
             }
 

@@ -30,13 +30,12 @@ namespace FTG.Studios.BISC.Assembler {
             CharNo = ch;
         }
 
-        /*public static Token Invalid {
-            get { return new Token(TokenType.Invalid); }
-        }*/
-
         public override string ToString() {
-            if (Value != null) return $"(Ln: {LineNo}, Ch: {CharNo}) <{Type}, {Value}>";
-            return $"<{Type}>";
+            string value = $"(Ln: {LineNo}, Ch: {CharNo}) <{Type}";
+            if (Mnemonic != null) value += $", {Mnemonic}";
+            if (Value != null) value += $" ({Value})";
+            value += '>';
+            return value;
         }
     }
 }
