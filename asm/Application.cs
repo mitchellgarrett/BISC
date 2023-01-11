@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace FTG.Studios.BISC {
+namespace FTG.Studios.BISC.Assembler {
 
     class Application {
 
@@ -14,12 +14,13 @@ namespace FTG.Studios.BISC {
 			}
 			
             string file_name = args[0];
-            Program program = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
-            for (UInt32 addr = 0; addr < program.Instructions.Length; addr++) {
-                Console.WriteLine("{0:x}: {1:x08}", program.Offset + addr * 4, program.Instructions[addr]);
+            UInt32[] program = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
+            
+            for (UInt32 addr = 0; addr < program.Length; addr++) {
+                Console.WriteLine("{0:x}: {1:x08}", addr * 4, program[addr]);
             }
 
-            Program.Write(file_name + ".bin", program);
+            BISC.Program.Write(file_name + ".bin", new BISC.Program(program));
         }
 		
 		static void PrintHelp() {

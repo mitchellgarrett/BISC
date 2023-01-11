@@ -1,6 +1,6 @@
 ﻿***VERY SUBJECT TO CHANGE***
 
-Mneumonic |  Opcode  | Format
+Mnemonic |  Opcode  | Format
 -----------------------------
 nop       | 00000000 |   I
 hlt       | 01000000 |   I

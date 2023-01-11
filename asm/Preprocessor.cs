@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FTG.Studios.BISC {
+namespace FTG.Studios.BISC.Assembler {
 	
 	/// <summary>
 	/// Preprocessor for BISC assembler.

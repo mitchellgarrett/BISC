@@ -4,7 +4,7 @@ namespace FTG.Studios.BISC {
 
     public static class Specification {
 
-        public const char COMMENT = ';';
+		public const char COMMENT = ';';
 		public const char LABEL_DELIMETER = ':';
 
         public static readonly string[] REGISTER_NAMES = {
@@ -40,11 +40,11 @@ namespace FTG.Studios.BISC {
 		}
 
 		public static readonly ArgumentType[][] instruction_format_definitions = {
-			new ArgumentType[] { ArgumentType.None, ArgumentType.None, ArgumentType.None },             // I
-			new ArgumentType[] { ArgumentType.Register, ArgumentType.None, ArgumentType.None },         // R
+			new ArgumentType[] { },                                                                     // I
+			new ArgumentType[] { ArgumentType.Register },                                               // R
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate16 },                     // RI
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Memory },                          // M
-			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.None },     // RD
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register },                        // RD
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // RRD
 		};
 

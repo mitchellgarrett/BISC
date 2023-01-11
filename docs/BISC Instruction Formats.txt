@@ -17,7 +17,7 @@ Register-Immediate (RI) Format
 |------|-------|---------------|
 31     24      16              0
 
-Register-Register-Immediate (RRI) Format
+Memory (M) Format
  opcode   dest   arg0     imm
 |------|-------|-------|-------|
 31     24      16      8       0

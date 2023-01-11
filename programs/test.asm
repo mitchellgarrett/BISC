@@ -1,13 +1,7 @@
-section .text
-
-global main
-main:
-	la rt, var_dword
-	ld rv, rt[0]
-	ret
-
-section .data
-	var_dword: .dword 45634566534
-	var_word: .word 6535
-	var_byte: 255
-	var_string: .string "howdy world\n\0"
+lui sp, 0
+lui r0, 55 ; this is a comment
+lui r1, 0xff
+add r2, r0, r1
+sw r2, sp[0b1111]
+function:
+ret
