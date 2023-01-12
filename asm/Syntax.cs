@@ -13,14 +13,15 @@ namespace FTG.Studios.BISC.Assembler {
         public const char label_delimeter = ':';
         public const char comment = ';';
 
-        //public const string line_seperator = @"\r?\n";
         public const string identifer = @"^([_a-zA-Z][_a-zA-Z0-9]*)([\._a-zA-Z][_a-zA-Z0-9]*)*$";
-        public const string integer_literal = @"^\d+$";
+        public const string integer_literal = @"^-?\d+$";
         public const string hexadecimal_literal = @"^(0x|0X)[a-fA-F0-9]+$";
         public const string binary_literal = @"^(0b|0B)[01]+$";
         public const string decimal_literal = @"^((\d+(\.\d*)?)|(\.\d+))$";
         public const string char_literal = @"^'[a-zA-Z0-9]'$";
         public const string string_literal = @"^""[a-zA-Z0-9]+""$";
+
+        public const string macro_literal = @"(%hi|%lo)\({0}\)";
 
         public static Opcode? GetOpcode(string Mnemonic) {
             for (Opcode opcode = 0; (int)opcode < Enum.GetValues(typeof(Opcode)).Length; opcode++ ) {

@@ -73,12 +73,9 @@ namespace FTG.Studios.BISC.Assembler {
 
         static Token BuildToken(char lexeme) {
             switch (lexeme) {
-                //case Syntax.line_seperator: return new Token(TokenType.LineSeperator);
                 case Syntax.seperator: return new Token(TokenType.Seperator, lineno, charno);
                 case Syntax.open_bracket: return new Token(TokenType.OpenBracket, lineno, charno);
                 case Syntax.close_bracket: return new Token(TokenType.CloseBracket, lineno, charno);
-                //case Syntax.single_quote: return new Token(TokenType.SingleQuote);
-                //case Syntax.double_quote: return new Token(TokenType.DoubleQuot);
                 case Syntax.label_delimeter: return new Token(TokenType.LabelDelimeter, lineno, charno);
                 case Syntax.comment: return new Token(TokenType.Comment, lineno, charno);
             }
@@ -107,7 +104,7 @@ namespace FTG.Studios.BISC.Assembler {
                 Regex.IsMatch(lexeme, Syntax.binary_literal) ||
                 Regex.IsMatch(lexeme, Syntax.char_literal)
             ) {
-                return new Token(TokenType.Immediate, lexeme, Assembler.ParseInteger32(lexeme), lineno, charno);
+                return new Token(TokenType.Immediate, lexeme, Assembler.ParseImmediate(lexeme), lineno, charno);
             }
 
             if (Regex.IsMatch(lexeme, Syntax.identifer)) {
