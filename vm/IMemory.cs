@@ -3,34 +3,84 @@ using System.Collections.Generic;
 
 namespace FTG.Studios.BISC {
 
-	/// <summary>
-	/// BISC memory element.
-	/// </summary>
-	public interface IMemory {
-		void Reset();
-		UInt32 Read(UInt32 address);
-		bool Write(UInt32 address, UInt32 data);
-	}
+  /// <summary>
+  /// BISC memory element.
+  /// </summary>
+  public interface IMemory {
 
-	public class Memory : IMemory {
+    /// <summary>
+    /// Populate with the desired reset functionality.
+    /// </summary>
+    void Reset();
 
-		Dictionary<UInt32, UInt32> memory;
+    /// <summary>
+    /// Return an array of bytes based on the address.
+    /// </summary>
+    /// <param name="address">32-bit starting address for the read.</param>
+    /// <param name="data">An array of bytes read from the Memory Element of the same size as the referenced array.</param>
+    bool Read(UInt32 address, ref byte[] data);
 
-		public Memory() {
-			memory = new Dictionary<UInt32, UInt32>();
-		}
+    /// <summary>
+    /// Write an array of bytes of arbitrary length.
+    /// </summary>
+    /// <param name="address">32-bit starting address for the read.</param>
+    /// <param name="data">An array of arbitrary length to be written to the Memory Element.</param>
+    bool Write(UInt32 address, byte[] data);
+  }
+
+  /// <summary>
+  /// BISC memory element.
+  /// </summary>
+  public class BasicVolatileMemory : IMemory {
+
+    Dictionary<UInt32, byte[]> memory;
+
+    public BasicVolatileMemory() {
+      memory = new Dictionary<UInt32, byte[]>();
+    }
 
 #region IMemory
-		void IMemory.Reset() { memory.Clear(); }
+    /// <summary>
+    /// Clear the internal memory of the BasicVolatileMemory.
+    /// </summary>
+    void IMemory.Reset() { memory.Clear(); }
 
-		UInt32 IMemory.Read(UInt32 address) { return memory[address]; }
+    /// <summary>
+    /// Read an array of bytes from the BasicVolatileMemory.
+    /// </summary>
+    bool IMemory.Read(UInt32 address, ref byte[] data) {
+      for(int i = 0; i < data.Length(); i++) {
+        // If the dictionary is missing our entry, return zero.
+        if(!memory.ContainsKey((address + i) >> 2)) return false;
+        // Shift the dictionary address by 2 to prevent multiple, overlapping entries.
+        data[i] = memory[(address + i) >> 2] // Get the address of the byte array you want to read.
+                        [((address & 0x3) + i) % 4]; // Get the address of the byte you want to read.
+      }
+      return true;
+    }
 
-		bool IMemory.Write(UInt32 address, UInt32 data) { 
-			memory[address] = data;
-			return true;
-		}
+    /// <summary>
+    /// Write an array of bytes to the BasicVolatileMemory.
+    /// </summary>
+    bool IMemory.Write(UInt32 address, byte[] data) { 
+      for(int i = 0; i < data.Length(); i++) {
+        // If this is the first write to this address, populate it with zeros first.
+        // This sets the other fields in case we are only writing part of an array, and protects the read function.
+        if(!memory.ContainsKey((address + i) >> 2)) {
+          for(int j = 0; j < 4; j++) {
+            memory[(address + i) >> 2][j] = 0;
+          }
+        }
+
+        // Shift the dictionary address by 2 to prevent multiple, overlapping entries.
+        memory[(address + i) >> 2] // Get the address of the byte array that the byte should be written into.
+          [((address & 0x3) + i) % 4] // Get an index for the byte array between 0-3.
+          = data; // Assign the data.
+      }
+      return true;
+    }
 #endregion
 
-	}
+  }
 
 }
