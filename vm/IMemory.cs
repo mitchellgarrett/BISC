@@ -43,17 +43,18 @@ namespace FTG.Studios.BISC {
     /// <summary>
     /// Clear the internal memory of the BasicVolatileMemory.
     /// </summary>
-    void IMemory.Reset() { memory.Clear(); }
+    public void Reset() { memory.Clear(); }
 
     /// <summary>
     /// Read an array of bytes from the BasicVolatileMemory.
     /// </summary>
-    bool IMemory.Read(UInt32 address, ref byte[] data) {
-      for(int i = 0; i < data.Length(); i++) {
+    public bool Read(UInt32 address, ref byte[] data) {
+      for(int i = 0; i < data.Length; i++) {
         // If the dictionary is missing our entry, return zero.
-        if(!memory.ContainsKey((address + i) >> 2)) return false;
+        if(!memory.ContainsKey((UInt32)((address + i) >> 2))) return false;
+
         // Shift the dictionary address by 2 to prevent multiple, overlapping entries.
-        data[i] = memory[(address + i) >> 2] // Get the address of the byte array you want to read.
+        data[i] = memory[(UInt32)(address + i) >> 2] // Get the address of the byte array you want to read.
                         [((address & 0x3) + i) % 4]; // Get the address of the byte you want to read.
       }
       return true;
@@ -62,20 +63,18 @@ namespace FTG.Studios.BISC {
     /// <summary>
     /// Write an array of bytes to the BasicVolatileMemory.
     /// </summary>
-    bool IMemory.Write(UInt32 address, byte[] data) { 
-      for(int i = 0; i < data.Length(); i++) {
+    public bool Write(UInt32 address, byte[] data) { 
+      for(int i = 0; i < data.Length; i++) {
         // If this is the first write to this address, populate it with zeros first.
         // This sets the other fields in case we are only writing part of an array, and protects the read function.
-        if(!memory.ContainsKey((address + i) >> 2)) {
-          for(int j = 0; j < 4; j++) {
-            memory[(address + i) >> 2][j] = 0;
-          }
+        if(!memory.ContainsKey((UInt32)((address + i) >> 2))) {
+          memory.Add((UInt32)((address + i) >> 2), new byte[] {0, 0, 0, 0});
         }
 
         // Shift the dictionary address by 2 to prevent multiple, overlapping entries.
-        memory[(address + i) >> 2] // Get the address of the byte array that the byte should be written into.
+        memory[(UInt32)(address + i) >> 2] // Get the address of the byte array that the byte should be written into.
           [((address & 0x3) + i) % 4] // Get an index for the byte array between 0-3.
-          = data; // Assign the data.
+          = data[i]; // Assign the data.
       }
       return true;
     }

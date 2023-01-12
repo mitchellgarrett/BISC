@@ -3,479 +3,461 @@ using System.Collections.Generic;
 
 namespace FTG.Studios.BISC {
 
-	/// <summary>
-	/// BISC virtual machine.
-	/// </summary>
-	public class VirtualMachine {
+  /// <summary>
+  /// BISC virtual machine.
+  /// </summary>
+  public class VirtualMachine {
 
-		delegate bool InstructionHandler(byte opcode, byte arg0, byte arg1, byte arg2);
-		InstructionHandler[] instructions;
+    delegate bool InstructionHandler(byte opcode, byte arg0, byte arg1, byte arg2);
+    InstructionHandler[] instructions;
 
-		UInt32[] registers;
+    UInt32[] registers;
 
-		UInt32 pc { get => registers[(int)Register.PC]; set { registers[(int)Register.PC] = value; } }
-		UInt32 sp { get => registers[(int)Register.SP]; set { registers[(int)Register.SP] = value; } }
-		UInt32 fp { get => registers[(int)Register.FP]; set { registers[(int)Register.FP] = value; } }
-		UInt32 ra { get => registers[(int)Register.RA]; set { registers[(int)Register.RA] = value; } }
-		UInt32 rv { get => registers[(int)Register.RV]; set { registers[(int)Register.RV] = value; } }
-		UInt32 ri { get => registers[(int)Register.RI]; set { registers[(int)Register.RI] = value; } }
+    UInt32 pc { get => registers[(int)Register.PC]; set { registers[(int)Register.PC] = value; } }
+    UInt32 sp { get => registers[(int)Register.SP]; set { registers[(int)Register.SP] = value; } }
+    UInt32 fp { get => registers[(int)Register.FP]; set { registers[(int)Register.FP] = value; } }
+    UInt32 ra { get => registers[(int)Register.RA]; set { registers[(int)Register.RA] = value; } }
+    UInt32 rv { get => registers[(int)Register.RV]; set { registers[(int)Register.RV] = value; } }
+    UInt32 ri { get => registers[(int)Register.RI]; set { registers[(int)Register.RI] = value; } }
 
-		public const UInt32 STACK_SIZE = 256;
-		public const UInt32 STACK_END = STACK_SIZE;
-		public const UInt32 STACK_START = STACK_END - STACK_SIZE;
+    public const UInt32 STACK_SIZE = 256;
+    public const UInt32 STACK_END = STACK_SIZE;
+    public const UInt32 STACK_START = STACK_END - STACK_SIZE;
 
-		IMemory memory;
+    BasicVolatileMemory memory;
 
-		public bool IsRunning { get; private set; }
+    public bool IsRunning { get; private set; }
 
-		public VirtualMachine(IMemory memory) {
-			this.memory = memory;
-			Initialize();
-		}
+    public VirtualMachine(BasicVolatileMemory memory) {
+      this.memory = memory;
+      Initialize();
+    }
 
-		void Initialize() {
-			registers = new UInt32[Specification.NUM_REGISTERS];
-			
-			// Iterate over all opcodes, find instance method with its name,
-			// cast it to an InstructionHandler delegate and add to the instructions array
-			instructions = new InstructionHandler[Enum.GetValues(typeof(Opcode)).Length];
-			for (Opcode o = 0; o < (Opcode)instructions.Length; o++) {
-				InstructionHandler handler = Delegate.CreateDelegate(typeof(InstructionHandler), this, o.ToString()) as InstructionHandler;
-				if (handler == null) {
-					Console.Error.WriteLine($"No instruction handler for '{o}'");
-					continue;
-				}
-				instructions[(int)o] = handler;
-            }
+    void Initialize() {
+      registers = new UInt32[Specification.NUM_REGISTERS];
+      instructions = new InstructionHandler[] {
+        NOP, HLT, SYS, CALL, RET,
+          LLI, LUI, MOV,
+          LW, LH, LB, SW, SH, SB,
+          ADD, SUB, MUL, DIV, MOD,
+          NOT, NEG, INV, AND, OR, XOR, BSL, BSR,
+          JMP, JEZ, JNZ, JEQ, JNE, JGT, JLT, JGE, JLE
+      };
+      Reset();
+    }
 
-			Reset();
-		}
+    public UInt32 GetRegister(int reg) {
+      if (((Register)reg).IsValid()) return registers[reg];
+      return 0xFFFFFFFF;
+    }
 
-		public UInt32 GetRegister(int reg) {
-			if (((Register)reg).IsValid()) return registers[reg];
-			return 0xFFFFFFFF;
+    public void Reset() {
+      // Zero out the registers.
+      for (int i = 0; i < registers.Length; i++) {
+        registers[i] = 0;
+      }
+
+      // Zero out the stack.
+      for (UInt32 addr = STACK_START; addr < STACK_END; addr++) {
+        memory.Write(addr, new byte[] {0});;
+      }
+
+      pc = 0;
+      sp = STACK_END;
+      IsRunning = true;
+    }
+
+    public void Halt() {
+      IsRunning = false;
+    }
+
+    /// <summary>
+    /// Executes a single 32-bit BISC instruction.
+    /// </summary>
+    /// <param name="instruction">32-bit instruction.</param>
+    public bool Execute(UInt32 instruction) {
+      //Console.WriteLine("Executing instruction: 0x{0:x8}", instruction);
+
+      // Decompose instruction into its byte parameters
+      byte[] bytes = Specification.DisassembleInteger32(instruction);
+
+      byte opcode = bytes[0];
+      byte arg0 = bytes[1];
+      byte arg1 = bytes[2];
+      byte arg2 = bytes[3];
+
+      if (opcode >= 0 && opcode < instructions.Length) {
+        if (!instructions[opcode](opcode, arg0, arg1, arg2)) {
+          // Set debug register to illegeal execution
+          return false;
         }
+      } else {
+        // Set debug register to illegal instruction
+        return false;
+      }
 
-		public void Reset() {
-			// Zero out the registers.
-			for (int i = 0; i < registers.Length; i++) {
-				registers[i] = 0;
-			}
+      return true;
+    }
 
-			// Zero out the stack.
-			for (UInt32 addr = STACK_START / 4; addr < (STACK_END / 4); addr++) {
-				memory.Write(addr, 0);
-			}
+    bool IsValidRegister(byte reg) {
+      return reg <= Specification.NUM_REGISTERS && reg != (byte)Register.INVALID0 && reg != (byte)Register.INVALID1;
+    }
 
-			pc = 0;
-			sp = STACK_END;
-			IsRunning = true;
-        }
+    public byte GetMemory8(UInt32 addr) {
+      byte[] data = {0};
+      memory.Read(addr, ref data);
 
-		public void Halt() {
-			IsRunning = false;
-        }
+      return data[0];
+    }
 
-		/// <summary>
-		/// Executes a single 32-bit BISC instruction.
-		/// </summary>
-		/// <param name="instruction">32-bit instruction.</param>
-		public bool Execute(UInt32 instruction) {
-			//Console.WriteLine("Executing instruction: 0x{0:x8}", instruction);
+    public UInt16 GetMemory16(UInt32 addr) {
+      byte[] data = {0, 0};
+      memory.Read(addr, ref data);
 
-			// Decompose instruction into its byte parameters
-			byte[] bytes = Specification.DisassembleInteger32(instruction);
+      return Specification.AssembleInteger16(data[0], data[1]);
+    }
 
-			byte opcode = bytes[0];
-			byte arg0 = bytes[1];
-			byte arg1 = bytes[2];
-			byte arg2 = bytes[3];
+    public UInt32 GetMemory32(UInt32 addr) {
+      byte[] data = {0, 0, 0, 0};
+      memory.Read(addr, ref data);
 
-			if (opcode >= 0 && opcode < instructions.Length) {
-				if (!instructions[opcode](opcode, arg0, arg1, arg2)) {
-					// Set debug register to illegeal execution
-					return false;
-				}
-			} else {
-				// Set debug register to illegal instruction
-				return false;
-			}
+      return Specification.AssembleInteger32(data[0], data[1], data[2], data[3]);
+    }
 
-			return true;
-		}
+    public void SetMemory8(UInt32 addr, UInt32 value) {
+      byte[] data = {(byte)(value & 0xFF)};
+      memory.Write(addr, data);
+    }
 
-		bool IsValidRegister(byte reg) {
-			return reg <= Specification.NUM_REGISTERS && reg != (byte)Register.INVALID0 && reg != (byte)Register.INVALID1;
-		}
+    public void SetMemory16(UInt32 addr, UInt32 value) {
+      byte[] data = Specification.DisassembleInteger16((UInt16) value);
+      memory.Write(addr, data);
+    }
 
-		public byte GetMemory8(UInt32 addr) {
-			return Specification.DisassembleInteger32(memory.Read(addr))[addr >> 30];
-		}
-
-		public UInt16 GetMemory16(UInt32 addr) {
-			byte[] bytes = Specification.DisassembleInteger32(memory.Read(addr));
-			return Specification.AssembleInteger16(bytes[addr >> 30], bytes[(addr >> 30) + 1]);
-		}
-
-		public UInt32 GetMemory32(UInt32 addr) {
-			return memory.Read(addr);
-		}
-
-		public void SetMemory8(UInt32 addr, UInt32 value) {
-			// Get the old data.
-			UInt32 data = memory.Read(addr);
-
-			// Zero out the chunk we want to set.
-			data = unchecked((UInt32)(unchecked((int)data) & (-1 & (0x00 << (8 * (unchecked((int)addr) >> 30))))));
-
-			// Apply our data to the section.
-			data = unchecked((UInt32) unchecked((int)data) | ((value & 0xFF) << (8 * (unchecked((int)addr) >> 30))));
-
-			// Write it back.
-			memory.Write(addr, data);
-		}
-
-		public void SetMemory16(UInt32 addr, UInt32 value) {
-			// Safety:
-			value = (value >> 16) << 16;
-			// Get the old data.
-			UInt32 data = memory.Read(addr);
-
-			if((value >> 31) == 0) {
-				// Set the lower bytes.
-				data = (data >> 16) << 16;
-				data &= value;
-			} else {
-				// Set the upper bytes.
-				data = (data << 16) >> 16;
-				data &= (value << 16);
-			}
-
-		}
-
-		public void SetMemory32(UInt32 addr, UInt32 value) {
-			memory.Write(addr, value);
-		}
+    public void SetMemory32(UInt32 addr, UInt32 value) {
+      byte[] data = Specification.DisassembleInteger32(value);
+      memory.Write(addr, data);
+    }
 
 #region Instructions
 
 #region System Instructions
-		bool NOP(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.NOP) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
-			
-			pc += 4;
-			return true;
-		}
+    bool NOP(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.NOP) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
 
-		bool HLT(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.HLT) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
-			
-			Halt();
-			return true;
-		}
+      pc += 4;
+      return true;
+    }
 
-		bool SYS(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.SYS) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
-			
-			pc += 4;
-			return true;
-		}
+    bool HLT(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.HLT) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
 
-		bool CALL(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.CALL) || !IsValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
-			
-			// Set return address to next instruction
-			ra = pc + 4;
-			// Jump to called address
-			pc = registers[arg0];
-			return true;
-		}
+      Halt();
+      return true;
+    }
 
-		bool RET(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.RET) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
-			
-			// Jump to return address
-			pc = ra;
-			return true;
-		}
+    bool SYS(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.SYS) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+
+      pc += 4;
+      return true;
+    }
+
+    bool CALL(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.CALL) || !IsValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
+
+      // Set return address to next instruction
+      ra = pc + 4;
+      // Jump to called address
+      pc = registers[arg0];
+      return true;
+    }
+
+    bool RET(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.RET) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+
+      // Jump to return address
+      pc = ra;
+      return true;
+    }
 #endregion
 
 #region Load Instructions
-		bool LLI(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.LLI) || !IsValidRegister(arg0)) return false;
-			
-			UInt16 imm = Specification.AssembleInteger16(arg1, arg2);
-			registers[arg0] = imm;
-			pc += 4;
-			return true;
-		}
+    bool LLI(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.LLI) || !IsValidRegister(arg0)) return false;
 
-		bool LUI(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.LUI) || !IsValidRegister(arg0)) return false;
-			
-			UInt16 imm = Specification.AssembleInteger16(arg1, arg2);
-			registers[arg0] = (UInt32)((registers[arg0] & 0xFFFF) | (UInt32)(imm << 16));
-			pc += 4;
-			return true;
-		}
+      UInt16 imm = Specification.AssembleInteger16(arg1, arg2);
+      registers[arg0] = imm;
+      pc += 4;
+      return true;
+    }
 
-		bool MOV(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.MOV) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
-			
-			registers[arg0] = registers[arg1];
-			pc += 4;
-			return true;
-		}
+    bool LUI(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.LUI) || !IsValidRegister(arg0)) return false;
+
+      UInt16 imm = Specification.AssembleInteger16(arg1, arg2);
+      registers[arg0] = (UInt32)((registers[arg0] & 0xFFFF) | (UInt32)(imm << 16));
+      pc += 4;
+      return true;
+    }
+
+    bool MOV(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.MOV) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
+
+      registers[arg0] = registers[arg1];
+      pc += 4;
+      return true;
+    }
 #endregion
 
 #region Memory Instructions
-		bool LW(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.LW) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
-			
-			sbyte offset = (sbyte) arg2;
-			UInt32 addr = (UInt32) (registers[arg1] + offset);
-			UInt32 value = GetMemory32(addr);
-			registers[arg0] = value;
-			pc += 4;
-			return true;
-		}
+    bool LW(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.LW) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
-		bool LH(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.LH) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
-			
-			sbyte offset = (sbyte) arg2;
-			UInt32 addr = (UInt32) (registers[arg1] + offset);
-			UInt16 value = GetMemory16(addr);
-			registers[arg0] = value;
-			pc += 4;
-			return true;
-		}
+      sbyte offset = (sbyte) arg2;
+      UInt32 addr = (UInt32) (registers[arg1] + offset);
+      UInt32 value = GetMemory32(addr);
+      registers[arg0] = value;
+      pc += 4;
+      return true;
+    }
 
-		bool LB(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.LB) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
-			
-			sbyte offset = (sbyte) arg2;
-			UInt32 addr = (UInt32) (registers[arg1] + offset);
-			byte value = GetMemory8(addr);
-			registers[arg0] = value;
-			pc += 4;
-			return true;
-		}
+    bool LH(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.LH) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
-		bool SW(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.SW) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
-			
-			sbyte offset = (sbyte) arg2;
-			UInt32 addr = (UInt32) (registers[arg1] + offset);
-			SetMemory32(addr, registers[arg0]);
-			pc += 4;
-			return true;
-		}
+      sbyte offset = (sbyte) arg2;
+      UInt32 addr = (UInt32) (registers[arg1] + offset);
+      UInt16 value = GetMemory16(addr);
+      registers[arg0] = value;
+      pc += 4;
+      return true;
+    }
 
-		bool SH(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.SH) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
-			
-			sbyte offset = (sbyte) arg2;
-			UInt32 addr = (UInt32) (registers[arg1] + offset);
-			SetMemory16(addr, registers[arg0]);
-			pc += 4;
-			return true;
-		}
+    bool LB(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.LB) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
-		bool SB(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.SB) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
-			
-			sbyte offset = (sbyte) arg2;
-			UInt32 addr = (UInt32) (registers[arg1] + offset);
-			SetMemory8(addr, registers[arg0]);
-			pc += 4;
-			return true;
-		}
+      sbyte offset = (sbyte) arg2;
+      UInt32 addr = (UInt32) (registers[arg1] + offset);
+      byte value = GetMemory8(addr);
+      registers[arg0] = value;
+      pc += 4;
+      return true;
+    }
+
+    bool SW(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.SW) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
+
+      sbyte offset = (sbyte) arg2;
+      UInt32 addr = (UInt32) (registers[arg1] + offset);
+      SetMemory32(addr, registers[arg0]);
+      pc += 4;
+      return true;
+    }
+
+    bool SH(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.SH) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
+
+      sbyte offset = (sbyte) arg2;
+      UInt32 addr = (UInt32) (registers[arg1] + offset);
+      SetMemory16(addr, registers[arg0]);
+      pc += 4;
+      return true;
+    }
+
+    bool SB(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.SB) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
+
+      sbyte offset = (sbyte) arg2;
+      UInt32 addr = (UInt32) (registers[arg1] + offset);
+      SetMemory8(addr, registers[arg0]);
+      pc += 4;
+      return true;
+    }
 #endregion
 
 #region Arithmetic Instructions
-		bool ADD(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.ADD) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			registers[arg0] = registers[arg1] + registers[arg2];
-			pc += 4;
-			return true;
-		}
+    bool ADD(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.ADD) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-		bool SUB(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.SUB) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			registers[arg0] = registers[arg1] - registers[arg2];
-			pc += 4;
-			return true;
-		}
+      registers[arg0] = registers[arg1] + registers[arg2];
+      pc += 4;
+      return true;
+    }
 
-		bool MUL(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.MUL) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			registers[arg0] = registers[arg1] * registers[arg2];
-			pc += 4;
-			return true;
-		}
+    bool SUB(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.SUB) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-		bool DIV(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.DIV) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			registers[arg0] = registers[arg1] / registers[arg2];
-			pc += 4;
-			return true;
-		}
+      registers[arg0] = registers[arg1] - registers[arg2];
+      pc += 4;
+      return true;
+    }
 
-		bool MOD(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.MOD) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			registers[arg0] = registers[arg1] % registers[arg2];
-			pc += 4;
-			return true;
-		}
+    bool MUL(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.MUL) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+      registers[arg0] = registers[arg1] * registers[arg2];
+      pc += 4;
+      return true;
+    }
+
+    bool DIV(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.DIV) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+      registers[arg0] = registers[arg1] / registers[arg2];
+      pc += 4;
+      return true;
+    }
+
+    bool MOD(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.MOD) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+      registers[arg0] = registers[arg1] % registers[arg2];
+      pc += 4;
+      return true;
+    }
 #endregion
 
 #region Negation Instructions
-		bool NOT(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.NEG) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
-			
-			registers[arg0] = registers[arg1] != 0 ? 0u : 1u;
-			pc += 4;
-			return true;
-		}
+    bool NOT(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.NEG) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
-		bool NEG(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.NEG) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
-			
-			registers[arg0] = (registers[arg1] ^ 0xFFFFFFFF) + 1;
-			pc += 4;
-			return true;
-		}
+      registers[arg0] = registers[arg1] != 0 ? 0u : 1u;
+      pc += 4;
+      return true;
+    }
 
-		bool INV(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.INV) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
-			
-			registers[arg0] = registers[arg1] ^ 0xFFFFFFFF;
-			pc += 4;
-			return true;
-		}
+    bool NEG(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.NEG) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
+
+      registers[arg0] = (registers[arg1] ^ 0xFFFFFFFF) + 1;
+      pc += 4;
+      return true;
+    }
+
+    bool INV(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.INV) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
+
+      registers[arg0] = registers[arg1] ^ 0xFFFFFFFF;
+      pc += 4;
+      return true;
+    }
 #endregion
 
 #region Logical Instructions
-		bool AND(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.AND) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			registers[arg0] = registers[arg1] & registers[arg2];
-			pc += 4;
-			return true;
-		}
+    bool AND(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.AND) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-		bool OR(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.OR) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			registers[arg0] = registers[arg1] | registers[arg2];
-			pc += 4;
-			return true;
-		}
+      registers[arg0] = registers[arg1] & registers[arg2];
+      pc += 4;
+      return true;
+    }
 
-		bool XOR(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.XOR) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			registers[arg0] = registers[arg1] ^ registers[arg2];
-			pc += 4;
-			return true;
-		}
+    bool OR(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.OR) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-		bool BSL(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.BSL) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			registers[arg0] = registers[arg1] << (Int32) registers[arg2];
-			pc += 4;
-			return true;
-		}
+      registers[arg0] = registers[arg1] | registers[arg2];
+      pc += 4;
+      return true;
+    }
 
-		bool BSR(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.BSR) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			registers[arg0] = registers[arg1] >> (Int32)registers[arg2];
-			pc += 4;
-			return true;
-		}
+    bool XOR(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.XOR) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+      registers[arg0] = registers[arg1] ^ registers[arg2];
+      pc += 4;
+      return true;
+    }
+
+    bool BSL(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.BSL) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+      registers[arg0] = registers[arg1] << (Int32) registers[arg2];
+      pc += 4;
+      return true;
+    }
+
+    bool BSR(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.BSR) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+      registers[arg0] = registers[arg1] >> (Int32)registers[arg2];
+      pc += 4;
+      return true;
+    }
 #endregion
 
 #region Jump Instructions
-		bool JMP(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.JMP) || !IsValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
-			
-			pc = registers[arg0];
-			return true;
-		}
+    bool JMP(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.JMP) || !IsValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
 
-		bool JEZ(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.JEZ) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
-			
-			if (registers[arg1] == 0) pc = registers[arg0];
-			else pc += 4;
-			return true;
-		}
+      pc = registers[arg0];
+      return true;
+    }
 
-		bool JNZ(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.JNZ) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
-			
-			if (registers[arg1] != 0) pc = registers[arg0];
-			else pc += 4;
-			return true;
-		}
+    bool JEZ(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.JEZ) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
-		bool JEQ(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.JEQ) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			if (registers[arg1] == registers[arg2]) pc = registers[arg0];
-			else pc += 4;
-			return true;
-		}
+      if (registers[arg1] == 0) pc = registers[arg0];
+      else pc += 4;
+      return true;
+    }
 
-		bool JNE(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.JNE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			if (registers[arg1] != registers[arg2]) pc = registers[arg0];
-			else pc += 4;
-			return true;
-		}
+    bool JNZ(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.JNZ) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
-		bool JGT(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.JGT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			if (registers[arg1] > registers[arg2]) pc = registers[arg0];
-			else pc += 4;
-			return true;
-		}
+      if (registers[arg1] != 0) pc = registers[arg0];
+      else pc += 4;
+      return true;
+    }
 
-		bool JLT(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.JLT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			if (registers[arg1] < registers[arg2]) pc = registers[arg0];
-			else pc += 4;
-			return true;
-		}
+    bool JEQ(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.JEQ) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-		bool JGE(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.JGE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			if (registers[arg1] >= registers[arg2]) pc = registers[arg0];
-			else pc += 4;
-			return true;
-		}
+      if (registers[arg1] == registers[arg2]) pc = registers[arg0];
+      else pc += 4;
+      return true;
+    }
 
-		bool JLE(byte opcode, byte arg0, byte arg1, byte arg2) {
-			if (opcode != ((byte)Opcode.JLE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-			
-			if (registers[arg1] <= registers[arg2]) pc = registers[arg0];
-			else pc += 4;
-			return true;
-		}
+    bool JNE(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.JNE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+      if (registers[arg1] != registers[arg2]) pc = registers[arg0];
+      else pc += 4;
+      return true;
+    }
+
+    bool JGT(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.JGT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+      if (registers[arg1] > registers[arg2]) pc = registers[arg0];
+      else pc += 4;
+      return true;
+    }
+
+    bool JLT(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.JLT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+      if (registers[arg1] < registers[arg2]) pc = registers[arg0];
+      else pc += 4;
+      return true;
+    }
+
+    bool JGE(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.JGE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+      if (registers[arg1] >= registers[arg2]) pc = registers[arg0];
+      else pc += 4;
+      return true;
+    }
+
+    bool JLE(byte opcode, byte arg0, byte arg1, byte arg2) {
+      if (opcode != ((byte)Opcode.JLE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+      if (registers[arg1] <= registers[arg2]) pc = registers[arg0];
+      else pc += 4;
+      return true;
+    }
 #endregion
 
 #endregion
-	}
+  }
 }
