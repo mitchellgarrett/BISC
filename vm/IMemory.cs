@@ -43,12 +43,12 @@ namespace FTG.Studios.BISC {
     /// <summary>
     /// Clear the internal memory of the BasicVolatileMemory.
     /// </summary>
-    public void Reset() { memory.Clear(); }
+    public virtual void Reset() { memory.Clear(); }
 
     /// <summary>
     /// Read an array of bytes from the BasicVolatileMemory.
     /// </summary>
-    public bool Read(UInt32 address, ref byte[] data) {
+    public virtual bool Read(UInt32 address, ref byte[] data) {
       for(int i = 0; i < data.Length; i++) {
         // If the dictionary is missing our entry, return zero.
         if(!memory.ContainsKey((UInt32)((address + i) >> 2))) return false;
@@ -63,7 +63,7 @@ namespace FTG.Studios.BISC {
     /// <summary>
     /// Write an array of bytes to the BasicVolatileMemory.
     /// </summary>
-    public bool Write(UInt32 address, byte[] data) { 
+    public virtual bool Write(UInt32 address, byte[] data) { 
       for(int i = 0; i < data.Length; i++) {
         // If this is the first write to this address, populate it with zeros first.
         // This sets the other fields in case we are only writing part of an array, and protects the read function.
@@ -82,4 +82,10 @@ namespace FTG.Studios.BISC {
 
   }
 
+  public class BasicNonVolatileMemory : BasicVolatileMemory {
+
+    // Non-volatile memory will not lose its contents on reset.
+    public override void Reset() {}
+
+  }
 }

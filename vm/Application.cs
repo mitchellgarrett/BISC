@@ -6,7 +6,7 @@ namespace FTG.Studios.BISC {
   class Application {
 
     enum Flags { None = 0x0, SingleStep = 0x1, Debug = 0x2 };
-    static BasicVolatileMemory memory;
+    static BasicNonVolatileMemory memory;
     static VirtualMachine vm;
 
     static void Main(string[] args) {
@@ -25,7 +25,7 @@ namespace FTG.Studios.BISC {
       //options = Flags.Debug;
       options = Flags.SingleStep | Flags.Debug;
 
-      memory = new BasicVolatileMemory();
+      memory = new BasicNonVolatileMemory();
 
       vm = new VirtualMachine(memory);
       vm.Reset();
