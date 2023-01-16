@@ -6,8 +6,6 @@ namespace FTG.Studios.BISC.Assembler {
     class Application {
 
         static void Main(string[] args) {
-            //Console.Title = "BISC Assembler";
-			
 			if (args.Length <= 0) {
 				PrintHelp();
 				return;

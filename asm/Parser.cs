@@ -202,81 +202,61 @@ namespace FTG.Studios.BISC.Assembler {
                 args.Add(token);
             }
 
-            List<ArgumentType> arg_types = new List<ArgumentType>();
-            for (int i = 0; i < args.Count; i++) {
-                Token arg = args[i];
-                switch (arg.Type) {
-                    case TokenType.Register:
-                        if (i < args.Count - 1) {
-                            if (Match(args[i + 1], TokenType.Seperator)) {
-                                arg_types.Add(ArgumentType.Register);
-                                args.RemoveAt(i + 1);
-                                i--;
-                            } else if(Match(args[i + 1], TokenType.OpenBracket)) {
-                                arg_types.Add(ArgumentType.Memory);
-                                args.RemoveAt(i + 1);
-                                i--;
-                            }
-                        } else {
-                            arg_types.Add(ArgumentType.Register);
-                        }
-                        break;
-                    case TokenType.Immediate:
-                        if (arg_types[i - 1] == ArgumentType.Register) {
-                            arg_types.Add(ArgumentType.Immediate32);
-                            if (i < args.Count - 1) {
-                                MatchFail(args[i + 1], TokenType.Seperator);
-                                args.RemoveAt(i + 1);
-                                i--;
-                            }
-                        } else if (arg_types[i - 1] == ArgumentType.Memory) {
-                            MatchFail(args[i + 1], TokenType.CloseBracket);
-                            args.RemoveAt(i + 1);
-                            i--;
-                        } else {
-                            arg_types.Add(ArgumentType.Immediate32);
-                        }
-                        break;
-                }
-            }
-
-            Console.WriteLine("\n\n\nPSEDUO ARGS");
-            Console.WriteLine(pseduo_op.Mnemonic);
-            for (int i = 0; i < args.Count; i++) {
-                Console.WriteLine(arg_types[i]);
-                Console.WriteLine(args[i]);
-            }
-            Console.WriteLine("\n\n\n");
-            
-            for (int i = args.Count - 1; i < 3; i++) {
-                args.Add(new Token(TokenType.Invalid, 0, 0));
-            }
-
             int index = (int)pseduo_op.Value;
             for (; index < Specification.pseudo_instruction_names.Length; index++) {
                 if (pseduo_op.Mnemonic == Specification.pseudo_instruction_names[index]) {
                     bool valid = true;
-                    if (arg_types.Count != Specification.pseudo_instruction_arguments[index].Length)
-                            valid = false;
-                    for (int i = 0; valid && i < Specification.pseudo_instruction_arguments[index].Length; i++) {
-                        if (arg_types[i] != Specification.pseudo_instruction_arguments[index][i])
-                            valid = false;
+                    Queue<Token> temp_stream = new Queue<Token>(args);
+                    List<Token> temp_args = new List<Token>();
+                    ArgumentType[] arg_types = Specification.pseudo_instruction_arguments[index];
+                    for (int a = 0; valid && a < arg_types.Length; a++) {
+                        switch (arg_types[a]) {
+                            case ArgumentType.None:
+                                if (temp_stream.Count > 0) valid = false;
+                                break;
+                            case ArgumentType.Register:
+                                if (temp_stream.Count == 0 || !Match(temp_stream.Peek(), TokenType.Register)) valid = false;
+                                temp_args.Add(temp_stream.Dequeue());
+                                break;
+                            case ArgumentType.Memory:
+                                if (temp_stream.Count == 0 || !Match(temp_stream.Peek(), TokenType.Register)) valid = false;
+                                else temp_args.Add(temp_stream.Dequeue());
+                                if (temp_stream.Count == 0 || !Match(temp_stream.Dequeue(), TokenType.OpenBracket)) valid = false;
+                                if (temp_stream.Count == 0 || !Match(temp_stream.Peek(), TokenType.Immediate)) valid = false;
+                                else temp_args.Add(temp_stream.Dequeue());
+                                if (temp_stream.Count == 0 || !Match(temp_stream.Dequeue(), TokenType.CloseBracket)) valid = false;
+                                break;
+                            case ArgumentType.Immediate32:
+                                if (temp_stream.Count == 0 || !Match(temp_stream.Peek(), TokenType.Immediate)) valid = false;
+                                else temp_args.Add(temp_stream.Dequeue());
+                                break;
+                        }
+                        if (a < arg_types.Length - 1 && (temp_stream.Count == 0 || !Match(temp_stream.Dequeue(), TokenType.Seperator))) valid = false;
                     }
-                    if (valid) break;
+                    if (temp_stream.Count > 0) valid = false;
+                    if (valid) {
+                        args = temp_args;
+                        break;
+                    }
                 }
             }
 
-            // Fix finding pseudos with same name and distinguishing between args
+            for (int i = args.Count; i < 3; i++) {
+                args.Add(new Token(TokenType.Invalid, 0, 0));
+            }
+            
             string[] definition = Specification.pseudo_instruction_definitions[index];
             string[] replacements = new string[definition.Length];
             Array.Copy(definition, replacements, replacements.Length);
 
-            for (int i = 0; i < replacements.Length; i++) {
+            for (int i = replacements.Length - 1; i >= 0; i--) {
                 replacements[i] = string.Format(replacements[i], args[0].Mnemonic, args[1].Mnemonic, args[2].Mnemonic);
                 replacements[i] += '\n';
                 List<Token> vals = Lexer.Tokenize(replacements[i]);
                 for (int v = vals.Count - 1; v >= 0; v--) {
-                    tokens.AddFirst(vals[v]);
+                    Token t = vals[v];
+                    t.LineNo += pseduo_op.LineNo - 1;
+                    tokens.AddFirst(t);
                 }
             }
 
