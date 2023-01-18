@@ -6,14 +6,16 @@ namespace FTG.Studios.BISC.Assembler {
 
     public static class Lexer {
 
-        static int lineno;
+        static int lineno = 1;
         static int charno;
+
+        public static void Reset() {
+            lineno = 1;
+        }
 
         public static List<Token> Tokenize(string source) {
             List<Token> tokens = new List<Token>();
-            source = source.Replace("\r\n", "\n");
-
-            lineno = charno = 1;
+            charno = 1;
 
             Token token;
             string current_word = string.Empty;
@@ -21,7 +23,12 @@ namespace FTG.Studios.BISC.Assembler {
             for (int i = 0; i < source.Length; i++) {
                 char c = source[i];
                 charno++;
-                
+
+                if (c == Syntax.carriage_return) {
+                    charno--; 
+                    continue;
+                }
+
                 if (parse_comment && c != Syntax.line_seperator) {
                     current_word += c;
                     continue;
@@ -84,14 +91,14 @@ namespace FTG.Studios.BISC.Assembler {
         }
 
         static Token BuildToken(string lexeme) {
-            Opcode? opcode;
-            if ((opcode = Syntax.GetOpcode(lexeme.ToUpper())).HasValue) {
-                return new Token(TokenType.Opcode, opcode.ToString(), (UInt32)opcode.Value, lineno, charno);
-            }
-
             for (int i = 0; i < Specification.pseudo_instruction_names.Length; i++) {
                 if (lexeme.ToUpper() == Specification.pseudo_instruction_names[i])
                     return new Token(TokenType.PseudoOp, lexeme.ToUpper(), (UInt32)i, lineno, charno);
+            }
+
+            Opcode? opcode;
+            if ((opcode = Syntax.GetOpcode(lexeme.ToUpper())).HasValue) {
+                return new Token(TokenType.Opcode, opcode.ToString(), (UInt32)opcode.Value, lineno, charno);
             }
 
             Register? register;

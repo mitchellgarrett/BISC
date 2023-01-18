@@ -3,6 +3,7 @@ namespace FTG.Studios.BISC.Assembler {
 	public static class Optimizer {
 		
 		public static void Optimize(Program program) {
+			return;
 			for (int i = 0; i < program.Instructions.Count; i++) {
 				Instruction inst = program.Instructions[i];
 				if (i < program.Instructions.Count - 1) {

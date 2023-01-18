@@ -4,6 +4,7 @@ namespace FTG.Studios.BISC.Assembler {
 
     static class Syntax {
 
+        public const char carriage_return = '\r';
         public const char line_seperator = '\n';
         public const char seperator = ',';
         public const char open_bracket = '[';

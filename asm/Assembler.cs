@@ -12,8 +12,6 @@ namespace FTG.Studios.BISC.Assembler {
 		static Dictionary<string, byte> opcodes;
 		static Dictionary<string, UInt32> symbols;
 		
-		static int lineno;
-		
 		/// <summary>
 		/// Assembles BISC source code into binary opcodes.
 		/// </summary>
@@ -33,9 +31,22 @@ namespace FTG.Studios.BISC.Assembler {
 			symbols = new Dictionary<string, UInt32>();
 			List<Instruction> unresolved_symbols = new List<Instruction>();
 
+			/*string[] lines = source.Split('\n');
+			Program program = new Program();
+			Lexer.Reset();
+            for (int lineno = 0; lineno < lines.Length; lineno++) {
+				string line = lines[lineno] + '\n';
+				List<Token> tokens = Lexer.Tokenize(line);
+				if (tokens.Count == 0) continue;
+				Console.WriteLine($"Line {lineno + 1}: ");
+                foreach (Token token in tokens) {
+					Console.WriteLine(token);
+                }
+			}*/
+			
 			List<Token> tokens = Lexer.Tokenize(source);
 			foreach (Token token in tokens) {
-				Console.WriteLine(token);
+				//Console.WriteLine(token);
 			}
 
 			Program program = Parser.Parse(tokens);
@@ -44,7 +55,7 @@ namespace FTG.Studios.BISC.Assembler {
 			}
 
 			// First-pass optimizations
-			Optimizer.Optimize(program);
+			//Optimizer.Optimize(program);
 
 			UInt32[] machine_code = new UInt32[program.Instructions.Count];
 			for (int i = 0; i < machine_code.Length; i++) {
@@ -188,11 +199,11 @@ namespace FTG.Studios.BISC.Assembler {
 		}
 
 		static void InvalidValue(string Mnemonic) {
-			Console.Error.WriteLine($"Invalid value at line {lineno}: {Mnemonic}");
+			//Console.Error.WriteLine($"Invalid value at line {lineno}: {Mnemonic}");
 		}
 
 		static void InvalidInstruction(string Mnemonic) {
-			Console.Error.WriteLine($"Invalid instruction at line {lineno}: {Mnemonic}");
+			//Console.Error.WriteLine($"Invalid instruction at line {lineno}: {Mnemonic}");
 		}
 	}
 }
