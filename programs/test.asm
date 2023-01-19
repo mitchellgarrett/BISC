@@ -4,5 +4,6 @@ call 0x1111
 hlt
 
 function:
+addi r0, 11, r0
 jez 0x1111, r0
 ret

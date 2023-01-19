@@ -6,43 +6,29 @@ namespace FTG.Studios.BISC.Assembler {
     public static class Parser {
 
         public static Program Parse(List<Token> tokens) {
-            // First pass: resolve pseduo-instructions to real instructions
-            Queue<Token> stream;
-            for (int i = 0; i < tokens.Count; i++) {
-                if (tokens[i].Type == TokenType.PseudoOp) {
-                    stream = new Queue<Token>();
-                    int len;
-                    for (len = 0; i + len < tokens.Count; len++) {
-                        stream.Enqueue(tokens[i + len]);
-                        if (tokens[i + len].Type == TokenType.LineSeperator) break;
-                    }
-                    Token[] instructions = ParsePseudoInstruction(stream);
-                    if (instructions != null) {
-                        tokens.RemoveRange(i, len);
-                        tokens.InsertRange(i--, instructions);
-                    }
-                }
-            }
-
-            // Second pass: parse instructions and labels
-            stream = new Queue<Token>(tokens);
+            LinkedList<Token> stream = new LinkedList<Token>(tokens);
             string label = null;
             Program program = new Program();
             while (stream.Count > 0) {
-                Console.WriteLine(stream.Peek());
                 switch (stream.Peek().Type) {
                     case TokenType.Opcode:
-                        program.Instructions.Add(ParseInstruction(stream));
+                        Instruction instruction = ParseInstruction(stream);
+
+                        Console.WriteLine(instruction);
+                        program.Instructions.Add(instruction);
                         if (!string.IsNullOrEmpty(label)) {
-                            program.Labels[label] = program.Instructions[program.Instructions.Count - 1];
+                            program.Labels[label] = instruction;
                             label = null;
                         }
+                        break;
+                    case TokenType.PseudoOp:
+                        ParsePseudoInstruction(stream);
                         break;
                     case TokenType.Label:
                         label = ParseLabel(stream);
                         break;
                     default:
-                        Fail(stream.Peek(), TokenType.Opcode);
+                        Fail(stream.First.Value, TokenType.Opcode);
                         break;
                 }
 
@@ -53,7 +39,7 @@ namespace FTG.Studios.BISC.Assembler {
             return program;
         }
 
-        static Instruction ParseInstruction(Queue<Token> tokens) {
+        static Instruction ParseInstruction(LinkedList<Token> tokens) {
             Token opcode = tokens.Peek();
             InstructionFormat format = Specification.instruction_formats[opcode.Value.Value];
             Instruction inst = null;
@@ -74,7 +60,7 @@ namespace FTG.Studios.BISC.Assembler {
             return inst;
         }
 
-        static Instruction ParseIInstruction(Queue<Token> tokens) {
+        static Instruction ParseIInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
             MatchFail(opcode, TokenType.Opcode);
@@ -84,7 +70,7 @@ namespace FTG.Studios.BISC.Assembler {
             return inst;
         }
 
-        static Instruction ParseRInstruction(Queue<Token> tokens) {
+        static Instruction ParseRInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
             MatchFail(opcode, TokenType.Opcode);
@@ -98,7 +84,7 @@ namespace FTG.Studios.BISC.Assembler {
             return inst;
         }
 
-        static Instruction ParseRIInstruction(Queue<Token> tokens) {
+        static Instruction ParseRIInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
             MatchFail(opcode, TokenType.Opcode);
@@ -117,7 +103,7 @@ namespace FTG.Studios.BISC.Assembler {
             return inst;
         }
 
-        static Instruction ParseMInstruction(Queue<Token> tokens) {
+        static Instruction ParseMInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
             MatchFail(opcode, TokenType.Opcode);
@@ -143,7 +129,7 @@ namespace FTG.Studios.BISC.Assembler {
             return inst;
         }
 
-        static Instruction ParseRDInstruction(Queue<Token> tokens) {
+        static Instruction ParseRDInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
             MatchFail(opcode, TokenType.Opcode);
@@ -162,7 +148,7 @@ namespace FTG.Studios.BISC.Assembler {
             return inst;
         }
 
-        static Instruction ParseRRDInstruction(Queue<Token> tokens) {
+        static Instruction ParseRRDInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
             MatchFail(opcode, TokenType.Opcode);
@@ -186,7 +172,7 @@ namespace FTG.Studios.BISC.Assembler {
             return inst;
         }
 
-        static Token[] ParsePseudoInstruction(Queue<Token> tokens) {
+        static void ParsePseudoInstruction(LinkedList<Token> tokens) {
             Token pseudo_op = tokens.Dequeue();
             MatchFail(pseudo_op, TokenType.PseudoOp);
 
@@ -196,6 +182,8 @@ namespace FTG.Studios.BISC.Assembler {
                 if (Match(token, TokenType.LineSeperator)) break;
                 if (Match(token, TokenType.Comment)) continue;
                 args.Add(token);
+
+                Console.WriteLine(token);
             }
 
             int index = (int)pseudo_op.Value;
@@ -245,8 +233,12 @@ namespace FTG.Studios.BISC.Assembler {
                 } else {
                     Fail(pseudo_op, TokenType.Opcode);
                 }
-                args.Insert(0, pseudo_op);
-                return args.ToArray();
+                tokens.AddFirst(new Token(TokenType.LineSeperator, pseudo_op.LineNo, 0));
+                for (int v = args.Count - 1; v >= 0; v--) {
+                    tokens.AddFirst(args[v]);
+                }
+                tokens.AddFirst(pseudo_op);
+                return;
             }
 
             for (int i = args.Count; i < 3; i++) {
@@ -257,22 +249,21 @@ namespace FTG.Studios.BISC.Assembler {
             string[] replacements = new string[definition.Length];
             Array.Copy(definition, replacements, replacements.Length);
 
-            List<Token> replacement_tokens = new List<Token>();
-            for (int i = 0; i < replacements.Length; i++) {
+            for (int i = replacements.Length - 1; i >= 0; i--) {
                 replacements[i] = string.Format(replacements[i], args[0].Mnemonic, args[1].Mnemonic, args[2].Mnemonic);
                 replacements[i] += '\n';
                 List<Token> vals = Lexer.Tokenize(replacements[i]);
-                for (int v = 0; v < vals.Count; v++) {
+                for (int v = vals.Count - 1; v >= 0; v--) {
                     Token t = vals[v];
                     t.LineNo = pseudo_op.LineNo;
+                    tokens.AddFirst(t);
                 }
-                replacement_tokens.AddRange(vals);
             }
 
-            return replacement_tokens.ToArray();
+            return;
         }
 
-        static string ParseLabel(Queue<Token> tokens) {
+        static string ParseLabel(LinkedList<Token> tokens) {
             Token label = tokens.Dequeue();
             MatchFail(label, TokenType.Label);
             MatchFail(tokens.Dequeue(), TokenType.LabelDelimeter);
@@ -295,6 +286,16 @@ namespace FTG.Studios.BISC.Assembler {
         static void Fail(Token token, TokenType expected) {
             Console.Error.WriteLine($"Invalid token: {token} (expected {expected})");
             Environment.Exit(1);
+        }
+
+        static Token Dequeue(this LinkedList<Token> tokens) {
+            Token node = tokens.First.Value;
+            tokens.RemoveFirst();
+            return node;
+        }
+
+        static Token Peek(this LinkedList<Token> tokens) {
+            return tokens.First.Value;
         }
     }
 }
