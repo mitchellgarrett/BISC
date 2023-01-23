@@ -1,9 +1,8 @@
-li sp, 0
-addi r1, r0, 0xffff
-call 0x1111
+li r0, 5
+call function
 hlt
 
 function:
-addi r0, 11, r0
-jez 0x1111, r0
-ret
+	dec r0
+	jnz function, r0
+	ret

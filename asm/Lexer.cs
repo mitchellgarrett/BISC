@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace FTG.Studios.BISC.Assembler {
+namespace FTG.Studios.BISC.Asm {
 
     public static class Lexer {
 

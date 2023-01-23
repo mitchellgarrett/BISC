@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace FTG.Studios.BISC.Assembler {
+namespace FTG.Studios.BISC.Asm {
 
 	/// <summary>
 	/// BISC Assembler.
@@ -11,7 +10,8 @@ namespace FTG.Studios.BISC.Assembler {
 
 		static Dictionary<string, byte> opcodes;
 		static Dictionary<string, UInt32> symbols;
-		
+		static Program program;
+
 		/// <summary>
 		/// Assembles BISC source code into binary opcodes.
 		/// </summary>
@@ -31,31 +31,33 @@ namespace FTG.Studios.BISC.Assembler {
 			symbols = new Dictionary<string, UInt32>();
 			List<Instruction> unresolved_symbols = new List<Instruction>();
 
-			/*string[] lines = source.Split('\n');
-			Program program = new Program();
-			Lexer.Reset();
-            for (int lineno = 0; lineno < lines.Length; lineno++) {
-				string line = lines[lineno] + '\n';
-				List<Token> tokens = Lexer.Tokenize(line);
-				if (tokens.Count == 0) continue;
-				Console.WriteLine($"Line {lineno + 1}: ");
-                foreach (Token token in tokens) {
-					Console.WriteLine(token);
-                }
-			}*/
-			
 			List<Token> tokens = Lexer.Tokenize(source);
 			foreach (Token token in tokens) {
-				//Console.WriteLine(token);
+				Console.WriteLine(token);
 			}
 
-			Program program = Parser.Parse(tokens);
-			foreach (Instruction inst in program.Instructions) {
-				Console.WriteLine(inst);
-			}
+			program = Parser.Parse(tokens);
 
 			// First-pass optimizations
-			//Optimizer.Optimize(program);
+			Optimizer.Optimize(program);
+
+			for (int i = 0; i < program.Instructions.Count; i++) {
+				program.Instructions[i].Address = (UInt32)(i * 4);
+			}
+
+			foreach (Instruction inst in program.Instructions) {
+				if (inst.HasUndefinedSymbol) {
+					for (int i = 0; i < inst.Parameters.Length; i++) {
+						Token arg = inst.Parameters[i];
+						if (arg.Type == TokenType.Label && !arg.Value.HasValue) {
+							arg.Type = TokenType.Immediate;
+							arg.Value = program.Labels[arg.Mnemonic].Address;
+							inst.Parameters[i] = arg;
+						}
+					}
+				}
+				Console.WriteLine(inst);
+			}
 
 			UInt32[] machine_code = new UInt32[program.Instructions.Count];
 			for (int i = 0; i < machine_code.Length; i++) {
@@ -74,6 +76,12 @@ namespace FTG.Studios.BISC.Assembler {
 					case TokenType.Register:
 						machine_code |= arg.Value.Value << (2 - i) * 8;
 						break;
+					case TokenType.Label:
+						/*if (!arg.Value.HasValue) {
+							arg.Value = program.Labels[arg.Mnemonic].Address;
+						}
+						// This fall-through is intentional - labels are treated as immediates
+						goto case TokenType.Immediate;*/
 					case TokenType.Immediate:
 						// TODO: Make this case not an absolute hack; this code sucks mega nuts
 						// If 3 parameters, immediate has to be 8 bits, otherwise 16 bits

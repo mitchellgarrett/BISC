@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FTG.Studios.BISC.Assembler {
+namespace FTG.Studios.BISC.Asm {
 
     public enum TokenType { Invalid, Opcode, PseudoOp, Label, Register, Immediate, Seperator, LineSeperator, LabelDelimeter, OpenBracket, CloseBracket, Comment }
 

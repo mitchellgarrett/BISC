@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FTG.Studios.BISC.Assembler {
+namespace FTG.Studios.BISC.Asm {
 
     public static class Parser {
 
+        /// <summary>
+        /// Parse a program from a list of tokens.
+        /// </summary>
+        /// <param name="tokens">Tokens to parse.</param>
+        /// <returns>A BISC program.</returns>
         public static Program Parse(List<Token> tokens) {
             LinkedList<Token> stream = new LinkedList<Token>(tokens);
             string label = null;
@@ -27,18 +32,23 @@ namespace FTG.Studios.BISC.Assembler {
                     case TokenType.Label:
                         label = ParseLabel(stream);
                         break;
+                    case TokenType.Comment:
+                    case TokenType.LineSeperator:
+                        stream.Dequeue();
+                        break;
                     default:
                         Fail(stream.First.Value, TokenType.Opcode);
                         break;
-                }
-
-                while (stream.Count > 0 && (Match(stream.Peek(), TokenType.LineSeperator) || Match(stream.Peek(), TokenType.Comment))) {
-                    stream.Dequeue();
                 }
             }
             return program;
         }
 
+        /// <summary>
+        /// Parse an instruction from the given token stream.
+        /// </summary>
+        /// <param name="tokens">Token stream.</param>
+        /// <returns>A single BISC instruction.</returns>
         static Instruction ParseInstruction(LinkedList<Token> tokens) {
             Token opcode = tokens.Peek();
             InstructionFormat format = Specification.instruction_formats[opcode.Value.Value];
@@ -54,12 +64,17 @@ namespace FTG.Studios.BISC.Assembler {
 
             if (tokens.Count > 0) {
                 if (Match(tokens.Peek(), TokenType.Comment)) tokens.Dequeue();
-                MatchFail(tokens.Dequeue(), TokenType.LineSeperator);
+                if ((tokens.Count > 0)) MatchFail(tokens.Dequeue(), TokenType.LineSeperator);
             }
 
             return inst;
         }
 
+        /// <summary>
+        /// Parse an instruction with format: Opcode
+        /// </summary>
+        /// <param name="tokens">Token stream.</param>
+        /// <returns>A single BISC instruction.</returns>
         static Instruction ParseIInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
@@ -70,6 +85,11 @@ namespace FTG.Studios.BISC.Assembler {
             return inst;
         }
 
+        /// <summary>
+        /// Parse an instruction with format: Opcode Register
+        /// </summary>
+        /// <param name="tokens">Token stream.</param>
+        /// <returns>A single BISC instruction.</returns>
         static Instruction ParseRInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
@@ -84,6 +104,11 @@ namespace FTG.Studios.BISC.Assembler {
             return inst;
         }
 
+        /// <summary>
+        /// Parse an instruction with format: Opcode Register, Register, Immediate
+        /// </summary>
+        /// <param name="tokens">Token stream.</param>
+        /// <returns>A single BISC instruction.</returns>
         static Instruction ParseRIInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
@@ -98,11 +123,16 @@ namespace FTG.Studios.BISC.Assembler {
             MatchFail(tokens.Dequeue(), TokenType.Seperator);
 
             inst.Parameters[1] = tokens.Dequeue();
-            MatchFail(inst.Parameters[1], TokenType.Immediate);
+            if (!Match(inst.Parameters[1], TokenType.Immediate) && !Match(inst.Parameters[1], TokenType.Label)) Fail(inst.Parameters[1], TokenType.Immediate);
 
             return inst;
         }
 
+        /// <summary>
+        /// Parse an instruction with format: Opcode Register, Register[Immediate]
+        /// </summary>
+        /// <param name="tokens">Token stream.</param>
+        /// <returns>A single BISC instruction.</returns>
         static Instruction ParseMInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
@@ -122,13 +152,18 @@ namespace FTG.Studios.BISC.Assembler {
             MatchFail(tokens.Dequeue(), TokenType.OpenBracket);
 
             inst.Parameters[2] = tokens.Dequeue();
-            MatchFail(inst.Parameters[2], TokenType.Immediate);
+            if (!Match(inst.Parameters[2], TokenType.Immediate) && !Match(inst.Parameters[2], TokenType.Label)) Fail(inst.Parameters[2], TokenType.Immediate);
 
             MatchFail(tokens.Dequeue(), TokenType.CloseBracket);
             
             return inst;
         }
 
+        /// <summary>
+        /// Parse an instruction with format: Opcode Register, Register
+        /// </summary>
+        /// <param name="tokens">Token stream.</param>
+        /// <returns>A single BISC instruction.</returns>
         static Instruction ParseRDInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
@@ -148,6 +183,11 @@ namespace FTG.Studios.BISC.Assembler {
             return inst;
         }
 
+        /// <summary>
+        /// Parse an instruction with format: Opcode Register, Register, Register
+        /// </summary>
+        /// <param name="tokens">Token stream.</param>
+        /// <returns>A single BISC instruction.</returns>
         static Instruction ParseRRDInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
@@ -172,6 +212,10 @@ namespace FTG.Studios.BISC.Assembler {
             return inst;
         }
 
+        /// <summary>
+        /// Parse a pseudo-instruction into its opcode replacements and push them onto the token stream.
+        /// </summary>
+        /// <param name="tokens">Token stream.</param>
         static void ParsePseudoInstruction(LinkedList<Token> tokens) {
             Token pseudo_op = tokens.Dequeue();
             MatchFail(pseudo_op, TokenType.PseudoOp);
@@ -182,8 +226,6 @@ namespace FTG.Studios.BISC.Assembler {
                 if (Match(token, TokenType.LineSeperator)) break;
                 if (Match(token, TokenType.Comment)) continue;
                 args.Add(token);
-
-                Console.WriteLine(token);
             }
 
             int index = (int)pseudo_op.Value;
@@ -206,12 +248,12 @@ namespace FTG.Studios.BISC.Assembler {
                                 if (temp_stream.Count == 0 || !Match(temp_stream.Peek(), TokenType.Register)) valid = false;
                                 else temp_args.Add(temp_stream.Dequeue());
                                 if (temp_stream.Count == 0 || !Match(temp_stream.Dequeue(), TokenType.OpenBracket)) valid = false;
-                                if (temp_stream.Count == 0 || !Match(temp_stream.Peek(), TokenType.Immediate)) valid = false;
+                                if (temp_stream.Count == 0 || (!Match(temp_stream.Peek(), TokenType.Immediate) && !Match(temp_stream.Peek(), TokenType.Label))) valid = false;
                                 else temp_args.Add(temp_stream.Dequeue());
                                 if (temp_stream.Count == 0 || !Match(temp_stream.Dequeue(), TokenType.CloseBracket)) valid = false;
                                 break;
                             case ArgumentType.Immediate32:
-                                if (temp_stream.Count == 0 || !Match(temp_stream.Peek(), TokenType.Immediate)) valid = false;
+                                if (temp_stream.Count == 0 || (!Match(temp_stream.Peek(), TokenType.Immediate) && !Match(temp_stream.Peek(), TokenType.Label))) valid = false;
                                 else temp_args.Add(temp_stream.Dequeue());
                                 break;
                         }
@@ -263,6 +305,11 @@ namespace FTG.Studios.BISC.Assembler {
             return;
         }
 
+        /// <summary>
+        /// Parse a label and return its name.
+        /// </summary>
+        /// <param name="tokens">Token stream.</param>
+        /// <returns>Name of the label.</returns>
         static string ParseLabel(LinkedList<Token> tokens) {
             Token label = tokens.Dequeue();
             MatchFail(label, TokenType.Label);

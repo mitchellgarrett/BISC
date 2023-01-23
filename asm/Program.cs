@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace FTG.Studios.BISC.Assembler {
+namespace FTG.Studios.BISC.Asm {
 
     public class Program {
 

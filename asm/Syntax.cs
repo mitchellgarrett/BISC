@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FTG.Studios.BISC.Assembler {
+namespace FTG.Studios.BISC.Asm {
 
     static class Syntax {
 
