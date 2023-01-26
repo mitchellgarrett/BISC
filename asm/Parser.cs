@@ -54,12 +54,12 @@ namespace FTG.Studios.BISC.Asm {
             InstructionFormat format = Specification.instruction_formats[opcode.Value.Value];
             Instruction inst = null;
             switch (format) {
-                case InstructionFormat.I:   inst = ParseIInstruction(tokens);   break;
-                case InstructionFormat.R:   inst = ParseRInstruction(tokens);   break;
-                case InstructionFormat.RI:  inst = ParseRIInstruction(tokens);  break;
-                case InstructionFormat.M:   inst = ParseMInstruction(tokens);   break;
-                case InstructionFormat.RD:  inst = ParseRDInstruction(tokens);  break;
-                case InstructionFormat.RRD: inst = ParseRRDInstruction(tokens); break;
+                case InstructionFormat.N: inst = ParseNInstruction(tokens); break;
+                case InstructionFormat.R: inst = ParseRInstruction(tokens); break;
+                case InstructionFormat.I: inst = ParseIInstruction(tokens); break;
+                case InstructionFormat.M: inst = ParseMInstruction(tokens); break;
+                case InstructionFormat.D: inst = ParseDInstruction(tokens); break;
+                case InstructionFormat.T: inst = ParseTInstruction(tokens); break;
             }
 
             if (tokens.Count > 0) {
@@ -75,7 +75,7 @@ namespace FTG.Studios.BISC.Asm {
         /// </summary>
         /// <param name="tokens">Token stream.</param>
         /// <returns>A single BISC instruction.</returns>
-        static Instruction ParseIInstruction(LinkedList<Token> tokens) {
+        static Instruction ParseNInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
             MatchFail(opcode, TokenType.Opcode);
@@ -109,7 +109,7 @@ namespace FTG.Studios.BISC.Asm {
         /// </summary>
         /// <param name="tokens">Token stream.</param>
         /// <returns>A single BISC instruction.</returns>
-        static Instruction ParseRIInstruction(LinkedList<Token> tokens) {
+        static Instruction ParseIInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
             MatchFail(opcode, TokenType.Opcode);
@@ -164,7 +164,7 @@ namespace FTG.Studios.BISC.Asm {
         /// </summary>
         /// <param name="tokens">Token stream.</param>
         /// <returns>A single BISC instruction.</returns>
-        static Instruction ParseRDInstruction(LinkedList<Token> tokens) {
+        static Instruction ParseDInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
             MatchFail(opcode, TokenType.Opcode);
@@ -188,7 +188,7 @@ namespace FTG.Studios.BISC.Asm {
         /// </summary>
         /// <param name="tokens">Token stream.</param>
         /// <returns>A single BISC instruction.</returns>
-        static Instruction ParseRRDInstruction(LinkedList<Token> tokens) {
+        static Instruction ParseTInstruction(LinkedList<Token> tokens) {
             Instruction inst = new Instruction();
             Token opcode = tokens.Dequeue();
             MatchFail(opcode, TokenType.Opcode);

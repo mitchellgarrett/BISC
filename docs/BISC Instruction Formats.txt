@@ -2,7 +2,7 @@
 BISC Instruction Formats
 ------------------------
 
-Instruction (I) Format
+Instruction (N) Format
  opcode          null        
 |------|-----------------------|
 31     24                      0
@@ -12,7 +12,7 @@ Register (R) Format
 |------|-------|---------------|
 31     24      16              0
 
-Register-Immediate (RI) Format
+Register-Immediate (I) Format
  opcode   dest        imm
 |------|-------|---------------|
 31     24      16              0
@@ -22,12 +22,12 @@ Memory (M) Format
 |------|-------|-------|-------|
 31     24      16      8       0
 
-Register-Register (RD) Format
+Double Register (D) Format
  opcode   dest   arg0    null
 |------|-------|-------|-------|
 31     24      16      8       0
 
-Register-Register-Register (RRD) Format
+Triple Register (T) Format
  opcode   dest   arg0    arg1
 |------|-------|-------|-------|
 31     24      16      8       0

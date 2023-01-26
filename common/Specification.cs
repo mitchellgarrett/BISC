@@ -49,15 +49,15 @@ namespace FTG.Studios.BISC {
 		};
 
 		public static readonly InstructionFormat[] instruction_formats = {
-			InstructionFormat.I,   // NOP
-			InstructionFormat.I,   // HLT
+			InstructionFormat.N,   // NOP
+			InstructionFormat.N,   // HLT
 			InstructionFormat.R,   // SYS
 			InstructionFormat.R,   // CALL
-			InstructionFormat.I,   // RET
+			InstructionFormat.N,   // RET
 
-			InstructionFormat.RI,  // LLI
-            InstructionFormat.RI,  // LUI
-			InstructionFormat.RD,  // MOV
+			InstructionFormat.I,  // LLI
+            InstructionFormat.I,  // LUI
+			InstructionFormat.D,  // MOV
 
 			InstructionFormat.M,  // LW
 			InstructionFormat.M,  // LH
@@ -66,31 +66,31 @@ namespace FTG.Studios.BISC {
 			InstructionFormat.M,  // SH
 			InstructionFormat.M,  // SB
 
-			InstructionFormat.RRD, // ADD
-			InstructionFormat.RRD, // SUB
-			InstructionFormat.RRD, // MUL
-			InstructionFormat.RRD, // DIV
-			InstructionFormat.RRD, // MOD
+			InstructionFormat.T, // ADD
+			InstructionFormat.T, // SUB
+			InstructionFormat.T, // MUL
+			InstructionFormat.T, // DIV
+			InstructionFormat.T, // MOD
 
-			InstructionFormat.RD,  // NOT
-			InstructionFormat.RD,  // NEG
-			InstructionFormat.RD,  // INV
+			InstructionFormat.D,  // NOT
+			InstructionFormat.D,  // NEG
+			InstructionFormat.D,  // INV
 
-			InstructionFormat.RRD, // AND
-			InstructionFormat.RRD, // OR
-			InstructionFormat.RRD, // XOR
-			InstructionFormat.RRD, // BSL
-			InstructionFormat.RRD, // BSR
+			InstructionFormat.T, // AND
+			InstructionFormat.T, // OR
+			InstructionFormat.T, // XOR
+			InstructionFormat.T, // BSL
+			InstructionFormat.T, // BSR
 
 			InstructionFormat.R,   // JMP
-			InstructionFormat.RD,  // JEZ
-			InstructionFormat.RD,  // JNZ
-			InstructionFormat.RRD, // JEQ
-			InstructionFormat.RRD, // JNE
-			InstructionFormat.RRD, // JGT
-			InstructionFormat.RRD, // JLT
-			InstructionFormat.RRD, // JGE
-			InstructionFormat.RRD, // JLE
+			InstructionFormat.D,  // JEZ
+			InstructionFormat.D,  // JNZ
+			InstructionFormat.T, // JEQ
+			InstructionFormat.T, // JNE
+			InstructionFormat.T, // JGT
+			InstructionFormat.T, // JLT
+			InstructionFormat.T, // JGE
+			InstructionFormat.T, // JLE
 		};
 		
 		public static readonly string[] pseudo_instruction_names = new string[] {
