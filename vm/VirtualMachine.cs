@@ -24,11 +24,11 @@ namespace FTG.Studios.BISC {
     public const UInt32 STACK_END = STACK_SIZE;
     public const UInt32 STACK_START = STACK_END - STACK_SIZE;
 
-    BasicVolatileMemory memory;
+    IMemory memory;
 
     public bool IsRunning { get; private set; }
 
-    public VirtualMachine(BasicVolatileMemory memory) {
+    public VirtualMachine(IMemory memory) {
       this.memory = memory;
       Initialize();
     }
@@ -57,10 +57,11 @@ namespace FTG.Studios.BISC {
         registers[i] = 0;
       }
 
-      // Zero out the stack.
-      for (UInt32 addr = STACK_START; addr < STACK_END; addr++) {
-        memory.Write(addr, new byte[] {0});;
-      }
+            // Zero out the stack.
+            //for (UInt32 addr = STACK_START; addr < STACK_END; addr++) {
+            //  memory.Write(addr, new byte[] {0});
+            //}
+            memory.Reset();
 
       pc = 0;
       sp = STACK_END;
