@@ -4,20 +4,20 @@ namespace FTG.Studios.BISC {
 
     // 80 * 24 characters
     // Memory map: 0x0000 - 0x1000
-    public class Terminal : IMemory {
+    public class Terminal : Memory {
 
         public int Width { get; private set; }
         public int Height { get; private set; }
 
-        UInt32 CursorEnableAddress;
-        UInt32 CursorXAddress;
-        UInt32 CursorYAddress;
-        UInt32 ReadCharAddress;
+        readonly UInt32 CursorEnableAddress;
+        readonly UInt32 CursorXAddress;
+        readonly UInt32 CursorYAddress;
+        readonly UInt32 ReadCharAddress;
 
         byte cursor_enabled, cursor_x, cursor_y;
         readonly byte[,] memory;
 
-        public Terminal(int width, int height) : base() {
+        public Terminal(UInt32 start_addr, int width, int height) : base() {
             this.Width = width;
             this.Height = height;
             CursorEnableAddress = (UInt32)(Width * Height);
@@ -25,10 +25,12 @@ namespace FTG.Studios.BISC {
             CursorYAddress = CursorXAddress + 1;
             ReadCharAddress = CursorYAddress + 1;
             Console.SetWindowSize(Width, Height);
+            AddressStart = start_addr;
+            AddressLength = ReadCharAddress;
             memory = new byte[Height, Width];
         }
 
-        public void Reset() {
+        public override void Reset() {
             for (int y = 0; y < Height; y++) {
                 for (int x = 0; x < Width; x++) {
                     memory[y, x] = 0;
@@ -37,7 +39,7 @@ namespace FTG.Studios.BISC {
             Refresh();
         }
 
-        public bool Read(UInt32 address, ref byte[] data) {
+        public override bool Read(UInt32 address, ref byte[] data) {
             for (int i = 0; i < data.Length; i++) {
                 if (address + i == CursorEnableAddress) {
                     data[i] = cursor_enabled;
@@ -69,7 +71,7 @@ namespace FTG.Studios.BISC {
             return true;
         }
 
-        public bool Write(UInt32 address, byte[] data) {
+        public override bool Write(UInt32 address, byte[] data) {
             System.Diagnostics.Debug.WriteLine($"Writing to address: 0x{address:x8}");
             if (address == CursorEnableAddress) {
                 cursor_enabled = data[0];

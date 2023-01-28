@@ -1,64 +1,83 @@
 ﻿; this program tests console io
 ; using memory-mapped operations
 
-; turn off cursor
+; set up pointers
 lli fp, 0x0780
+lli sp, 0
+
+; turn off cursor
 lli r0, 0
 sb r0, fp[0]
 
-lli sp, 0
+
 lli r0, 'H'
-sb r0, sp[0]
+call write_char
+
 lli r0, 'o'
-sb r0, sp[1]
+call write_char
 lli r0, 'w'
-sb r0, sp[2]
+call write_char
 lli r0, 'd'
-sb r0, sp[3]
+call write_char
 lli r0, 'y'
-sb r0, sp[4]
+call write_char
 ;lli r0, ','
-;sb r0, sp[5]
+;call write_char
 ;lli r0, ' '
-;sb r0, sp[6]
+;call write_char
+inc sp
 lli r0, 'f'
-sb r0, sp[6]
+call write_char
 lli r0, 'r'
-sb r0, sp[7]
+call write_char
 lli r0, 'o'
-sb r0, sp[8]
+call write_char
 lli r0, 'm'
-sb r0, sp[9]
+call write_char
+;lli r0, ' '
+;call write_char
+inc sp
 lli r0, 'B'
-sb r0, sp[11]
+call write_char
 lli r0, 'I'
-sb r0, sp[12]
+call write_char
 lli r0, 'S'
-sb r0, sp[13]
+call write_char
 lli r0, 'C'
-sb r0, sp[14]
+call write_char
 lli r0, '!'
-sb r0, sp[15]
+call write_char
 
 lli sp, 120
 lli r0, 'L'
-sb r0, sp[0]
+call write_char
 lli r0, 'e'
-sb r0, sp[1]
+call write_char
 lli r0, 't'
-sb r0, sp[2]
+call write_char
 lli r0, '''
-sb r0, sp[3]
+call write_char
 lli r0, 's'
-sb r0, sp[4]
+call write_char
 lli r0, 'g'
-sb r0, sp[6]
+call write_char
 lli r0, 'o'
-sb r0, sp[7]
+call write_char
 lli r0, '!'
-sb r0, sp[8]
+call write_char
 
 ; read char
-lb r0, fp[3]
-sb r0, sp[40]
+call read_char
+sb rv, sp[40]
 hlt
+
+; write char
+write_char:
+	sb r0, sp[0]
+	inc sp
+	ret
+
+; read char
+read_char:
+	lb rv, fp[3]
+	ret

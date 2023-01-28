@@ -24,11 +24,11 @@ namespace FTG.Studios.BISC {
     public const UInt32 STACK_END = STACK_SIZE;
     public const UInt32 STACK_START = STACK_END - STACK_SIZE;
 
-    IMemory memory;
+    Memory memory;
 
     public bool IsRunning { get; private set; }
 
-    public VirtualMachine(IMemory memory) {
+    public VirtualMachine(Memory memory) {
       this.memory = memory;
       Initialize();
     }

@@ -199,8 +199,8 @@ namespace FTG.Studios.BISC {
 			
  			new string[] { "LI ri, {2}", "MOD {0}, {1}, ri" },         // MODI {reg}, {reg}, {imm}
 			
-			new string[] { "ADDI {0}, {-}, 1" },                       // INC {reg}
- 			new string[] { "SUBI {0}, {0}, 1" },                       // DEC {reg}
+			new string[] { "ADDI {0}, {0}, 1" },                       // INC {reg}
+ 			new string[] { "SUBI {0}, {0}, -1" },                      // DEC {reg}
 			
 			new string[] { "LA ri, {0}", "JMP ri" },                   // JMP {imm}
 			new string[] { "LA ri, {0}", "JEZ ri, {1}" },              // JEZ {imm}, {reg}
