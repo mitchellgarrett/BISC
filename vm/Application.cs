@@ -27,11 +27,8 @@ namespace FTG.Studios.BISC.VM {
 
             MemoryManager mmu = new MemoryManager();
             mmu.AddDevice(new Terminal(0x00000000, 80, 24));
-			Flags options = Flags.None;
-			//options = Flags.Debug;
-			//options = Flags.SingleStep | Flags.Debug;
 
-			vm = new VirtualMachine();
+			vm = new VirtualMachine(mmu);
 			vm.Reset();
 
 			Stopwatch sw = new Stopwatch();
