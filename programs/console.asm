@@ -45,8 +45,8 @@ lli r0, 'S'
 call write_char
 lli r0, 'C'
 call write_char
-lli r0, '!'
-call write_char
+;lli r0, '!'
+;call write_char
 
 lli sp, 120
 lli r0, 'L'
@@ -55,16 +55,16 @@ lli r0, 'e'
 call write_char
 lli r0, 't'
 call write_char
-lli r0, '''
-call write_char
+;lli r0, '''
+;call write_char
 lli r0, 's'
 call write_char
 lli r0, 'g'
 call write_char
 lli r0, 'o'
 call write_char
-lli r0, '!'
-call write_char
+;lli r0, '!'
+;call write_char
 
 ; read char
 call read_char
