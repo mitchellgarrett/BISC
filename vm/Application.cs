@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
-namespace FTG.Studios.BISC {
+namespace FTG.Studios.BISC.VM {
 
     class Application {
 
@@ -16,9 +17,9 @@ namespace FTG.Studios.BISC {
                 return;
             }
 
-            string file_name = args[0];
-            Program program = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
-            Program.Write(file_name + ".bin", program);
+			string file_name = args[0];
+			UInt32[] program = Asm.Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
+			BISC.Program.Write(file_name + ".bin", new BISC.Program(program));
 
             Flags options = Flags.None;
             //options = Flags.Debug;
@@ -26,14 +27,21 @@ namespace FTG.Studios.BISC {
 
             MemoryManager mmu = new MemoryManager();
             mmu.AddDevice(new Terminal(0x00000000, 80, 24));
+			Flags options = Flags.None;
+			//options = Flags.Debug;
+			//options = Flags.SingleStep | Flags.Debug;
 
-            vm = new VirtualMachine(mmu);
-            vm.Reset();
+			vm = new VirtualMachine();
+			vm.Reset();
 
-            if (options.HasFlag(Flags.Debug)) {
-                Console.Clear();
-                PrintRegisters();
-                PrintStack();
+			Stopwatch sw = new Stopwatch();
+			UInt32 inst_count = 0;
+			if (options.HasFlag(Flags.Debug)) {
+				Console.Clear();
+				PrintRegisters();
+				PrintStack();
+            } else {
+				sw.Start();
             }
 
             while (vm.IsRunning) {
@@ -45,9 +53,10 @@ namespace FTG.Studios.BISC {
                     Console.ReadKey(true);
                 }
 
-                UInt32 instruction = program.Instructions[vm.GetRegister((int)Register.PC) / 4];
-                bool success = vm.Execute(instruction);
-                if (vm.GetRegister((int)Register.PC) >= program.Instructions.Length * 4) vm.Halt();
+				UInt32 instruction = program[vm.GetRegister((int)Register.PC) / 4];
+				bool success = vm.Execute(instruction);
+				inst_count++;
+				if (vm.GetRegister((int)Register.PC) >= program.Length * 4) vm.Halt();
 
                 if (options.HasFlag(Flags.Debug)) {
                     Console.Clear();
@@ -60,12 +69,18 @@ namespace FTG.Studios.BISC {
                 }
             }
 
-            if (options.HasFlag(Flags.Debug)) {
-                Console.SetCursorPosition(0, Specification.NUM_REGISTERS - 1);
-                Console.Write("Program complete...");
-            }
-            Console.ReadKey(true);
-        }
+			if (options.HasFlag(Flags.Debug)) {
+				Console.SetCursorPosition(0, Specification.NUM_REGISTERS - 1);
+				Console.Write("Program complete...");
+				Console.ReadKey(true);
+			} else {
+				sw.Stop();
+				Console.WriteLine("Program complete...");
+				Console.WriteLine($"Execution time: {sw.Elapsed.TotalSeconds}s");
+				Console.WriteLine($"Instruction count: {inst_count} ({Math.Round(inst_count / sw.Elapsed.TotalMilliseconds, 2)}/ms)");
+				Console.WriteLine($"Cycle time: {Math.Round(inst_count / sw.Elapsed.TotalSeconds / 1000, 2)}kHz");
+			}
+		}
 
         static void PrintHelp() {
             Console.WriteLine("Usage: bisc-vm file");

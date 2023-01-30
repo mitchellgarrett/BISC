@@ -1,21 +1,19 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace FTG.Studios.BISC {
+namespace FTG.Studios.BISC.Asm {
 	
 	/// <summary>
 	/// Preprocessor for BISC assembler.
 	/// </summary>
 	public static class Preprocessor {
 		
-		
-		public static void Preprocess(List<string> lines) {
-			
-		}
-		
-		public static void ResolveSymbols(List<string> lines) {
-			
+		public static string Preprocess(string source) {
+			source = source.Replace("\r\n", "\n");
+			List<string> lines = new List<string>(source.Split('\n'));
+            for (int i = 0; i < lines.Count; i++) {
+				string line = lines[i];
+            }
+			return source;
 		}
 	}
 }

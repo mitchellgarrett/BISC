@@ -4,7 +4,7 @@ namespace FTG.Studios.BISC {
 
     public static class Specification {
 
-        public const char COMMENT = ';';
+		public const char COMMENT = ';';
 		public const char LABEL_DELIMETER = ':';
 
         public static readonly string[] REGISTER_NAMES = {
@@ -40,24 +40,24 @@ namespace FTG.Studios.BISC {
 		}
 
 		public static readonly ArgumentType[][] instruction_format_definitions = {
-			new ArgumentType[] { ArgumentType.None, ArgumentType.None, ArgumentType.None },             // I
-			new ArgumentType[] { ArgumentType.Register, ArgumentType.None, ArgumentType.None },         // R
+			new ArgumentType[] { },                                                                     // I
+			new ArgumentType[] { ArgumentType.Register },                                               // R
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate16 },                     // RI
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Memory },                          // M
-			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.None },     // RD
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register },                        // RD
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Register }, // RRD
 		};
 
 		public static readonly InstructionFormat[] instruction_formats = {
-			InstructionFormat.I,   // NOP
-			InstructionFormat.I,   // HLT
+			InstructionFormat.N,   // NOP
+			InstructionFormat.N,   // HLT
 			InstructionFormat.R,   // SYS
 			InstructionFormat.R,   // CALL
-			InstructionFormat.I,   // RET
+			InstructionFormat.N,   // RET
 
-			InstructionFormat.RI,  // LLI
-            InstructionFormat.RI,  // LUI
-			InstructionFormat.RD,  // MOV
+			InstructionFormat.I,  // LLI
+            InstructionFormat.I,  // LUI
+			InstructionFormat.D,  // MOV
 
 			InstructionFormat.M,  // LW
 			InstructionFormat.M,  // LH
@@ -66,31 +66,31 @@ namespace FTG.Studios.BISC {
 			InstructionFormat.M,  // SH
 			InstructionFormat.M,  // SB
 
-			InstructionFormat.RRD, // ADD
-			InstructionFormat.RRD, // SUB
-			InstructionFormat.RRD, // MUL
-			InstructionFormat.RRD, // DIV
-			InstructionFormat.RRD, // MOD
+			InstructionFormat.T, // ADD
+			InstructionFormat.T, // SUB
+			InstructionFormat.T, // MUL
+			InstructionFormat.T, // DIV
+			InstructionFormat.T, // MOD
 
-			InstructionFormat.RD,  // NOT
-			InstructionFormat.RD,  // NEG
-			InstructionFormat.RD,  // INV
+			InstructionFormat.D,  // NOT
+			InstructionFormat.D,  // NEG
+			InstructionFormat.D,  // INV
 
-			InstructionFormat.RRD, // AND
-			InstructionFormat.RRD, // OR
-			InstructionFormat.RRD, // XOR
-			InstructionFormat.RRD, // BSL
-			InstructionFormat.RRD, // BSR
+			InstructionFormat.T, // AND
+			InstructionFormat.T, // OR
+			InstructionFormat.T, // XOR
+			InstructionFormat.T, // BSL
+			InstructionFormat.T, // BSR
 
 			InstructionFormat.R,   // JMP
-			InstructionFormat.RD,  // JEZ
-			InstructionFormat.RD,  // JNZ
-			InstructionFormat.RRD, // JEQ
-			InstructionFormat.RRD, // JNE
-			InstructionFormat.RRD, // JGT
-			InstructionFormat.RRD, // JLT
-			InstructionFormat.RRD, // JGE
-			InstructionFormat.RRD, // JLE
+			InstructionFormat.D,  // JEZ
+			InstructionFormat.D,  // JNZ
+			InstructionFormat.T, // JEQ
+			InstructionFormat.T, // JNE
+			InstructionFormat.T, // JGT
+			InstructionFormat.T, // JLT
+			InstructionFormat.T, // JGE
+			InstructionFormat.T, // JLE
 		};
 		
 		public static readonly string[] pseudo_instruction_names = new string[] {
@@ -159,9 +159,10 @@ namespace FTG.Studios.BISC {
 			new ArgumentType[] { ArgumentType.Immediate32, ArgumentType.Register, ArgumentType.Register }, // JGE {imm}, {reg}, {reg}
 			new ArgumentType[] { ArgumentType.Immediate32, ArgumentType.Register, ArgumentType.Register }, // JLE {imm}, {reg}, {reg}
 		};
-		
+
 		public static readonly string[][] pseudo_instruction_definitions = new string[][] {
-			new string[] { "LLI {0}, {1}(0:1)", "LUI {0}, {1}(2:3)" }, // LI {imm} change to %hi(val), %lo(val) syntax
+			//new string[] { "LLI {0}, %lo({1})", "LUI {0}, %hi({1})" }, // LI {imm}
+			new string[] { "LLI {0}, {1}", "LUI {0}, {1}" },
 			new string[] { "LI {0}, {1}" },                            // LA {imm}
 			
 			new string[] { "LI ri, {0}", "SYS ri" },                   // SYS {imm}
@@ -200,7 +201,7 @@ namespace FTG.Studios.BISC {
  			new string[] { "LI ri, {2}", "MOD {0}, {1}, ri" },         // MODI {reg}, {reg}, {imm}
 			
 			new string[] { "ADDI {0}, {0}, 1" },                       // INC {reg}
- 			new string[] { "SUBI {0}, {0}, -1" },                      // DEC {reg}
+ 			new string[] { "SUBI {0}, {0}, 1" },                       // DEC {reg}
 			
 			new string[] { "LA ri, {0}", "JMP ri" },                   // JMP {imm}
 			new string[] { "LA ri, {0}", "JEZ ri, {1}" },              // JEZ {imm}, {reg}

@@ -7,7 +7,7 @@
         /// <summary>
         /// Instruction format.
         /// </summary>
-        I,
+        N,
 
         /// <summary>
         /// Register format.
@@ -17,7 +17,7 @@
         /// <summary>
         /// Register-immediate format.
         /// </summary>
-        RI,
+        I,
 
         /// <summary>
         /// Memory format.
@@ -25,13 +25,13 @@
         M,
         
         /// <summary>
-        /// Register-destination format.
+        /// Double register format.
         /// </summary>
-        RD, 
+        D, 
 
         /// <summary>
-        /// Register-register-destination format.
+        /// Triple register format.
         /// </summary>
-        RRD
+        T
     }
 }
