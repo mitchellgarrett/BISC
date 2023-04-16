@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FTG.Studios.BISC {
+namespace FTG.Studios.BISC.VM {
 
     public class MemoryManager : Memory {
 

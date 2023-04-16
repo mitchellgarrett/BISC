@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FTG.Studios.BISC {
+namespace FTG.Studios.BISC.VM {
 
     // 80 * 24 characters
     // Memory map: 0x0000 - 0x1000
@@ -17,16 +17,16 @@ namespace FTG.Studios.BISC {
         byte cursor_enabled, cursor_x, cursor_y;
         readonly byte[,] memory;
 
-        public Terminal(UInt32 start_addr, int width, int height) : base() {
+        public Terminal(UInt32 addr, int width, int height) : base() {
             this.Width = width;
             this.Height = height;
-            CursorEnableAddress = (UInt32)(Width * Height);
+            AddressStart = addr;
+            AddressLength = ReadCharAddress;
+            CursorEnableAddress = AddressStart + (UInt32)(Width * Height);
             CursorXAddress = CursorEnableAddress + 1;
             CursorYAddress = CursorXAddress + 1;
             ReadCharAddress = CursorYAddress + 1;
             Console.SetWindowSize(Width, Height);
-            AddressStart = start_addr;
-            AddressLength = ReadCharAddress;
             memory = new byte[Height, Width];
         }
 

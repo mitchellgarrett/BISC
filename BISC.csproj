@@ -7,17 +7,24 @@
     <StartupObject />
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="asm\**" />
     <Compile Remove="Assembler\**" />
+    <Compile Remove="test\**" />
     <Compile Remove="Virtual Machine\**" />
     <Compile Remove="vm\**" />
     <EmbeddedResource Remove="asm\**" />
     <EmbeddedResource Remove="Assembler\**" />
+    <EmbeddedResource Remove="test\**" />
     <EmbeddedResource Remove="Virtual Machine\**" />
     <EmbeddedResource Remove="vm\**" />
     <None Remove="asm\**" />
     <None Remove="Assembler\**" />
+    <None Remove="test\**" />
     <None Remove="Virtual Machine\**" />
     <None Remove="vm\**" />
   </ItemGroup>

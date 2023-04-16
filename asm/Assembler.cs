@@ -26,21 +26,24 @@ namespace FTG.Studios.BISC.Asm {
 					opcodes[opcode.ToString()] = (byte)opcode;
 				}
 			}
-
+			
 			// Initialize dictionaries for known symbol values and instructions with unresolved symbols
 			symbols = new Dictionary<string, UInt32>();
 			List<Instruction> unresolved_symbols = new List<Instruction>();
 
 			List<Token> tokens = Lexer.Tokenize(source);
+			if (tokens.Count <= 0) return new UInt32[] { };
 			foreach (Token token in tokens) {
 				Console.WriteLine(token);
 			}
-
+			
 			program = Parser.Parse(tokens);
-
+			
+			if (program.Instructions.Count <= 0) return new UInt32[] { };
+			
 			// First-pass optimizations
 			Optimizer.Optimize(program);
-
+			
 			for (int i = 0; i < program.Instructions.Count; i++) {
 				program.Instructions[i].Address = (UInt32)(i * 4);
 			}
@@ -68,13 +71,12 @@ namespace FTG.Studios.BISC.Asm {
 		}
 		
 		static UInt32 AssembleInstruction(Instruction inst) {
-			UInt32 machine_code = 0x00000000;
-			machine_code |= (UInt32)inst.Opcode << 24;
+			UInt32 machine_code = (UInt32)inst.Opcode;
 			for (int i = 0; i < inst.Parameters.Length; i++) {
 				Token arg = inst.Parameters[i];
 				switch (arg.Type) {
 					case TokenType.Register:
-						machine_code |= arg.Value.Value << (2 - i) * 8;
+						machine_code |= arg.Value.Value << (i + 1) * 8;
 						break;
 					case TokenType.Label:
 						/*if (!arg.Value.HasValue) {
@@ -85,10 +87,10 @@ namespace FTG.Studios.BISC.Asm {
 					case TokenType.Immediate:
 						// TODO: Make this case not an absolute hack; this code sucks mega nuts
 						// If 3 parameters, immediate has to be 8 bits, otherwise 16 bits
-						if (inst.Parameters.Length == 3) machine_code |= (arg.Value.Value & 0xFF) << (2 - i) * 8;
+						if (inst.Parameters.Length == 3) machine_code |= (arg.Value.Value & 0xFF) << (i + 1) * 8;
 						// If opcode is LUI, load top 16 bits
-						else if (inst.Opcode == Opcode.LUI) machine_code |= ((arg.Value.Value >> 16) & 0xFFFF) << (1 - i) * 8;
-						else machine_code |= (arg.Value.Value & 0xFFFF) << (1 - i) * 8;
+						else if (inst.Opcode == Opcode.LUI) machine_code |= ((arg.Value.Value >> 16) & 0xFFFF) << (i + 1) * 8;
+						else machine_code |= (arg.Value.Value & 0xFFFF) << (i + 1) * 8;
 						break;
 				}
 

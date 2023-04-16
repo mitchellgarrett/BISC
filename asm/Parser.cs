@@ -155,7 +155,7 @@ namespace FTG.Studios.BISC.Asm {
             if (!Match(inst.Parameters[2], TokenType.Immediate) && !Match(inst.Parameters[2], TokenType.Label)) Fail(inst.Parameters[2], TokenType.Immediate);
 
             MatchFail(tokens.Dequeue(), TokenType.CloseBracket);
-            
+
             return inst;
         }
 
@@ -286,7 +286,7 @@ namespace FTG.Studios.BISC.Asm {
             for (int i = args.Count; i < 3; i++) {
                 args.Add(new Token(TokenType.Invalid, 0, 0));
             }
-            
+
             string[] definition = Specification.pseudo_instruction_definitions[index];
             string[] replacements = new string[definition.Length];
             Array.Copy(definition, replacements, replacements.Length);
@@ -326,13 +326,16 @@ namespace FTG.Studios.BISC.Asm {
         }
 
         static void Fail(Token token) {
-            Console.Error.WriteLine($"Invalid token: {token}");
-            Environment.Exit(1);
+            //Console.Error.WriteLine($"Invalid token: {token}");
+            //Environment.Exit(1);
+            throw new ArgumentException($"Invalid token: {token}");
+
         }
 
         static void Fail(Token token, TokenType expected) {
-            Console.Error.WriteLine($"Invalid token: {token} (expected {expected})");
-            Environment.Exit(1);
+            //Console.Error.WriteLine($"Invalid token: {token} (expected {expected})");
+            //Environment.Exit(1);
+            throw new ArgumentException($"Invalid token: {token} (expected {expected})");
         }
 
         static Token Dequeue(this LinkedList<Token> tokens) {
