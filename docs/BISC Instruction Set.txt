@@ -39,8 +39,8 @@ imm ::= 0 | 0x0 | 0b0 | '0'
 Instructions
 ------------
 
-General
--------
+System
+------
 nop
 hlt
 sys  arg0 (reg)
@@ -52,13 +52,13 @@ Stack Operations
 ----------------
 push  arg0 (reg)*
 push  arg0 (imm)*
-pushw arg0 (reg)*
-pushw arg0 (imm)*
+pushh arg0 (reg)*
+pushh arg0 (imm)*
 pushb arg0 (reg)*
 pushb arg0 (imm)*
 
 pop  arg0 (reg)*
-popw arg0 (reg)*
+poph arg0 (reg)*
 popb arg0 (reg)*
 
 
@@ -67,22 +67,22 @@ Loading and Storing
 lli  dest (reg), arg0 (imm)
 lui  dest (reg), arg0 (imm)
 mov  dest (reg), arg0 (reg)
-li   dest (reg), arg0 (imm)*
-la   dest (reg), arg0 (imm)*
+ldi  dest (reg), arg0 (imm)*
+lra  dest (reg), arg0 (imm)*
 
-lw   dest (reg), arg0 (mem)
-lh   dest (reg), arg0 (mem)
-lb   dest (reg), arg0 (mem)
-sw   arg0 (reg), dest (mem)
-sh   arg0 (reg), dest (mem)
-sb   arg0 (reg), dest (mem)
+ldw   dest (reg), arg0 (mem)
+ldh   dest (reg), arg0 (mem)
+ldb   dest (reg), arg0 (mem)
+stw   arg0 (reg), dest (mem)
+sth   arg0 (reg), dest (mem)
+stb   arg0 (reg), dest (mem)
 
-lw   dest (reg), arg0 (imm)*
-lh   dest (reg), arg0 (imm)*
-lb   dest (reg), arg0 (imm)*
-sw   arg0 (reg), dest (imm)*
-sh   arg0 (reg), dest (imm)*
-sb   arg0 (reg), dest (imm)*
+ldw   dest (reg), arg0 (imm)*
+ldh   dest (reg), arg0 (imm)*
+ldb   dest (reg), arg0 (imm)*
+stw   arg0 (reg), dest (imm)*
+sth   arg0 (reg), dest (imm)*
+stb   arg0 (reg), dest (imm)*
 
 
 Arithmetic and Logic
@@ -113,9 +113,11 @@ or   dest (reg), arg0 (reg), arg1 (reg)
 xor  dest (reg), arg0 (reg), arg1 (reg)
 bsl  dest (reg), arg0 (reg), arg1 (reg)
 bsr  dest (reg), arg0 (reg), arg1 (reg)
+exh  dest (reg), arg0 (reg)
+exb  dest (reg), arg0 (reg)
 
 
-Jumping and branching
+Jumping and Branching
 ---------------------
 jmp addr (reg)
 jez addr (reg), arg0 (reg)
@@ -143,7 +145,12 @@ fjeq
 fjne
 fjlt
 fle
-
+flw
+fsw
+fcu
+fcs
+ucf
+scf
 
 --------
 Sections [WIP]

@@ -2,20 +2,20 @@
 
 Mnemonic |  Opcode  | Format
 -----------------------------
-nop       | 00000000 |   N
-hlt       | 01000000 |   N
+hlt       | 00000000 |   N
+nop       | 01000000 |   N
 sys       | 02rr0000 |   R
 call      | 03rr0000 |   R
 ret       | 04000000 |   N
 lli       | 05rriiii |   I
 lui       | 06rriiii |   I
 mov       | 07rrrr00 |   D
-lw        | 08rrrrii |   M
-lh        | 09rrrrii |   M
-lb        | 0Arrrrii |   M
-sw        | 0Brrrrii |   M
-sh        | 0Crrrrii |   M
-sb        | 0Drrrrii |   M
+ldw       | 08rrrrii |   M
+ldh       | 09rrrrii |   M
+ldb       | 0Arrrrii |   M
+stw       | 0Brrrrii |   M
+sth       | 0Crrrrii |   M
+stb       | 0Drrrrii |   M
 add       | 0Errrrrr |   T
 sub       | 0Frrrrrr |   T
 mul       | 10rrrrrr |   T
