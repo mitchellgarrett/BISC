@@ -11,7 +11,7 @@ sp - stack pointer
 fp - frame pointer
 ra - return address
 rv - return value
-ri - temproary immediate register
+ri - temporary immediate register
 r0-r7 - general-purpose registers
 t0-t7 - temporary registers
 f0-f7 - general-purpose floating-point registers
@@ -41,10 +41,12 @@ Instructions
 
 System
 ------
-nop
 hlt
+nop
 sys  arg0 (reg)
+sys  arg0 (imm)*
 call arg0 (reg)
+call arg0 (imm)*
 ret
 
 
