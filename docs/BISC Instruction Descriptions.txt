@@ -2,13 +2,16 @@
 BISC Instructions
 -----------------
 
-NOP - No Operation (N)
-  - Skips to next instruction by incrementing the Program Counter (PC) register by 4.
-  - pc += 4
-
+------
+System
+------
 HLT - Halt (N)
   - Halts program execution.
   - PC is not incremented.
+  
+NOP - No Operation (N)
+  - Skips to next instruction by incrementing the Program Counter (PC) register by 4.
+  - pc += 4
 
 SYS arg0 (reg) - System Call
   - Executes the system call indexed by the value of arg0.
@@ -24,6 +27,21 @@ RET - Return From Function
   - It is expected that the return value of the function is store in the Return Value (RV) register.
   - pc = ra
 
+----
+Load
+----
+LDW dst (reg), src (reg), offset (imm) - Load Word (M)
+  - Loads a 32-bit word from the memory address index by registers(src) + offset into registers(dst).
+  - Written as: LDW dst, src[offset]
+  - registers(dst) = memory(registers(src) + offset)
+
+------
+Memory
+------
+
+----------
+Arithmetic
+----------
 ADD dest (reg), arg0 (reg), arg1 (reg) - Add
   - Computes the sum of arg0 and arg1 and stores the result in dest.
   - dest = arg0 + arg1
@@ -49,6 +67,9 @@ MOD dest (reg), arg0 (reg), arg1 (reg) - Modulo
   - dest = arg0 % arg1
   - pc += 4
 
+--------
+Negation
+--------
 NEG dest (reg), arg0 (reg) - Negate
   - Computes the arithmetic negation of arg0
   - dest = arg0 * -1
@@ -66,3 +87,11 @@ INV dest (reg), arg0 (reg) - Invert
   - Inverts all of the bits in arg0.
   - dest = invert_bits(arg0)
   - pc += 4
+
+-----
+Logic
+-----
+
+----
+Jump
+----
