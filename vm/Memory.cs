@@ -15,7 +15,7 @@ namespace FTG.Studios.BISC.VM {
         /// <summary>
         /// Ending address for this memory element;
         /// </summary>
-        public UInt32 AddressEnd { get { return AddressStart + AddressLength; } }
+        public UInt32 AddressEnd { get { return AddressStart + AddressLength - 1; } }
 
         /// <summary>
         /// Length of address range.

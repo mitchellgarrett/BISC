@@ -6,7 +6,7 @@ namespace FTG.Studios.BISC.VM {
 
     class Application {
 
-        enum Flags { None = 0x0, SingleStep = 0x1, Debug = 0x2 };
+        enum Flags { None = 0x0, SingleStep = 0x1, Debug = 0x2, Stat = 0x4 };
         static VirtualMachine vm;
 
         static void Main(string[] args) {
@@ -22,15 +22,25 @@ namespace FTG.Studios.BISC.VM {
 			BISC.Program.Write(file_name + ".bin", new BISC.Program(program));
 
             Flags options = Flags.None;
+			//options = Flags.Stat;
             //options = Flags.Debug;
+			//options = Flags.SingleStep;
             //options = Flags.SingleStep | Flags.Debug;
 
             MemoryManager mmu = new MemoryManager();
-            mmu.AddDevice(new Terminal(0x00000000, 80, 24));
+			
+			VolatileMemory ram = new VolatileMemory(0, 0x1000);
+			mmu.AddDevice(ram);
+			
+			Terminal terminal = new Terminal(0x1000, 80, 24);
+            mmu.AddDevice(terminal);
+			
+			RandomNumberGenerator rng = new RandomNumberGenerator(0x3000);
+			mmu.AddDevice(rng);
 
 			vm = new VirtualMachine(mmu);
 			vm.Reset();
-
+			
 			Stopwatch sw = new Stopwatch();
 			UInt32 inst_count = 0;
 			if (options.HasFlag(Flags.Debug)) {
@@ -70,12 +80,14 @@ namespace FTG.Studios.BISC.VM {
 				Console.SetCursorPosition(0, Specification.NUM_REGISTERS - 1);
 				Console.Write("Program complete...");
 				Console.ReadKey(true);
-			} else {
+			} else if (options.HasFlag(Flags.Stat)) {
 				sw.Stop();
 				Console.WriteLine("Program complete...");
 				Console.WriteLine($"Execution time: {sw.Elapsed.TotalSeconds}s");
 				Console.WriteLine($"Instruction count: {inst_count} ({Math.Round(inst_count / sw.Elapsed.TotalMilliseconds, 2)}/ms)");
 				Console.WriteLine($"Cycle time: {Math.Round(inst_count / sw.Elapsed.TotalSeconds / 1000, 2)}kHz");
+			} else {
+				Console.SetCursorPosition(0, Console.WindowHeight - 1);
 			}
 		}
 
@@ -86,7 +98,7 @@ namespace FTG.Studios.BISC.VM {
         static void PrintRegisters() {
             Console.SetCursorPosition(0, 0);
             for (int i = 0; i < Specification.NUM_REGISTERS; i++) {
-                if (((Register)i).IsValid()) Console.WriteLine("{0}: 0x{1:x8}", Specification.REGISTER_NAMES[i], vm.GetRegister(i));
+            	Console.WriteLine("{0}: 0x{1:x8}", Specification.REGISTER_NAMES[i], vm.GetRegister(i));
             }
         }
 

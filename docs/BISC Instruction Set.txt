@@ -20,12 +20,13 @@ ft0-ft7 - temporary floating-point registers
 ------------------------
 Control Status Registers [WIP]
 ------------------------
-0x00, model - model number of this CPU
-0x01, cycle - CPU cycle count
-0x02, cycleh - upper 32-bits of cycle
+0x00, mid - model number of this CPU
+0x01, ccl - CPU cycle count
+0x02, cch - upper 32-bits of cycle
 0x03, etype - exception type
 0x04, epc - exception PC
 0x05, eval - exception value
+tid - thread id
 
 ------------------
 General Formatting

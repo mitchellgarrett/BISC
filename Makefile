@@ -23,18 +23,18 @@ help:
 	@echo "make vm  : run virtual machine"
 
 $(ASM_EXE): $(ASM_SRC)
-	mkdir -p $(BUILD_DIR)
-	csc $(ASM_SRC) -out:$(BUILD_DIR)/$(ASM_EXE) $(CSC_FLAGS)
+	@mkdir -p $(BUILD_DIR)
+	@csc $(ASM_SRC) -out:$(BUILD_DIR)/$(ASM_EXE) $(CSC_FLAGS)
 
 $(VM_EXE): $(VM_SRC)
-	mkdir -p $(BUILD_DIR)
-	csc $(VM_SRC) -out:$(BUILD_DIR)/$(VM_EXE) $(CSC_FLAGS)
+	@mkdir -p $(BUILD_DIR)
+	@csc $(VM_SRC) -out:$(BUILD_DIR)/$(VM_EXE) $(CSC_FLAGS)
 
 asm: $(ASM_EXE)
-	mono $(BUILD_DIR)/$(ASM_EXE) $(FILE)
+	@mono $(BUILD_DIR)/$(ASM_EXE) $(FILE)
 
 vm: $(VM_EXE)
-	mono $(BUILD_DIR)/$(VM_EXE) $(FILE)
+	@mono $(BUILD_DIR)/$(VM_EXE) $(FILE)
 
 clean:
-	rm -r $(BUILD_DIR)
+	@rm -r $(BUILD_DIR)

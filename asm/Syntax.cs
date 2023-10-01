@@ -19,7 +19,7 @@ namespace FTG.Studios.BISC.Asm {
         public const string hexadecimal_literal = @"^(0x|0X)[a-fA-F0-9]+$";
         public const string binary_literal = @"^(0b|0B)[01]+$";
         public const string decimal_literal = @"^((\d+(\.\d*)?)|(\.\d+))$";
-        public const string char_literal = @"^'[a-zA-Z0-9]'$";
+        public const string char_literal = @"^'[ -~]'$";
         public const string string_literal = @"^""[a-zA-Z0-9]+""$";
 
         public const string macro_literal = @"(%hi|%lo)\({0}\)";
@@ -32,8 +32,8 @@ namespace FTG.Studios.BISC.Asm {
         }
 
         public static Register? GetRegister(string Mnemonic) {
-            for (Register reg = 0; (int)reg < Enum.GetValues(typeof(Opcode)).Length; reg++) {
-                if (reg.IsValid() && Mnemonic == reg.ToString()) return reg;
+            for (Register reg = 0; (int)reg < Enum.GetValues(typeof(Register)).Length; reg++) {
+                if (Mnemonic == reg.ToString()) return reg;
             }
             return null;
         }

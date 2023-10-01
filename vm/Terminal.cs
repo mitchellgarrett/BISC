@@ -2,8 +2,14 @@
 
 namespace FTG.Studios.BISC.VM {
 
-    // 80 * 24 characters
-    // Memory map: 0x0000 - 0x1000
+	/// <summary>
+	/// 80 * 24 characters
+    /// Cursor Enabled : 0x0000 - 0x0003
+	/// Cursor X       : 0x0004 - 0x0007
+	/// Cursor Y       : 0x0008 - 0x000B
+	/// Read Character : 0x000C - 0x000F
+	/// Characters     : 0x0010 - 0x100F
+	/// </summary>
     public class Terminal : Memory {
 
         public int Width { get; private set; }
@@ -13,6 +19,7 @@ namespace FTG.Studios.BISC.VM {
         readonly UInt32 CursorXAddress;
         readonly UInt32 CursorYAddress;
         readonly UInt32 ReadCharAddress;
+		readonly UInt32 CharacterDataAddress;
 
         byte cursor_enabled, cursor_x, cursor_y;
         readonly byte[,] memory;
@@ -21,11 +28,12 @@ namespace FTG.Studios.BISC.VM {
             this.Width = width;
             this.Height = height;
             AddressStart = addr;
-            AddressLength = ReadCharAddress;
-            CursorEnableAddress = AddressStart + (UInt32)(Width * Height);
-            CursorXAddress = CursorEnableAddress + 1;
-            CursorYAddress = CursorXAddress + 1;
-            ReadCharAddress = CursorYAddress + 1;
+			CursorEnableAddress = AddressStart;
+            CursorXAddress = CursorEnableAddress + 4;
+            CursorYAddress = CursorXAddress + 4;
+            ReadCharAddress = CursorYAddress + 4;
+			CharacterDataAddress = ReadCharAddress + 4;
+            AddressLength = CharacterDataAddress + (UInt32)(Width * Height) - AddressStart;
             Console.SetWindowSize(Width, Height);
             memory = new byte[Height, Width];
         }
@@ -40,7 +48,7 @@ namespace FTG.Studios.BISC.VM {
         }
 
         public override bool Read(UInt32 address, ref byte[] data) {
-            for (int i = 0; i < data.Length; i++) {
+			for (int i = 0; i < data.Length; i++) {
                 if (address + i == CursorEnableAddress) {
                     data[i] = cursor_enabled;
                     continue;
@@ -60,11 +68,12 @@ namespace FTG.Studios.BISC.VM {
                     data[i] = (byte)Console.ReadKey(true).KeyChar;
                     continue;
                 }
-
-                if (address + i >= memory.Length) data[i] = 0;
+				
+				UInt32 relative_address = address + (UInt32)i - CharacterDataAddress;
+                if (relative_address >= memory.Length) data[i] = 0;
                 else {
-                    int row = (int)((address + i) / Width);
-                    int col = (int)((address + i) % Width);
+                    int row = (int)((relative_address) / Width);
+                    int col = (int)((relative_address) % Width);
                     data[i] = memory[row, col];
                 }
             }
@@ -73,7 +82,7 @@ namespace FTG.Studios.BISC.VM {
 
         public override bool Write(UInt32 address, byte[] data) {
             System.Diagnostics.Debug.WriteLine($"Writing to address: 0x{address:x8}");
-            if (address == CursorEnableAddress) {
+			if (address == CursorEnableAddress) {
                 cursor_enabled = data[0];
                 Console.CursorVisible = cursor_enabled == 1;
                 return true;
@@ -96,9 +105,10 @@ namespace FTG.Studios.BISC.VM {
             }
 
             for (int i = 0; i < data.Length; i++) {
-                if (address + i < memory.Length) {
-                    int row = (int)((address + i) / Width);
-                    int col = (int)((address + i) % Width);
+				UInt32 relative_address = address + (UInt32)i - CharacterDataAddress;
+                if (relative_address < memory.Length) {
+                    int row = (int)((relative_address) / Width);
+                    int col = (int)((relative_address) % Width);
                     memory[row, col] = data[i];
                     Refresh(row, col);
                 } else break;

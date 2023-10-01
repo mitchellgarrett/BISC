@@ -12,7 +12,7 @@ namespace FTG.Studios.BISC.Asm {
         /// <returns>A BISC program.</returns>
         public static Program Parse(List<Token> tokens) {
             LinkedList<Token> stream = new LinkedList<Token>(tokens);
-            string label = null;
+            List<string> labels = new List<string>();
             Program program = new Program();
             while (stream.Count > 0) {
                 switch (stream.Peek().Type) {
@@ -21,16 +21,23 @@ namespace FTG.Studios.BISC.Asm {
 
                         Console.WriteLine(instruction);
                         program.Instructions.Add(instruction);
-                        if (!string.IsNullOrEmpty(label)) {
-                            program.Labels[label] = instruction;
-                            label = null;
+						
+						// FIXME: This needs to work for the case wehre two labels are stacked on top of each other
+						if (labels.Count > 0) {
+							foreach	(string l in labels) {
+								program.Labels[l] = instruction;
+								//Console.WriteLine("\n\n\n" + label + "\n\n\n");
+							}
+							labels.Clear();
                         }
                         break;
                     case TokenType.PseudoOp:
                         ParsePseudoInstruction(stream);
                         break;
                     case TokenType.Label:
-                        label = ParseLabel(stream);
+                        string label = ParseLabel(stream);
+						if (!string.IsNullOrEmpty(label)) labels.Add(label);
+						//Console.WriteLine("\n\n\n" + label + "\n\n\n");
                         break;
                     case TokenType.Comment:
                     case TokenType.LineSeperator:

@@ -14,10 +14,12 @@ namespace FTG.Studios.BISC.VM {
 
         UInt32 pc { get => registers[(int)Register.PC]; set { registers[(int)Register.PC] = value; } }
         UInt32 sp { get => registers[(int)Register.SP]; set { registers[(int)Register.SP] = value; } }
-        UInt32 fp { get => registers[(int)Register.FP]; set { registers[(int)Register.FP] = value; } }
+        UInt32 gp { get => registers[(int)Register.GP]; set { registers[(int)Register.GP] = value; } }
+		UInt32 fp { get => registers[(int)Register.FP]; set { registers[(int)Register.FP] = value; } }
         UInt32 ra { get => registers[(int)Register.RA]; set { registers[(int)Register.RA] = value; } }
         UInt32 rv { get => registers[(int)Register.RV]; set { registers[(int)Register.RV] = value; } }
-        UInt32 ri { get => registers[(int)Register.RI]; set { registers[(int)Register.RI] = value; } }
+        UInt32 ti { get => registers[(int)Register.TI]; set { registers[(int)Register.TI] = value; } }
+        UInt32 ta { get => registers[(int)Register.TA]; set { registers[(int)Register.TA] = value; } }
 
         public const UInt32 STACK_SIZE = 256;
         public const UInt32 STACK_END = STACK_SIZE;
@@ -40,31 +42,32 @@ namespace FTG.Studios.BISC.VM {
                 LDW, LDH, LDB, STW, STH, STB,
                 ADD, SUB, MUL, DIV, MOD,
                 NOT, NEG, INV, AND, OR, XOR, BSL, BSR,
-                JMP, JEZ, JNZ, JEQ, JNE, JGT, JLT, JGE, JLE
+                JMP, JEZ, JNZ, JEQ, JNE, 
+				JGT, JLT, JGE, JLE,
+				JGTU, JLTU, JGEU, JLEU
             };
             Reset();
         }
 
         public UInt32 GetRegister(int reg) {
-            if (((Register)reg).IsValid()) return registers[reg];
+            if (reg >= 0 && reg < Specification.NUM_REGISTERS) return registers[reg];
             return 0xFFFFFFFF;
         }
 
         public UInt32 GetRegister(Register reg) {
-            if (reg.IsValid()) return registers[(int)reg];
-            return 0xFFFFFFFF;
+            return registers[(int)reg];
         }
 
         public void SetRegister(int reg, UInt32 val) {
-            if (((Register)reg).IsValid()) registers[reg] = val;
+            if (reg >= 0 && reg < Specification.NUM_REGISTERS) registers[reg] = val;
         }
 
         public void SetRegister(Register reg, UInt32 val) {
-            if (reg.IsValid()) registers[(int)reg] = val;
+            registers[(int)reg] = val;
         }
 
         bool IsValidRegister(byte reg) {
-            return reg <= Specification.NUM_REGISTERS && reg != (byte)Register.INVALID0 && reg != (byte)Register.INVALID1;
+            return reg <= Specification.NUM_REGISTERS;
         }
 
         public byte GetMemory8(UInt32 addr) {
@@ -439,7 +442,7 @@ namespace FTG.Studios.BISC.VM {
         bool JGT(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JGT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-            if (registers[arg1] > registers[arg2]) pc = registers[arg0];
+            if ((int)registers[arg1] > (int)registers[arg2]) pc = registers[arg0];
             else pc += 4;
             return true;
         }
@@ -447,7 +450,7 @@ namespace FTG.Studios.BISC.VM {
         bool JLT(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JLT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-            if (registers[arg1] < registers[arg2]) pc = registers[arg0];
+            if ((int)registers[arg1] < (int)registers[arg2]) pc = registers[arg0];
             else pc += 4;
             return true;
         }
@@ -455,12 +458,44 @@ namespace FTG.Studios.BISC.VM {
         bool JGE(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JGE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-            if (registers[arg1] >= registers[arg2]) pc = registers[arg0];
+            if ((int)registers[arg1] >= (int)registers[arg2]) pc = registers[arg0];
             else pc += 4;
             return true;
         }
 
         bool JLE(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JLE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+            if ((int)registers[arg1] <= (int)registers[arg2]) pc = registers[arg0];
+            else pc += 4;
+            return true;
+        }
+		
+		bool JGTU(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JGT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+            if (registers[arg1] > registers[arg2]) pc = registers[arg0];
+            else pc += 4;
+            return true;
+        }
+
+        bool JLTU(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JLT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+            if (registers[arg1] < registers[arg2]) pc = registers[arg0];
+            else pc += 4;
+            return true;
+        }
+
+        bool JGEU(byte opcode, byte arg0, byte arg1, byte arg2) {
+            if (opcode != ((byte)Opcode.JGE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+            if (registers[arg1] >= registers[arg2]) pc = registers[arg0];
+            else pc += 4;
+            return true;
+        }
+
+        bool JLEU(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JLE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
             if (registers[arg1] <= registers[arg2]) pc = registers[arg0];

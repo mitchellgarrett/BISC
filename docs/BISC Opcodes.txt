@@ -1,6 +1,6 @@
 ﻿***VERY SUBJECT TO CHANGE***
 
-Mnemonic |  Opcode  | Format
+Mnemonic  |  Opcode  | Format
 -----------------------------
 hlt       | 00000000 |   N
 nop       | 01000000 |   N
@@ -38,3 +38,7 @@ jgt       | 20rrrrrr |   T
 jlt       | 21rrrrrr |   T
 jge       | 22rrrrrr |   T
 jle       | 23rrrrrr |   T
+jgtu      | 24rrrrrr |   T
+jltu      | 25rrrrrr |   T
+jgeu      | 26rrrrrr |   T
+jleu      | 27rrrrrr |   T

@@ -54,6 +54,12 @@ namespace FTG.Studios.BISC.Asm {
 						Token arg = inst.Parameters[i];
 						if (arg.Type == TokenType.Label && !arg.Value.HasValue) {
 							arg.Type = TokenType.Immediate;
+							if (!program.Labels.TryGetValue(arg.Mnemonic, out Instruction label)) {
+								foreach (var o in program.Labels) {
+									Console.WriteLine(o);
+								}
+								throw new ArgumentException($"(Ln: {arg.LineNo}, Ch: {arg.CharNo}) Undefined symbol: '{arg.Mnemonic}'\n'{inst}'");
+							}
 							arg.Value = program.Labels[arg.Mnemonic].Address;
 							inst.Parameters[i] = arg;
 						}
@@ -115,7 +121,7 @@ namespace FTG.Studios.BISC.Asm {
 		/// <returns>Register index.</returns>
 		public static byte? ParseRegister(string Mnemonic) {
 			for (byte i = 0; i < Specification.NUM_REGISTERS; i++) {
-				if (((Register)i).IsValid() && Mnemonic == Specification.REGISTER_NAMES[i]) return i;
+				if (Mnemonic == Specification.REGISTER_NAMES[i]) return i;
 			}
 			return null;
 		}

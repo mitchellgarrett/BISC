@@ -7,7 +7,7 @@ lli sp, 0
 
 ; turn off cursor
 lli r0, 0
-sb r0, fp[0]
+stb r0, fp[0]
 
 
 lli r0, 'H'
@@ -68,16 +68,16 @@ call write_char
 
 ; read char
 call read_char
-sb rv, sp[40]
+stb rv, sp[40]
 hlt
 
 ; write char
 write_char:
-	sb r0, sp[0]
+	stb r0, sp[0]
 	inc sp
 	ret
 
 ; read char
 read_char:
-	lb rv, fp[3]
+	ldb rv, fp[3]
 	ret
