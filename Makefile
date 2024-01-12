@@ -37,4 +37,4 @@ vm: $(VM_EXE)
 	@mono $(BUILD_DIR)/$(VM_EXE) $(FILE)
 
 clean:
-	@rm -r $(BUILD_DIR)
+	@rm -rf $(BUILD_DIR)

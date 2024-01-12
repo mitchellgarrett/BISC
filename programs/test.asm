@@ -1,4 +1,4 @@
-li r0, 5
+lli r0, 5
 call function
 hlt
 
