@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 
 namespace FTG.Studios.BISC {
 
@@ -40,6 +41,19 @@ namespace FTG.Studios.BISC {
             if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt32(new byte[] { d, c, b, a }, 0);
             return BitConverter.ToUInt32(new byte[] { a, b, c, d }, 0);
 		}
+
+		/// <summary>
+		/// Assembles a 32-bit integer from a string using ASCII.
+		/// </summary>
+		/// <param name="s">The string to be converted to a UInt32.</param>
+		/// <returns>A UInt32 representaion of the string.</returns>
+        public static UInt32 AssembleInteger32FromString(string s) {
+
+            byte[] bytes = Encoding.ASCII.GetBytes(s);
+
+            return AssembleInteger32(bytes[0], bytes[1], bytes[2], bytes[3]);
+        }
+
 		
 		/// <summary>
 		/// Disassembles a 16-bit integer into two bytes in little-endian order.
