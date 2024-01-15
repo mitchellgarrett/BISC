@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace FTG.Studios.BISC.VM {
 
@@ -70,41 +72,50 @@ namespace FTG.Studios.BISC.VM {
             return reg <= Specification.NUM_REGISTERS;
         }
 
-        public byte GetMemory8(UInt32 addr) {
+        public byte GetMemory8(UInt32 address) {
             byte[] data = { 0 };
-            memory.Read(addr, ref data);
+            memory.Read(address, ref data);
 
             return data[0];
         }
 
-        public UInt16 GetMemory16(UInt32 addr) {
+        public UInt16 GetMemory16(UInt32 address) {
             byte[] data = { 0, 0 };
-            memory.Read(addr, ref data);
+            memory.Read(address, ref data);
 
             return Specification.AssembleInteger16(data[0], data[1]);
         }
 
-        public UInt32 GetMemory32(UInt32 addr) {
+        public UInt32 GetMemory32(UInt32 address) {
             byte[] data = { 0, 0, 0, 0 };
-            memory.Read(addr, ref data);
+            memory.Read(address, ref data);
 
             return Specification.AssembleInteger32(data[0], data[1], data[2], data[3]);
         }
 
-        public void SetMemory8(UInt32 addr, UInt32 value) {
+        public void SetMemory8(UInt32 address, UInt32 value) {
             byte[] data = { (byte)(value & 0xFF) };
-            memory.Write(addr, data);
+            memory.Write(address, data);
         }
 
-        public void SetMemory16(UInt32 addr, UInt32 value) {
+        public void SetMemory16(UInt32 address, UInt32 value) {
             byte[] data = Specification.DisassembleInteger16((UInt16)value);
-            memory.Write(addr, data);
+            memory.Write(address, data);
         }
 
-        public void SetMemory32(UInt32 addr, UInt32 value) {
+        public void SetMemory32(UInt32 address, UInt32 value) {
             byte[] data = Specification.DisassembleInteger32(value);
-            memory.Write(addr, data);
+            memory.Write(address, data);
         }
+		
+		public void SetMemoryRange(UInt32 address, byte[] data) {
+			memory.Write(address, data);
+		}
+		
+		public void SetMemoryRange(UInt32 address, UInt32[] data) {
+			byte[] bytes = data.SelectMany(BitConverter.GetBytes).ToArray(); 
+			memory.Write(address, bytes);
+		}
 
         public void Reset() {
             // Zero out the registers.
@@ -122,12 +133,40 @@ namespace FTG.Studios.BISC.VM {
         public void Halt() {
             IsRunning = false;
         }
-
+		
+		/// <summary>
+		/// Executes a single 32-bit BISC instruction at the address stored in PC.
+		/// </summary>
+		/// <returns>True if the executed instruction is valid, false otherwise.</returns>
+		public bool ExecuteNext() {
+			return ExecuteAt(pc);
+		}
+		
+		/// <summary>
+		/// Executes a single 32-bit BISC instruction at the given address.
+		/// </summary>
+		/// <param name="address">The memory address the instruction to execute is located.</param>
+		/// <returns>True if the instruction at the given address is valid, false otherwise.</returns>
+		public bool ExecuteAt(UInt32 address) {
+			UInt32 instruction = GetMemory32(address);
+			return ExecuteInstruction(instruction);
+		}
+		
+		/// <summary>
+		/// Executes 32-bit BISC instructions starting at the given address.
+		/// </summary>
+		/// <param name="address">The memory addrerss to start execution from.</param>
+		public void ExecuteFrom(UInt32 address) {
+			pc = address;
+			while (ExecuteAt(pc));
+		}
+		
         /// <summary>
         /// Executes a single 32-bit BISC instruction.
         /// </summary>
         /// <param name="instruction">32-bit instruction.</param>
-        public bool Execute(UInt32 instruction) {
+		/// <returns>True if the given instruction is valid, false otherwise.</returns>
+        public bool ExecuteInstruction(UInt32 instruction) {
             //Console.WriteLine("Executing instruction: 0x{0:x8}", instruction);
 
             // Decompose instruction into its byte parameters

@@ -24,7 +24,7 @@ namespace FTG.Studios.BISC.VM {
         byte cursor_enabled, cursor_x, cursor_y;
         readonly byte[,] memory;
 
-        public Terminal(UInt32 addr, int width, int height) : base() {
+        public Terminal(int width, int height) : base() {
             this.Width = width;
             this.Height = height;
 			CursorEnableAddress = 0;

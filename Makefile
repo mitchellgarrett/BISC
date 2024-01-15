@@ -1,5 +1,5 @@
 CMN_DIR = common
-CMN_SRC = $(wildcard $(CMN_DIR)/*.cs)
+CMN_SRC = $(wildcard $(CMN_DIR)/*.cs) $(wildcard deps/beef/src/*.cs)
 BUILD_DIR = build
 
 ASM_DIR = asm

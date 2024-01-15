@@ -21,6 +21,8 @@ namespace FTG.Studios.BISC.VM {
 			UInt32[] program = Asm.Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
 			BISC.Program.Write(file_name + ".bin", new BISC.Program(program));
 
+			
+
             Flags options = Flags.None;
 			//options = Flags.Stat;
             //options = Flags.Debug;
@@ -29,17 +31,21 @@ namespace FTG.Studios.BISC.VM {
 
             MemoryManager mmu = new MemoryManager(32, 0xFFFF_0000);
 			
-			VolatileMemory ram = new VolatileMemory(0x1000);
+			VolatileMemory ram = new VolatileMemory(0x4000);
 			mmu.AddModule(ram, 0);
 			
-			Terminal terminal = new Terminal(0x1000, 80, 24);
-            mmu.AddModule(terminal, 0x1000);
+			Terminal terminal = new Terminal(80, 24);
+            mmu.AddModule(terminal, 0x4000);
 			
-			RandomNumberGenerator rng = new RandomNumberGenerator(0x3000);
-			mmu.AddModule(rng, 0x3000);
+			RandomNumberGenerator rng = new RandomNumberGenerator();
+			mmu.AddModule(rng, 0x5000);
 
 			vm = new VirtualMachine(mmu);
 			vm.Reset();
+			
+			// Load BEEF executable into memory
+			BEEF.ObjectFile beef = BEEF.ObjectFile.Deserialize(file_name + ".exe");
+			LoadProgram(beef);
 			
 			Stopwatch sw = new Stopwatch();
 			UInt32 inst_count = 0;
@@ -59,12 +65,18 @@ namespace FTG.Studios.BISC.VM {
                     }
                     Console.ReadKey(true);
                 }
-
+				
+				UInt32 instruction = vm.GetMemory32(vm.GetRegister(Register.PC));
+				bool success = vm.ExecuteNext();
+				inst_count++;
+				
+				/*
 				UInt32 instruction = program[vm.GetRegister((int)Register.PC) / 4];
-				bool success = vm.Execute(instruction);
+				bool success = vm.ExecuteInstruction(instruction);
 				inst_count++;
 				if (vm.GetRegister((int)Register.PC) >= program.Length * 4) vm.Halt();
-
+				*/
+				
                 if (options.HasFlag(Flags.Debug)) {
                     Console.Clear();
                     PrintRegisters();
@@ -90,7 +102,22 @@ namespace FTG.Studios.BISC.VM {
 				Console.SetCursorPosition(0, Console.WindowHeight - 1);
 			}
 		}
-
+	
+		static bool LoadProgram(BEEF.ObjectFile program) {
+			UInt32 entry_point = program.FileHeader.EntryPoint;
+			vm.SetRegister(Register.PC, entry_point);
+			for (int s = 0; s < program.FileHeader.SectionCount; s++) {
+				BEEF.SectionHeader header = program.SectionHeaders[s];
+				UInt32 section_address = header.Address;
+				for (UInt32 b = 0; b < program.SectionData[s].Length; b++) {
+					byte value = program.SectionData[s][b];
+					vm.SetMemory8(section_address + b, value);
+				}
+			}
+			
+			return false;
+		}
+	
         static void PrintHelp() {
             Console.WriteLine("Usage: bisc-vm file");
         }

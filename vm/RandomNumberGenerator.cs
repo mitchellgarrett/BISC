@@ -10,8 +10,8 @@ namespace FTG.Studios.BISC.VM {
         readonly UInt32 ValueAddress;
 		Random rng;
 
-        public RandomNumberGenerator(UInt32 addr) : base() {
-			SeedAddress = addr;
+        public RandomNumberGenerator() : base() {
+			SeedAddress = 0;
 			ValueAddress = SeedAddress + 4;
             AddressLength = 8;
 			rng = new Random();
