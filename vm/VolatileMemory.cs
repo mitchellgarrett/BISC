@@ -13,7 +13,7 @@ namespace FTG.Studios.BISC.VM {
         public VolatileMemory(UInt32 len) {
             Random rng = new Random();
 
-            MetaName = UInt32.Parse("VMEM");
+            MetaName = Specification.AssembleInteger32FromString("VMEM");
             MetaID   = (UInt32)rng.Next();
             AddressLength = len;
             memory = new Dictionary<UInt32, byte[]>();

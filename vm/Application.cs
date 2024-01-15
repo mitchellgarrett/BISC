@@ -30,13 +30,13 @@ namespace FTG.Studios.BISC.VM {
             MemoryManager mmu = new MemoryManager(32, 0xFFFF_0000);
 			
 			VolatileMemory ram = new VolatileMemory(0x1000);
-			mmu.AddDevice(ram, 0);
+			mmu.AddModule(ram, 0);
 			
 			Terminal terminal = new Terminal(0x1000, 80, 24);
-            mmu.AddDevice(terminal, 0x1000);
+            mmu.AddModule(terminal, 0x1000);
 			
 			RandomNumberGenerator rng = new RandomNumberGenerator(0x3000);
-			mmu.AddDevice(rng, 0x3000);
+			mmu.AddModule(rng, 0x3000);
 
 			vm = new VirtualMachine(mmu);
 			vm.Reset();

@@ -22,7 +22,7 @@ namespace FTG.Studios.BISC.VM {
 
             this.maxModules = maxModules;
 
-            MetaName   = UInt32.Parse("MMU");
+            MetaName   = Specification.AssembleInteger32FromString("MMU ");
             Random rng = new Random();
             MetaID     = (UInt32)rng.Next();
             meta       = new MemoryManagerMeta[maxModules * 4];
@@ -30,6 +30,8 @@ namespace FTG.Studios.BISC.VM {
 
             memoryModules = new MemoryModule[4 * maxModules];
             AddressLength = 0xFFFF_FFFF;
+
+            meta[0] = new MemoryManagerMeta();
 
             meta[0].Name    = MetaName;
             meta[0].ID      = MetaID;
@@ -39,7 +41,7 @@ namespace FTG.Studios.BISC.VM {
 
         }
 
-        public bool AddDevice(MemoryModule module, UInt32 addr) {
+        public bool AddModule(MemoryModule module, UInt32 addr) {
 
             UInt32 moduleStart = addr;
             UInt32 moduleEnd   = addr + module.AddressLength;
@@ -79,6 +81,7 @@ namespace FTG.Studios.BISC.VM {
             }
 
             // Add the module.
+            meta[index]         = new MemoryManagerMeta();
             meta[index].Name    = module.MetaName;
             meta[index].ID      = module.MetaID;
             meta[index].Address = addr;
@@ -93,7 +96,7 @@ namespace FTG.Studios.BISC.VM {
             return true;
         }
 
-        public bool RemoveDevice(MemoryModule module) {
+        public bool RemoveModule(MemoryModule module) {
 
             for(int i = 0; i < maxModules; i++) {
 
@@ -113,8 +116,10 @@ namespace FTG.Studios.BISC.VM {
         }
 
         public override void Reset() {
-            foreach (MemoryModule module in memoryModules) {
-                module.Reset();
+
+            // Start at 1 to only reset the modules that the MMU controls.
+            for(int i = 1; i < maxModules; i++) {
+                if(metaValid[i]) memoryModules[i].Reset();
             }
         }
 
