@@ -15,7 +15,7 @@ namespace FTG.Studios.BISC.VM {
         UInt32 pc { get => registers[(int)Register.PC]; set { registers[(int)Register.PC] = value; } }
         UInt32 sp { get => registers[(int)Register.SP]; set { registers[(int)Register.SP] = value; } }
         UInt32 gp { get => registers[(int)Register.GP]; set { registers[(int)Register.GP] = value; } }
-		UInt32 fp { get => registers[(int)Register.FP]; set { registers[(int)Register.FP] = value; } }
+        UInt32 fp { get => registers[(int)Register.FP]; set { registers[(int)Register.FP] = value; } }
         UInt32 ra { get => registers[(int)Register.RA]; set { registers[(int)Register.RA] = value; } }
         UInt32 rv { get => registers[(int)Register.RV]; set { registers[(int)Register.RV] = value; } }
         UInt32 ti { get => registers[(int)Register.TI]; set { registers[(int)Register.TI] = value; } }
@@ -25,11 +25,11 @@ namespace FTG.Studios.BISC.VM {
         public const UInt32 STACK_END = STACK_SIZE;
         public const UInt32 STACK_START = STACK_END - STACK_SIZE;
 
-        readonly Memory memory;
+        readonly MemoryModule memory;
 
         public bool IsRunning { get; private set; }
 
-        public VirtualMachine(Memory memory) {
+        public VirtualMachine(MemoryModule memory) {
             this.memory = memory;
             Initialize();
         }
@@ -43,8 +43,8 @@ namespace FTG.Studios.BISC.VM {
                 ADD, SUB, MUL, DIV, MOD,
                 NOT, NEG, INV, AND, OR, XOR, BSL, BSR,
                 JMP, JEZ, JNZ, JEQ, JNE, 
-				JGT, JLT, JGE, JLE,
-				JGTU, JLTU, JGEU, JLEU
+                JGT, JLT, JGE, JLE,
+                JGTU, JLTU, JGEU, JLEU
             };
             Reset();
         }
@@ -140,7 +140,7 @@ namespace FTG.Studios.BISC.VM {
             
             if (opcode >= 0 && opcode < instructions.Length) {
                 if (!instructions[opcode](opcode, arg0, arg1, arg2)) {
-                    // Set debug register to illegeal execution
+                    // Set debug register to illegal execution
                     Console.Error.WriteLine($"Illegal execution: 0x{instruction:x8}");
                     return false;
                 }
@@ -153,7 +153,7 @@ namespace FTG.Studios.BISC.VM {
             return true;
         }
 
-        #region Instructions
+    #region Instructions
 
         #region System Instructions
         bool NOP(byte opcode, byte arg0, byte arg1, byte arg2) {
@@ -471,7 +471,7 @@ namespace FTG.Studios.BISC.VM {
             return true;
         }
 		
-		bool JGTU(byte opcode, byte arg0, byte arg1, byte arg2) {
+        bool JGTU(byte opcode, byte arg0, byte arg1, byte arg2) {
             if (opcode != ((byte)Opcode.JGT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
             if (registers[arg1] > registers[arg2]) pc = registers[arg0];
@@ -504,6 +504,6 @@ namespace FTG.Studios.BISC.VM {
         }
         #endregion
 
-        #endregion
+    #endregion
     }
 }

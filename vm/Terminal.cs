@@ -10,7 +10,7 @@ namespace FTG.Studios.BISC.VM {
 	/// Read Character : 0x000C - 0x000F
 	/// Characters     : 0x0010 - 0x100F
 	/// </summary>
-    public class Terminal : Memory {
+    public class Terminal : MemoryModule {
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -27,13 +27,12 @@ namespace FTG.Studios.BISC.VM {
         public Terminal(UInt32 addr, int width, int height) : base() {
             this.Width = width;
             this.Height = height;
-            AddressStart = addr;
-			CursorEnableAddress = AddressStart;
+			CursorEnableAddress = 0;
             CursorXAddress = CursorEnableAddress + 4;
             CursorYAddress = CursorXAddress + 4;
             ReadCharAddress = CursorYAddress + 4;
 			CharacterDataAddress = ReadCharAddress + 4;
-            AddressLength = CharacterDataAddress + (UInt32)(Width * Height) - AddressStart;
+            AddressLength = CharacterDataAddress + (UInt32)(Width * Height);
             Console.SetWindowSize(Width, Height);
             memory = new byte[Height, Width];
         }

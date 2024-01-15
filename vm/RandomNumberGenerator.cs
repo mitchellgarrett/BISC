@@ -4,14 +4,13 @@ namespace FTG.Studios.BISC.VM {
 
     // Returns a random 32-bit integer on read
     // Memory map: 0x00, 0x04
-    public class RandomNumberGenerator : Memory {
+    public class RandomNumberGenerator : MemoryModule {
 
         readonly UInt32 SeedAddress;
         readonly UInt32 ValueAddress;
 		Random rng;
 
         public RandomNumberGenerator(UInt32 addr) : base() {
-            AddressStart = addr;
 			SeedAddress = addr;
 			ValueAddress = SeedAddress + 4;
             AddressLength = 8;
