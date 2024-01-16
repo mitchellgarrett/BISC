@@ -4,11 +4,11 @@ using System.Collections.Generic;
 namespace FTG.Studios.BISC.VM {
 
     /// <summary>
-    /// BISC memory element.
+    /// BISC memory element that clears on reset.
     /// </summary>
     public class VolatileMemory : MemoryModule {
 
-        readonly Dictionary<UInt32, byte[]> memory;
+        protected readonly Dictionary<UInt32, byte[]> memory;
 
         public VolatileMemory(UInt32 len) {
             Random rng = new Random();
