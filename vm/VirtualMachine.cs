@@ -27,7 +27,7 @@ namespace FTG.Studios.BISC.VM {
         public const UInt32 STACK_END = STACK_SIZE;
         public const UInt32 STACK_START = STACK_END - STACK_SIZE;
 
-        readonly MemoryModule memory;
+        public readonly MemoryModule memory;
 
         public bool IsRunning { get; private set; }
 
