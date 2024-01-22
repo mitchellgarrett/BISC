@@ -103,6 +103,9 @@ namespace FTG.Studios.BISC.VM {
 				// See if we have a match in our list of modules.
 				if(meta[i].ID == module.MetaID) {
 
+                    System.Diagnostics.Debug.WriteLine($"Removing module {module} (start=0x{meta[i].Address:x8}, end=0x{meta[i].Address + meta[i].Length:x8}, length=0x{meta[i].Length:x8}) from MMU at index={i}");
+                    Console.WriteLine($"Removing module {module} (start=0x{meta[i].Address:x8}, end=0x{meta[i].Address + meta[i].Length:x8}, length=0x{meta[i].Length:x8}) from MMU at index={i}");
+
 					meta[i]          = null;
 					metaValid[i]     = false;
 					memoryModules[i] = null;
