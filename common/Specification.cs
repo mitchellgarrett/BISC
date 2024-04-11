@@ -1,14 +1,16 @@
 using System;
 
-namespace FTG.Studios.BISC {
+namespace FTG.Studios.BISC
+{
 
-    public static class Specification {
+	public static class Specification
+	{
 
 		public const char COMMENT = ';';
 		public const char LABEL_DELIMETER = ':';
 
-        public static readonly string[] REGISTER_NAMES = {
-            "pc", "sp", "gp", "fp", "ra", "rv", "ti", "ta", 
+		public static readonly string[] REGISTER_NAMES = {
+			"pc", "sp", "gp", "fp", "ra", "rv", "ti", "ta",
 			"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
 			"t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7",
 			//"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
@@ -16,16 +18,17 @@ namespace FTG.Studios.BISC {
 		};
 
 		public static int NUM_REGISTERS { get { return REGISTER_NAMES.Length; } }
-		
+
 		/// <summary>
 		/// Assembles a 16-bit integer from two bytes supplied in little-endian order.
 		/// </summary>
 		/// <param name="a">Least significant byte.</param>
 		/// <param name="b">Most significant byte.</param>
 		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
-		public static UInt16 AssembleInteger16(byte a, byte b) {
-            if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt16(new byte[] { b, a }, 0);
-            return BitConverter.ToUInt16(new byte[] { a, b }, 0);
+		public static UInt16 AssembleInteger16(byte a, byte b)
+		{
+			if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt16(new byte[] { b, a }, 0);
+			return BitConverter.ToUInt16(new byte[] { a, b }, 0);
 		}
 
 		/// <summary>
@@ -36,20 +39,22 @@ namespace FTG.Studios.BISC {
 		/// <param name="c">Third byte.</param>
 		/// <param name="d">Most significant byte.</param>
 		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
-		public static UInt32 AssembleInteger32(byte a, byte b, byte c, byte d) {
-            if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt32(new byte[] { d, c, b, a }, 0);
-            return BitConverter.ToUInt32(new byte[] { a, b, c, d }, 0);
+		public static UInt32 AssembleInteger32(byte a, byte b, byte c, byte d)
+		{
+			if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt32(new byte[] { d, c, b, a }, 0);
+			return BitConverter.ToUInt32(new byte[] { a, b, c, d }, 0);
 		}
-		
+
 		/// <summary>
 		/// Disassembles a 16-bit integer into two bytes in little-endian order.
 		/// </summary>
 		/// <param name="value">16-bit integer.</param>
 		/// <returns>A byte array of two bytes in little-endian order.</returns>
-		public static byte[] DisassembleInteger16(UInt16 value) {
+		public static byte[] DisassembleInteger16(UInt16 value)
+		{
 			byte[] bytes = BitConverter.GetBytes(value);
-            if (!BitConverter.IsLittleEndian) Array.Reverse(bytes);
-            return bytes;
+			if (!BitConverter.IsLittleEndian) Array.Reverse(bytes);
+			return bytes;
 		}
 
 		/// <summary>
@@ -57,10 +62,11 @@ namespace FTG.Studios.BISC {
 		/// </summary>
 		/// <param name="value">16-bit integer.</param>
 		/// <returns>A byte array of four bytes in little-endian order.</returns>
-		public static byte[] DisassembleInteger32(UInt32 value) {
+		public static byte[] DisassembleInteger32(UInt32 value)
+		{
 			byte[] bytes = BitConverter.GetBytes(value);
-            if (!BitConverter.IsLittleEndian) Array.Reverse(bytes);
-            return bytes;
+			if (!BitConverter.IsLittleEndian) Array.Reverse(bytes);
+			return bytes;
 		}
 
 		public static readonly ArgumentType[][] instruction_format_definitions = {
@@ -106,6 +112,8 @@ namespace FTG.Studios.BISC {
 			InstructionFormat.T, // BSL
 			InstructionFormat.T, // BSR
 
+// TODO: maybe change jump instructions to reg reg label
+
 			InstructionFormat.R, // JMP
 			InstructionFormat.D, // JEZ
 			InstructionFormat.D, // JNZ
@@ -123,7 +131,7 @@ namespace FTG.Studios.BISC {
 			InstructionFormat.T, // JGEU
 			InstructionFormat.T, // JLEU
 		};
-		
+
 		public static readonly string[] pseudo_instruction_names = new string[] {
 			"LDI", "LRA",
 			"SYS", "CALL",
@@ -131,15 +139,16 @@ namespace FTG.Studios.BISC {
 			"PUSH", "PUSH", "PUSHW", "PUSHW", "PUSHB", "PUSHB",
 			"POP", "POPW", "POPB",
 			"ADDI", "ADDI", "SUBI", "SUBI", "MULI", "MULI", "DIVI", "DIVI", "MODI",
+			"ANDI", "ORI", "XORI",
 			"INC", "DEC",
-			"JMP", "JEZ", "JNZ", 
-			"JEQ", "JEQ", "JEQ", "JNE", "JNE", "JNE", 
-			"JGT", "JGT", "JGT", "JLT", "JLT", "JLT", 
+			"JMP", "JEZ", "JNZ",
+			"JEQ", "JEQ", "JEQ", "JNE", "JNE", "JNE",
+			"JGT", "JGT", "JGT", "JLT", "JLT", "JLT",
 			"JGE", "JGE", "JGE", "JLE", "JLE", "JLE",
-			"JGTU", "JGTU", "JGTU", "JLTU", "JLTU", "JLTU", 
+			"JGTU", "JGTU", "JGTU", "JLTU", "JLTU", "JLTU",
 			"JGEU", "JGEU", "JGEU", "JLEU", "JLEU", "JLEU"
 		};
-		
+
 		public static readonly ArgumentType[][] pseudo_instruction_arguments = new ArgumentType[][] {
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // LDI {imm}
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // LRA {imm}
@@ -178,6 +187,10 @@ namespace FTG.Studios.BISC {
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32, ArgumentType.Register }, // DIVI {reg}, {imm}, {reg}
 			
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Immediate32 }, // MODI {reg}, {reg}, {imm}
+			
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Immediate32 }, // ANDI {reg}, {reg}, {imm}
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Immediate32 }, // ORI  {reg}, {reg}, {imm}
+			new ArgumentType[] { ArgumentType.Register, ArgumentType.Register, ArgumentType.Immediate32 }, // XORI {reg}, {reg}, {imm}
 			
 			new ArgumentType[] { ArgumentType.Register },                                                     // INC {reg}
 			new ArgumentType[] { ArgumentType.Register },                                                     // DEC {reg}
@@ -267,6 +280,10 @@ namespace FTG.Studios.BISC {
 			
  			new string[] { "LDI ti, {2}", "MOD {0}, {1}, ti" },         // MODI {reg}, {reg}, {imm}
 			
+			new string[] { "LDI ti, {2}", "AND {0}, {1}, ti" },         // ANDI {reg}, {reg}, {imm}
+			new string[] { "LDI ti, {2}", "OR {0}, {1}, ti" },          // ORI  {reg}, {reg}, {imm}
+			new string[] { "LDI ti, {2}", "XOR {0}, {1}, ti" },         // XORI {reg}, {reg}, {imm}
+			
 			new string[] { "ADDI {0}, {0}, 1" },                        // INC {reg}
  			new string[] { "SUBI {0}, {0}, 1" },                        // DEC {reg}
 			
@@ -314,5 +331,5 @@ namespace FTG.Studios.BISC {
 			new string[] { "LDI ta, {0}", "LDI ti, {2}", "JLEU ta, {1}, ti" }, // JLEU {imm}, {reg}, {imm}
 			new string[] { "LDI ta, {0}", "LDI ti, {1}", "JLEU ta, ti, {2}" }, // JLEU {imm}, {imm}, {reg}
 		};
-    }
+	}
 }
