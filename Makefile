@@ -8,7 +8,7 @@ ASM_SRC = $(wildcard $(ASM_DIR)/*.cs) $(CMN_SRC)
 
 VM_DIR = vm
 VM_EXE = bisc-vm.exe
-VM_SRC = $(wildcard $(VM_DIR)/*.cs) $(CMN_SRC) $(filter-out $(ASM_DIR)/Application.cs, $(wildcard $(ASM_DIR)/*.cs))
+VM_SRC = $(wildcard $(VM_DIR)/*.cs) $(CMN_SRC)
 
 CSC_FLAGS = -errorendlocation
 FILE ?= programs/console
@@ -33,7 +33,8 @@ $(VM_EXE): $(VM_SRC)
 asm: $(ASM_EXE)
 	@mono $(BUILD_DIR)/$(ASM_EXE) $(FILE)
 
-vm: $(VM_EXE)
+vm: $(VM_EXE) $(ASM_EXE)
+	@mono $(BUILD_DIR)/$(ASM_EXE) $(FILE)
 	@mono $(BUILD_DIR)/$(VM_EXE) $(FILE)
 
 clean:
