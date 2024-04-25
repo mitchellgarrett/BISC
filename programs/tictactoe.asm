@@ -100,7 +100,7 @@ play_game:
 		; check if there is a winner
 		; if return value is non-zero, game is over
 		call check_board
-		jnz play_game_end, rv
+		jnz play_game_game_over, rv
 		
 		; select next player
 		jeq play_game_select_o, r7, 1
@@ -117,6 +117,25 @@ play_game:
 		; if r6 != 0, start next player's turn
 		; otherwise, no tiles are left and game is over
 		jnz play_game_loop, r6
+	
+	play_game_game_over:
+		ldi r0, 6
+		ldi r1, 0
+		ldi r2, 'N'
+		
+		jeq play_game_print_winner_x, rv, 1
+		jeq play_game_print_winner_o, rv, 2
+		jmp play_game_print_winner
+		
+		play_game_print_winner_x:
+			ldi r2, 'X'
+			jmp play_game_print_winner
+			
+		play_game_print_winner_o:
+			ldi r2, 'O'
+		
+		play_game_print_winner:
+			call print_char
 	
 	play_game_end:
 		pop r7
