@@ -16,19 +16,31 @@ namespace FTG.Studios.BISC.Asm
 		{
 			LinkedList<Token> stream = new LinkedList<Token>(tokens);
 			List<string> labels = new List<string>();
+
 			Program program = new Program();
+
 			while (stream.Count > 0)
 			{
 				switch (stream.Peek().Type)
 				{
+					case TokenType.Directive:
+						ParseDirective(stream);
+						break;
+
+					case TokenType.DataInitializer:
+						Binary binary = ParseDataInitializer(stream);
+						program.Add(binary);
+						break;
+
 					case TokenType.Opcode:
 						Instruction instruction = ParseInstruction(stream);
 
 						Console.WriteLine(instruction);
-						program.Instructions.Add(instruction);
+						program.Add(instruction);
+						//program.Instructions.Add(instruction);
 
 						// FIXME: This needs to work for the case wehre two labels are stacked on top of each other
-						if (labels.Count > 0)
+						/*if (labels.Count > 0)
 						{
 							foreach (string l in labels)
 							{
@@ -36,14 +48,15 @@ namespace FTG.Studios.BISC.Asm
 								//Console.WriteLine("\n\n\n" + label + "\n\n\n");
 							}
 							labels.Clear();
-						}
+						}*/
 						break;
 					case TokenType.PseudoOp:
 						ParsePseudoInstruction(stream);
 						break;
 					case TokenType.Label:
-						string label = ParseLabel(stream);
-						if (!string.IsNullOrEmpty(label)) labels.Add(label);
+						Label label = ParseLabel(stream);
+						program.Add(label);
+						//if (!string.IsNullOrEmpty(label)) labels.Add(label);
 						//Console.WriteLine("\n\n\n" + label + "\n\n\n");
 						break;
 					case TokenType.Comment:
@@ -56,6 +69,48 @@ namespace FTG.Studios.BISC.Asm
 				}
 			}
 			return program;
+		}
+
+		static Instruction ParseDirective(LinkedList<Token> tokens)
+		{
+			Token directive = tokens.Dequeue();
+			return null;
+		}
+
+		static Binary ParseDataInitializer(LinkedList<Token> tokens)
+		{
+			Token operation = tokens.Dequeue();
+			Token value = tokens.Dequeue();
+
+			byte[] data;
+			switch (operation.Mnemonic)
+			{
+				case Syntax.data_byte:
+					MatchFail(value, TokenType.Immediate);
+					int data_byte = (int)value.Value;
+					data = new byte[1];
+					data[0] = (byte)data_byte;
+					return new Binary(data);
+
+				case Syntax.data_half:
+					MatchFail(value, TokenType.Immediate);
+					int data_half = (int)value.Value;
+					data = Specification.DisassembleInteger16((UInt16)data_half);
+					return new Binary(data);
+
+				case Syntax.data_word:
+					MatchFail(value, TokenType.Immediate);
+					int data_word = (int)value.Value;
+					data = Specification.DisassembleInteger32((UInt32)data_word);
+					return new Binary(data);
+
+				case Syntax.data_zero:
+					MatchFail(value, TokenType.Immediate);
+					int number_of_zero_bytes = (int)value.Value;
+					data = new byte[number_of_zero_bytes];
+					return new Binary(data);
+			}
+			return null;
 		}
 
 		/// <summary>
@@ -81,7 +136,7 @@ namespace FTG.Studios.BISC.Asm
 			if (tokens.Count > 0)
 			{
 				if (Match(tokens.Peek(), TokenType.Comment)) tokens.Dequeue();
-				if ((tokens.Count > 0)) MatchFail(tokens.Dequeue(), TokenType.LineSeperator);
+				if (tokens.Count > 0) MatchFail(tokens.Dequeue(), TokenType.LineSeperator);
 			}
 
 			return inst;
@@ -348,12 +403,12 @@ namespace FTG.Studios.BISC.Asm
 		/// </summary>
 		/// <param name="tokens">Token stream.</param>
 		/// <returns>Name of the label.</returns>
-		static string ParseLabel(LinkedList<Token> tokens)
+		static Label ParseLabel(LinkedList<Token> tokens)
 		{
 			Token label = tokens.Dequeue();
 			MatchFail(label, TokenType.Label);
 			MatchFail(tokens.Dequeue(), TokenType.LabelDelimeter);
-			return label.Mnemonic;
+			return new Label(label.Mnemonic);
 		}
 
 		static bool Match(Token token, TokenType type)

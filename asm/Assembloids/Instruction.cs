@@ -3,10 +3,9 @@ using System;
 namespace FTG.Studios.BISC.Asm
 {
 
-	public class Instruction
+	public class Instruction : Assembloid
 	{
 
-		public UInt32 Address;
 		public Opcode Opcode;
 		public Token[] Parameters;
 
@@ -16,16 +15,13 @@ namespace FTG.Studios.BISC.Asm
 			else Parameters = new Token[0];
 		}
 
-		public bool HasUndefinedSymbol
+		public override bool HasUndefinedSymbol()
 		{
-			get
+			foreach (Token arg in Parameters)
 			{
-				foreach (Token arg in Parameters)
-				{
-					if (arg.Type == TokenType.Label && !arg.Value.HasValue) return true;
-				}
-				return false;
+				if (arg.Type == TokenType.Label && !arg.Value.HasValue) return true;
 			}
+			return false;
 		}
 
 		public override string ToString()

@@ -1,4 +1,4 @@
-namespace FTG.Studios.BISC.Asm
+/*namespace FTG.Studios.BISC.Asm
 {
 
 	public static class Optimizer
@@ -24,4 +24,4 @@ namespace FTG.Studios.BISC.Asm
 			}
 		}
 	}
-}
+}*/

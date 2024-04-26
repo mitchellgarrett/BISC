@@ -1,8 +1,6 @@
-li r0, 5
-call function
+ldi r0, 5
+.zero 8
+.byte 0xff
+.half 0xdead
+.word 0xbabecafe
 hlt
-
-function:
-	dec r0
-	jnz function, r0
-	ret

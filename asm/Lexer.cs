@@ -109,6 +109,16 @@ namespace FTG.Studios.BISC.Asm
 		{
 			string lexeme_upper = lexeme.ToUpper();
 
+			if (lexeme_upper[0] == Syntax.directive_prefix)
+			{
+				return new Token(TokenType.Directive, lexeme_upper, null, lineno, charno);
+			}
+
+			if (lexeme_upper[0] == Syntax.data_prefix)
+			{
+				return new Token(TokenType.DataInitializer, lexeme_upper, null, lineno, charno);
+			}
+
 			for (int index = 0; index < Specification.pseudo_instruction_names.Length; index++)
 			{
 				if (lexeme_upper == Specification.pseudo_instruction_names[index])

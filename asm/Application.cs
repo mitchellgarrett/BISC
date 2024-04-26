@@ -16,7 +16,7 @@ namespace FTG.Studios.BISC.Asm
 			}
 
 			string file_name = args[0];
-			UInt32[] program = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
+			byte[] program = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
 			BEEF.ObjectFile beef = ToBEEF(program);
 			BEEF.ObjectFile.Serialize(beef, file_name + ".exe");
 			Console.WriteLine(beef);
@@ -26,7 +26,7 @@ namespace FTG.Studios.BISC.Asm
                 Console.WriteLine("{0:x}: {1:x08}", addr * 4, program[addr]);
             }*/
 
-			BISC.Program.Write(file_name + ".bin", new BISC.Program(program));
+			//BISC.Program.Write(file_name + ".bin", new BISC.Program(program));
 		}
 
 		static void PrintHelp()
@@ -34,7 +34,7 @@ namespace FTG.Studios.BISC.Asm
 			Console.WriteLine("Usage: bisc-asm file");
 		}
 
-		static BEEF.ObjectFile ToBEEF(UInt32[] machine_code)
+		static BEEF.ObjectFile ToBEEF(byte[] machine_code)
 		{
 			BEEF.ObjectFile obj = new BEEF.ObjectFile();
 			obj.FileHeader = new BEEF.FileHeader()
@@ -59,15 +59,15 @@ namespace FTG.Studios.BISC.Asm
 			};
 
 			obj.SectionData = new byte[1][];
-			obj.SectionData[0] = new byte[machine_code.Length * 4];
-			for (int i = 0; i < machine_code.Length; i++)
+			obj.SectionData[0] = machine_code;
+			/*for (int i = 0; i < machine_code.Length; i++)
 			{
 				byte[] bytes = Specification.DisassembleInteger32(machine_code[i]);
 				obj.SectionData[0][i * 4 + 0] = bytes[0];
 				obj.SectionData[0][i * 4 + 1] = bytes[1];
 				obj.SectionData[0][i * 4 + 2] = bytes[2];
 				obj.SectionData[0][i * 4 + 3] = bytes[3];
-			}
+			}*/
 
 			return obj;
 		}

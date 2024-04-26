@@ -19,7 +19,7 @@ namespace FTG.Studios.BISC.Asm
 		/// </summary>
 		/// <param name="source">Source code.</param>
 		/// <returns>An executable program.</returns>
-		public static UInt32[] Assemble(string source)
+		public static byte[] Assemble(string source)
 		{
 
 			// Initialize opcodes dictionary to convert string Mnemonic to byte value
@@ -37,7 +37,7 @@ namespace FTG.Studios.BISC.Asm
 			List<Instruction> unresolved_symbols = new List<Instruction>();
 
 			List<Token> tokens = Lexer.Tokenize(source);
-			if (tokens.Count <= 0) return new UInt32[] { };
+			if (tokens.Count <= 0) return new byte[] { };
 			foreach (Token token in tokens)
 			{
 				Console.WriteLine(token);
@@ -45,49 +45,79 @@ namespace FTG.Studios.BISC.Asm
 
 			program = Parser.Parse(tokens);
 
-			if (program.Instructions.Count <= 0) return new UInt32[] { };
+			if (program.Count <= 0) return new byte[] { };
 
 			// First-pass optimizations
-			Optimizer.Optimize(program);
+			//Optimizer.Optimize(program);
 
-			for (int i = 0; i < program.Instructions.Count; i++)
+			UInt32 address = 0;
+			for (int i = 0; i < program.Count; i++)
 			{
-				program.Instructions[i].Address = (UInt32)(i * 4);
+				program[i].Address = address;
+				if (program[i] is Instruction) address += 4;
 			}
 
-			foreach (Instruction inst in program.Instructions)
+			for (int a = 0; a < program.Count; a++)
 			{
-				if (inst.HasUndefinedSymbol)
+				Assembloid assembloid = program[a];
+
+				if (assembloid.HasUndefinedSymbol())
 				{
-					for (int i = 0; i < inst.Parameters.Length; i++)
+					if (assembloid is Instruction)
 					{
-						Token arg = inst.Parameters[i];
-						if (arg.Type == TokenType.Label && !arg.Value.HasValue)
+						Instruction instruction = assembloid as Instruction;
+						for (int i = 0; i < instruction.Parameters.Length; i++)
 						{
-							arg.Type = TokenType.Immediate;
-							if (!program.Labels.TryGetValue(arg.Mnemonic, out Instruction label))
+							Token arg = instruction.Parameters[i];
+							if (arg.Type == TokenType.Label && !arg.Value.HasValue)
 							{
-								foreach (var o in program.Labels)
+								arg.Type = TokenType.Immediate;
+								Label label = program.GetLabel(arg.Mnemonic);
+
+								if (label == null)
 								{
-									Console.WriteLine(o);
+									throw new ArgumentException($"(Ln: {arg.LineNo}, Ch: {arg.CharNo}) Undefined symbol: '{arg.Mnemonic}'\n'{instruction}'");
 								}
-								throw new ArgumentException($"(Ln: {arg.LineNo}, Ch: {arg.CharNo}) Undefined symbol: '{arg.Mnemonic}'\n'{inst}'");
+
+								arg.Value = label.Address;
+								instruction.Parameters[i] = arg;
+								/*if (!program.Labels.TryGetValue(arg.Mnemonic, out Instruction label))
+								{
+									foreach (var o in program.Labels)
+									{
+										Console.WriteLine(o);
+									}
+									throw new ArgumentException($"(Ln: {arg.LineNo}, Ch: {arg.CharNo}) Undefined symbol: '{arg.Mnemonic}'\n'{inst}'");
+								}
+								arg.Value = program.Labels[arg.Mnemonic].Address;
+								inst.Parameters[i] = arg;*/
 							}
-							arg.Value = program.Labels[arg.Mnemonic].Address;
-							inst.Parameters[i] = arg;
 						}
 					}
 				}
-				Console.WriteLine(inst);
+				Console.WriteLine(assembloid);
 			}
 
-			UInt32[] machine_code = new UInt32[program.Instructions.Count];
-			for (int i = 0; i < machine_code.Length; i++)
+			//byte[] machine_code = new byte[program.SizeInBytes];
+			List<byte> machine_code = new List<byte>();
+			for (int i = 0; i < program.Count; i++)
 			{
-				machine_code[i] = AssembleInstruction(program.Instructions[i]);
+				if (program[i] is Instruction)
+				{
+					//machine_code[machine_code_index++] = AssembleInstruction(program[i] as Instruction);
+					machine_code.AddRange(Specification.DisassembleInteger32(AssembleInstruction(program[i] as Instruction)));
+				}
+
+				if (program[i] is Binary)
+				{
+					//machine_code[machine_code_index++] = AssembleInstruction(program[i] as Instruction);
+					machine_code.AddRange((program[i] as Binary).Data);
+				}
 			}
 
-			return machine_code;
+			if (machine_code.Count != program.SizeInBytes) Console.WriteLine($"Machine code length: {machine_code.Count}, expected length: {program.SizeInBytes}");
+
+			return machine_code.ToArray();
 		}
 
 		static UInt32 AssembleInstruction(Instruction inst)

@@ -26,6 +26,15 @@ namespace FTG.Studios.BISC.Asm
 
 		public const string macro_literal = @"(%hi|%lo)\({0}\)";
 
+		public const char directive_prefix = '%';
+		public const char data_prefix = '.';
+
+		public const string data_byte = ".BYTE";
+		public const string data_half = ".HALF";
+		public const string data_word = ".WORD";
+		public const string data_string = ".STRING";
+		public const string data_zero = ".ZERO";
+
 		public static Opcode? GetOpcode(string Mnemonic)
 		{
 			for (Opcode opcode = 0; (int)opcode < Enum.GetValues(typeof(Opcode)).Length; opcode++)
