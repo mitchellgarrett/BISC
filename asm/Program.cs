@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace FTG.Studios.BISC.Asm
@@ -8,24 +7,30 @@ namespace FTG.Studios.BISC.Asm
 	public class Program
 	{
 
-		readonly List<Assembloid> assembloids;
+		public readonly List<Assembloid> Assembloids;
 
 		public int SizeInBytes { get; private set; }
 
 		public Program()
 		{
-			assembloids = new List<Assembloid>();
+			Assembloids = new List<Assembloid>();
 		}
 
 		public void Add(Assembloid assembloid)
 		{
 			SizeInBytes += assembloid.Size;
-			assembloids.Add(assembloid);
+			Assembloids.Add(assembloid);
 		}
 
-		public Label GetLabel(string identifer)
+		public void RemoveAt(int index)
 		{
-			foreach (Assembloid assembloid in assembloids)
+			SizeInBytes -= Assembloids[index].Size;
+			Assembloids.RemoveAt(index);
+		}
+
+		Label GetLabel(string identifer)
+		{
+			foreach (Assembloid assembloid in Assembloids)
 			{
 				if (assembloid is Label)
 				{
@@ -39,7 +44,7 @@ namespace FTG.Studios.BISC.Asm
 		public void AssignAddresses()
 		{
 			UInt32 address = 0;
-			foreach (Assembloid assembloid in assembloids)
+			foreach (Assembloid assembloid in Assembloids)
 			{
 				assembloid.Address = address;
 				address += (UInt32)assembloid.Size;
@@ -48,7 +53,7 @@ namespace FTG.Studios.BISC.Asm
 
 		public void ResolveUndefinedSymboles()
 		{
-			foreach (Assembloid assembloid in assembloids)
+			foreach (Assembloid assembloid in Assembloids)
 			{
 				if (!assembloid.HasUndefinedSymbol) continue;
 				if (!(assembloid is Instruction)) continue;
@@ -94,7 +99,7 @@ namespace FTG.Studios.BISC.Asm
 		public byte[] Assemble()
 		{
 			List<byte> machine_code = new List<byte>();
-			foreach (Assembloid assembloid in assembloids)
+			foreach (Assembloid assembloid in Assembloids)
 			{
 				machine_code.AddRange(assembloid.Assemble());
 			}
@@ -107,7 +112,7 @@ namespace FTG.Studios.BISC.Asm
 		public override string ToString()
 		{
 			string output = string.Empty;
-			foreach (Assembloid assembloid in assembloids)
+			foreach (Assembloid assembloid in Assembloids)
 			{
 				output += $"{assembloid}\n";
 			}

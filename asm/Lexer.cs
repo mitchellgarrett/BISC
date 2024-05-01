@@ -99,6 +99,7 @@ namespace FTG.Studios.BISC.Asm
 				case Syntax.open_bracket: return new Token(TokenType.OpenBracket, lineno, charno);
 				case Syntax.close_bracket: return new Token(TokenType.CloseBracket, lineno, charno);
 				case Syntax.label_delimeter: return new Token(TokenType.LabelDelimeter, lineno, charno);
+				case Syntax.double_quote: return new Token(TokenType.DoubleQuote, lineno, charno);
 				case Syntax.comment: return new Token(TokenType.Comment, lineno, charno);
 			}
 
