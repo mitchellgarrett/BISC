@@ -7,34 +7,34 @@ namespace FTG.Studios.BISC.Asm
 	public class AssemblerResult
 	{
 
-		public readonly List<Assembloid> Assembloids;
+		public readonly List<AssemblerData> Data;
 
 		public int SizeInBytes { get; private set; }
 
 		public AssemblerResult()
 		{
-			Assembloids = new List<Assembloid>();
+			Data = new List<AssemblerData>();
 		}
 
-		public void Add(Assembloid assembloid)
+		public void Add(AssemblerData data)
 		{
-			SizeInBytes += assembloid.Size;
-			Assembloids.Add(assembloid);
+			SizeInBytes += data.Size;
+			Data.Add(data);
 		}
 
 		public void RemoveAt(int index)
 		{
-			SizeInBytes -= Assembloids[index].Size;
-			Assembloids.RemoveAt(index);
+			SizeInBytes -= Data[index].Size;
+			Data.RemoveAt(index);
 		}
 
 		Label GetLabel(string identifer)
 		{
-			foreach (Assembloid assembloid in Assembloids)
+			foreach (AssemblerData data in Data)
 			{
-				if (assembloid is Label)
+				if (data is Label)
 				{
-					Label label = assembloid as Label;
+					Label label = data as Label;
 					if (label.Identifier == identifer) return label;
 				}
 			}
@@ -44,23 +44,23 @@ namespace FTG.Studios.BISC.Asm
 		public void AssignAddresses()
 		{
 			UInt32 address = 0;
-			foreach (Assembloid assembloid in Assembloids)
+			foreach (AssemblerData data in Data)
 			{
-				assembloid.Address = address;
-				address += (UInt32)assembloid.Size;
+				data.Address = address;
+				address += (UInt32)data.Size;
 			}
 		}
 
 		public void ResolveUndefinedSymboles()
 		{
-			foreach (Assembloid assembloid in Assembloids)
+			foreach (AssemblerData data in Data)
 			{
-				if (!assembloid.HasUndefinedSymbol) continue;
-				if (!(assembloid is Instruction)) continue;
+				if (!data.HasUndefinedSymbol) continue;
+				if (!(data is Instruction)) continue;
 
-				if (assembloid is IInstruction)
+				if (data is IInstruction)
 				{
-					IInstruction iinstruction = assembloid as IInstruction;
+					IInstruction iinstruction = data as IInstruction;
 
 					Token immediate = iinstruction.Immediate;
 					if (immediate.Type == TokenType.Label && !immediate.Value.HasValue)
@@ -76,9 +76,9 @@ namespace FTG.Studios.BISC.Asm
 					}
 				}
 
-				if (assembloid is MInstruction)
+				if (data is MInstruction)
 				{
-					MInstruction minstruction = assembloid as MInstruction;
+					MInstruction minstruction = data as MInstruction;
 
 					Token offset = minstruction.Offset;
 					if (offset.Type == TokenType.Label && !offset.Value.HasValue)
@@ -99,9 +99,9 @@ namespace FTG.Studios.BISC.Asm
 		public byte[] Assemble()
 		{
 			List<byte> machine_code = new List<byte>();
-			foreach (Assembloid assembloid in Assembloids)
+			foreach (AssemblerData data in Data)
 			{
-				machine_code.AddRange(assembloid.Assemble());
+				machine_code.AddRange(data.Assemble());
 			}
 
 			if (machine_code.Count != SizeInBytes) throw new ArgumentException($"Machine code length: {machine_code.Count}, expected length: {SizeInBytes}");
@@ -112,9 +112,9 @@ namespace FTG.Studios.BISC.Asm
 		public override string ToString()
 		{
 			string output = string.Empty;
-			foreach (Assembloid assembloid in Assembloids)
+			foreach (AssemblerData data in Data)
 			{
-				output += $"{assembloid}\n";
+				output += $"{data}\n";
 			}
 			return output;
 		}

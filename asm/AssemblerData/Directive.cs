@@ -1,7 +1,7 @@
 namespace FTG.Studios.BISC.Asm
 {
 
-	public class Directive : Assembloid
+	public class Directive : AssemblerData
 	{
 
 		public string Identifier;

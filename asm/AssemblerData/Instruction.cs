@@ -3,7 +3,7 @@ using System;
 namespace FTG.Studios.BISC.Asm
 {
 
-	public abstract class Instruction : Assembloid
+	public abstract class Instruction : AssemblerData
 	{
 
 		public Opcode Opcode { get; protected set; }

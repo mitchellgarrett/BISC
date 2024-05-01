@@ -1,7 +1,7 @@
 namespace FTG.Studios.BISC.Asm
 {
 
-	public class Label : Assembloid
+	public class Label : AssemblerData
 	{
 
 		public string Identifier;

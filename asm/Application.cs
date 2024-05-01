@@ -16,8 +16,8 @@ namespace FTG.Studios.BISC.Asm
 			}
 
 			string file_name = args[0];
-			AssemblerResult program = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
-			BEEF.ObjectFile beef = ToBEEF(program);
+			AssemblerResult result = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
+			BEEF.ObjectFile beef = ToBEEF(result);
 			BEEF.ObjectFile.Serialize(beef, file_name + ".exe");
 			Console.WriteLine(beef);
 		}

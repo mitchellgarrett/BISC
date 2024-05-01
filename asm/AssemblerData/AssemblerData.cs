@@ -3,7 +3,7 @@ using System;
 namespace FTG.Studios.BISC.Asm
 {
 
-	public abstract class Assembloid
+	public abstract class AssemblerData
 	{
 		public UInt32 Address;
 		public int Size { get; protected set; }

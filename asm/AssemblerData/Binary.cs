@@ -1,7 +1,7 @@
 namespace FTG.Studios.BISC.Asm
 {
 
-	public class Binary : Assembloid
+	public class Binary : AssemblerData
 	{
 
 		public byte[] Data;

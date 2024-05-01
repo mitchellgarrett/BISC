@@ -6,13 +6,13 @@ namespace FTG.Studios.BISC.Asm
 
 		public static void Optimize(AssemblerResult program)
 		{
-			for (int i = 0; i < program.Assembloids.Count; i++)
+			for (int i = 0; i < program.Data.Count; i++)
 			{
-				if (!(program.Assembloids[i] is IInstruction current_iinstruction)) continue;
+				if (!(program.Data[i] is IInstruction current_iinstruction)) continue;
 
-				if (i < program.Assembloids.Count - 1)
+				if (i < program.Data.Count - 1)
 				{
-					if (!(program.Assembloids[i + 1] is IInstruction next_iinstruction)) continue;
+					if (!(program.Data[i + 1] is IInstruction next_iinstruction)) continue;
 
 
 					// If current inst is LLI, next inst is LUI, both have same dest reg, and next inst loads 0
