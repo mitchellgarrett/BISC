@@ -11,11 +11,11 @@ namespace FTG.Studios.BISC.Asm
 	{
 
 		/// <summary>
-		/// Assembles BISC source code into binary opcodes.
+		/// Assembles BISC source code into an intermediate program represnetation.
 		/// </summary>
 		/// <param name="source">Source code.</param>
 		/// <returns>An executable program.</returns>
-		public static byte[] Assemble(string source)
+		public static Program Assemble(string source)
 		{
 			List<Token> tokens = Lexer.Tokenize(source);
 			Program program = Parser.Parse(tokens);
@@ -26,9 +26,7 @@ namespace FTG.Studios.BISC.Asm
 			program.AssignAddresses();
 			program.ResolveUndefinedSymboles();
 
-			Console.WriteLine(program);
-
-			return program.Assemble();
+			return program;
 		}
 
 		/// <summary>
