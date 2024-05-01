@@ -147,15 +147,12 @@ namespace FTG.Studios.BISC.Asm
 		/// </summary>
 		/// <param name="tokens">Token stream.</param>
 		/// <returns>A single BISC instruction.</returns>
-		static Instruction ParseNInstruction(LinkedList<Token> tokens)
+		static NInstruction ParseNInstruction(LinkedList<Token> tokens)
 		{
-			Instruction inst = new Instruction();
 			Token opcode = tokens.Dequeue();
 			MatchFail(opcode, TokenType.Opcode);
 
-			inst.Opcode = (Opcode)opcode.Value.Value;
-
-			return inst;
+			return new NInstruction((Opcode)opcode.Value.Value);
 		}
 
 		/// <summary>
@@ -163,44 +160,36 @@ namespace FTG.Studios.BISC.Asm
 		/// </summary>
 		/// <param name="tokens">Token stream.</param>
 		/// <returns>A single BISC instruction.</returns>
-		static Instruction ParseRInstruction(LinkedList<Token> tokens)
+		static RInstruction ParseRInstruction(LinkedList<Token> tokens)
 		{
-			Instruction inst = new Instruction();
 			Token opcode = tokens.Dequeue();
 			MatchFail(opcode, TokenType.Opcode);
 
-			inst.Opcode = (Opcode)opcode.Value.Value;
-			inst.Parameters = new Token[1];
+			Token register = tokens.Dequeue();
+			MatchFail(register, TokenType.Register);
 
-			inst.Parameters[0] = tokens.Dequeue();
-			MatchFail(inst.Parameters[0], TokenType.Register);
-
-			return inst;
+			return new RInstruction((Opcode)opcode.Value.Value, register);
 		}
 
 		/// <summary>
-		/// Parse an instruction with format: Opcode Register, Register, Immediate
+		/// Parse an instruction with format: Opcode Register, Immediate
 		/// </summary>
 		/// <param name="tokens">Token stream.</param>
 		/// <returns>A single BISC instruction.</returns>
-		static Instruction ParseIInstruction(LinkedList<Token> tokens)
+		static IInstruction ParseIInstruction(LinkedList<Token> tokens)
 		{
-			Instruction inst = new Instruction();
 			Token opcode = tokens.Dequeue();
 			MatchFail(opcode, TokenType.Opcode);
 
-			inst.Opcode = (Opcode)opcode.Value.Value;
-			inst.Parameters = new Token[2];
-
-			inst.Parameters[0] = tokens.Dequeue();
-			MatchFail(inst.Parameters[0], TokenType.Register);
+			Token register = tokens.Dequeue();
+			MatchFail(register, TokenType.Register);
 
 			MatchFail(tokens.Dequeue(), TokenType.Seperator);
 
-			inst.Parameters[1] = tokens.Dequeue();
-			if (!Match(inst.Parameters[1], TokenType.Immediate) && !Match(inst.Parameters[1], TokenType.Label)) Fail(inst.Parameters[1], TokenType.Immediate);
+			Token immediate = tokens.Dequeue();
+			if (!Match(immediate, TokenType.Immediate) && !Match(immediate, TokenType.Label)) Fail(immediate, TokenType.Immediate);
 
-			return inst;
+			return new IInstruction((Opcode)opcode.Value.Value, register, immediate);
 		}
 
 		/// <summary>
@@ -208,31 +197,27 @@ namespace FTG.Studios.BISC.Asm
 		/// </summary>
 		/// <param name="tokens">Token stream.</param>
 		/// <returns>A single BISC instruction.</returns>
-		static Instruction ParseMInstruction(LinkedList<Token> tokens)
+		static MInstruction ParseMInstruction(LinkedList<Token> tokens)
 		{
-			Instruction inst = new Instruction();
 			Token opcode = tokens.Dequeue();
 			MatchFail(opcode, TokenType.Opcode);
 
-			inst.Opcode = (Opcode)opcode.Value.Value;
-			inst.Parameters = new Token[3];
-
-			inst.Parameters[0] = tokens.Dequeue();
-			MatchFail(inst.Parameters[0], TokenType.Register);
+			Token destination_register = tokens.Dequeue();
+			MatchFail(destination_register, TokenType.Register);
 
 			MatchFail(tokens.Dequeue(), TokenType.Seperator);
 
-			inst.Parameters[1] = tokens.Dequeue();
-			MatchFail(inst.Parameters[1], TokenType.Register);
+			Token source_register = tokens.Dequeue();
+			MatchFail(source_register, TokenType.Register);
 
 			MatchFail(tokens.Dequeue(), TokenType.OpenBracket);
 
-			inst.Parameters[2] = tokens.Dequeue();
-			if (!Match(inst.Parameters[2], TokenType.Immediate) && !Match(inst.Parameters[2], TokenType.Label)) Fail(inst.Parameters[2], TokenType.Immediate);
+			Token offset = tokens.Dequeue();
+			if (!Match(offset, TokenType.Immediate) && !Match(offset, TokenType.Label)) Fail(offset, TokenType.Immediate);
 
 			MatchFail(tokens.Dequeue(), TokenType.CloseBracket);
 
-			return inst;
+			return new MInstruction((Opcode)opcode.Value.Value, destination_register, source_register, offset);
 		}
 
 		/// <summary>
@@ -240,24 +225,20 @@ namespace FTG.Studios.BISC.Asm
 		/// </summary>
 		/// <param name="tokens">Token stream.</param>
 		/// <returns>A single BISC instruction.</returns>
-		static Instruction ParseDInstruction(LinkedList<Token> tokens)
+		static DInstruction ParseDInstruction(LinkedList<Token> tokens)
 		{
-			Instruction inst = new Instruction();
 			Token opcode = tokens.Dequeue();
 			MatchFail(opcode, TokenType.Opcode);
 
-			inst.Opcode = (Opcode)opcode.Value.Value;
-			inst.Parameters = new Token[2];
-
-			inst.Parameters[0] = tokens.Dequeue();
-			MatchFail(inst.Parameters[0], TokenType.Register);
+			Token destination_register = tokens.Dequeue();
+			MatchFail(destination_register, TokenType.Register);
 
 			MatchFail(tokens.Dequeue(), TokenType.Seperator);
 
-			inst.Parameters[1] = tokens.Dequeue();
-			MatchFail(inst.Parameters[1], TokenType.Register);
+			Token source_register = tokens.Dequeue();
+			MatchFail(source_register, TokenType.Register);
 
-			return inst;
+			return new DInstruction((Opcode)opcode.Value.Value, destination_register, source_register);
 		}
 
 		/// <summary>
@@ -265,29 +246,25 @@ namespace FTG.Studios.BISC.Asm
 		/// </summary>
 		/// <param name="tokens">Token stream.</param>
 		/// <returns>A single BISC instruction.</returns>
-		static Instruction ParseTInstruction(LinkedList<Token> tokens)
+		static TInstruction ParseTInstruction(LinkedList<Token> tokens)
 		{
-			Instruction inst = new Instruction();
 			Token opcode = tokens.Dequeue();
 			MatchFail(opcode, TokenType.Opcode);
 
-			inst.Opcode = (Opcode)opcode.Value.Value;
-			inst.Parameters = new Token[3];
-
-			inst.Parameters[0] = tokens.Dequeue();
-			MatchFail(inst.Parameters[0], TokenType.Register);
+			Token destination_register = tokens.Dequeue();
+			MatchFail(destination_register, TokenType.Register);
 
 			MatchFail(tokens.Dequeue(), TokenType.Seperator);
 
-			inst.Parameters[1] = tokens.Dequeue();
-			MatchFail(inst.Parameters[1], TokenType.Register);
+			Token source_register_a = tokens.Dequeue();
+			MatchFail(source_register_a, TokenType.Register);
 
 			MatchFail(tokens.Dequeue(), TokenType.Seperator);
 
-			inst.Parameters[2] = tokens.Dequeue();
-			MatchFail(inst.Parameters[2], TokenType.Register);
+			Token source_register_b = tokens.Dequeue();
+			MatchFail(source_register_b, TokenType.Register);
 
-			return inst;
+			return new TInstruction((Opcode)opcode.Value.Value, destination_register, source_register_a, source_register_b);
 		}
 
 		/// <summary>

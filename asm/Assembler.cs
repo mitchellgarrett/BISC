@@ -45,110 +45,15 @@ namespace FTG.Studios.BISC.Asm
 
 			program = Parser.Parse(tokens);
 
-			if (program.Count <= 0) return new byte[] { };
+			//if (program.Count <= 0) return new byte[] { };
 
 			// First-pass optimizations
 			//Optimizer.Optimize(program);
 
-			UInt32 address = 0;
-			for (int i = 0; i < program.Count; i++)
-			{
-				program[i].Address = address;
-				if (program[i] is Instruction) address += 4;
-			}
+			program.AssignAddresses();
+			program.ResolveUndefinedSymboles();
 
-			for (int a = 0; a < program.Count; a++)
-			{
-				Assembloid assembloid = program[a];
-
-				if (assembloid.HasUndefinedSymbol())
-				{
-					if (assembloid is Instruction)
-					{
-						Instruction instruction = assembloid as Instruction;
-						for (int i = 0; i < instruction.Parameters.Length; i++)
-						{
-							Token arg = instruction.Parameters[i];
-							if (arg.Type == TokenType.Label && !arg.Value.HasValue)
-							{
-								arg.Type = TokenType.Immediate;
-								Label label = program.GetLabel(arg.Mnemonic);
-
-								if (label == null)
-								{
-									throw new ArgumentException($"(Ln: {arg.LineNo}, Ch: {arg.CharNo}) Undefined symbol: '{arg.Mnemonic}'\n'{instruction}'");
-								}
-
-								arg.Value = label.Address;
-								instruction.Parameters[i] = arg;
-								/*if (!program.Labels.TryGetValue(arg.Mnemonic, out Instruction label))
-								{
-									foreach (var o in program.Labels)
-									{
-										Console.WriteLine(o);
-									}
-									throw new ArgumentException($"(Ln: {arg.LineNo}, Ch: {arg.CharNo}) Undefined symbol: '{arg.Mnemonic}'\n'{inst}'");
-								}
-								arg.Value = program.Labels[arg.Mnemonic].Address;
-								inst.Parameters[i] = arg;*/
-							}
-						}
-					}
-				}
-				Console.WriteLine(assembloid);
-			}
-
-			//byte[] machine_code = new byte[program.SizeInBytes];
-			List<byte> machine_code = new List<byte>();
-			for (int i = 0; i < program.Count; i++)
-			{
-				if (program[i] is Instruction)
-				{
-					//machine_code[machine_code_index++] = AssembleInstruction(program[i] as Instruction);
-					machine_code.AddRange(Specification.DisassembleInteger32(AssembleInstruction(program[i] as Instruction)));
-				}
-
-				if (program[i] is Binary)
-				{
-					//machine_code[machine_code_index++] = AssembleInstruction(program[i] as Instruction);
-					machine_code.AddRange((program[i] as Binary).Data);
-				}
-			}
-
-			if (machine_code.Count != program.SizeInBytes) Console.WriteLine($"Machine code length: {machine_code.Count}, expected length: {program.SizeInBytes}");
-
-			return machine_code.ToArray();
-		}
-
-		static UInt32 AssembleInstruction(Instruction inst)
-		{
-			UInt32 machine_code = (UInt32)inst.Opcode;
-			for (int i = 0; i < inst.Parameters.Length; i++)
-			{
-				Token arg = inst.Parameters[i];
-				switch (arg.Type)
-				{
-					case TokenType.Register:
-						machine_code |= arg.Value.Value << (i + 1) * 8;
-						break;
-					case TokenType.Label:
-					/*if (!arg.Value.HasValue) {
-						arg.Value = program.Labels[arg.Mnemonic].Address;
-					}
-					// This fall-through is intentional - labels are treated as immediates
-					goto case TokenType.Immediate;*/
-					case TokenType.Immediate:
-						// TODO: Make this case not an absolute hack; this code sucks mega nuts
-						// If 3 parameters, immediate has to be 8 bits, otherwise 16 bits
-						if (inst.Parameters.Length == 3) machine_code |= (arg.Value.Value & 0xFF) << (i + 1) * 8;
-						// If opcode is LUI, load top 16 bits
-						else if (inst.Opcode == Opcode.LUI) machine_code |= ((arg.Value.Value >> 16) & 0xFFFF) << (i + 1) * 8;
-						else machine_code |= (arg.Value.Value & 0xFFFF) << (i + 1) * 8;
-						break;
-				}
-
-			}
-			return machine_code;
+			return program.Assemble();
 		}
 
 		/// <summary>

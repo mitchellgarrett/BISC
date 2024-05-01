@@ -9,11 +9,20 @@ namespace FTG.Studios.BISC.Asm
 		public Binary(byte[] data)
 		{
 			Data = data;
+			Size = Data.Length;
+			HasUndefinedSymbol = false;
 		}
 
-		public override bool HasUndefinedSymbol()
+		public override byte[] Assemble()
 		{
-			return false;
+			return Data;
+		}
+
+		public override string ToString()
+		{
+			string output = "Binary: ";
+			foreach (var b in Data) output += $"{b:x2} ";
+			return output;
 		}
 	}
 }

@@ -9,11 +9,12 @@ namespace FTG.Studios.BISC.Asm
 		public Directive(string identifer)
 		{
 			Identifier = identifer;
+			Size = 0;
+			HasUndefinedSymbol = false;
 		}
-
-		public override bool HasUndefinedSymbol()
+		public override byte[] Assemble()
 		{
-			return false;
+			return new byte[] { };
 		}
 	}
 }

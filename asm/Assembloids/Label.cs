@@ -9,11 +9,18 @@ namespace FTG.Studios.BISC.Asm
 		public Label(string identifer)
 		{
 			Identifier = identifer;
+			Size = 0;
+			HasUndefinedSymbol = false;
 		}
 
-		public override bool HasUndefinedSymbol()
+		public override byte[] Assemble()
 		{
-			return false;
+			return new byte[] { };
+		}
+
+		public override string ToString()
+		{
+			return $"{Identifier}: 0x{Address:x8}";
 		}
 	}
 }
