@@ -12,12 +12,12 @@ namespace FTG.Studios.BISC.Asm
 		/// </summary>
 		/// <param name="tokens">Tokens to parse.</param>
 		/// <returns>A BISC program.</returns>
-		public static Program Parse(List<Token> tokens)
+		public static AssemblerResult Parse(List<Token> tokens)
 		{
 			LinkedList<Token> stream = new LinkedList<Token>(tokens);
 			List<string> labels = new List<string>();
 
-			Program program = new Program();
+			AssemblerResult program = new AssemblerResult();
 
 			while (stream.Count > 0)
 			{

@@ -11,14 +11,14 @@ namespace FTG.Studios.BISC.Asm
 	{
 
 		/// <summary>
-		/// Assembles BISC source code into an intermediate program represnetation.
+		/// Assembles BISC source code into an intermediate program representation.
 		/// </summary>
 		/// <param name="source">Source code.</param>
 		/// <returns>An executable program.</returns>
-		public static Program Assemble(string source)
+		public static AssemblerResult Assemble(string source)
 		{
 			List<Token> tokens = Lexer.Tokenize(source);
-			Program program = Parser.Parse(tokens);
+			AssemblerResult program = Parser.Parse(tokens);
 
 			// First-pass optimizations
 			//Optimizer.Optimize(program);

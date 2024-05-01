@@ -4,7 +4,7 @@ namespace FTG.Studios.BISC.Asm
 	public static class Optimizer
 	{
 
-		public static void Optimize(Program program)
+		public static void Optimize(AssemblerResult program)
 		{
 			for (int i = 0; i < program.Assembloids.Count; i++)
 			{

@@ -4,14 +4,14 @@ using System.Collections.Generic;
 namespace FTG.Studios.BISC.Asm
 {
 
-	public class Program
+	public class AssemblerResult
 	{
 
 		public readonly List<Assembloid> Assembloids;
 
 		public int SizeInBytes { get; private set; }
 
-		public Program()
+		public AssemblerResult()
 		{
 			Assembloids = new List<Assembloid>();
 		}
