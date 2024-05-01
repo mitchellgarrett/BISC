@@ -34,35 +34,23 @@ namespace FTG.Studios.BISC.Asm
 
 					case TokenType.Opcode:
 						Instruction instruction = ParseInstruction(stream);
-
-						Console.WriteLine(instruction);
 						program.Add(instruction);
-						//program.Instructions.Add(instruction);
-
-						// FIXME: This needs to work for the case wehre two labels are stacked on top of each other
-						/*if (labels.Count > 0)
-						{
-							foreach (string l in labels)
-							{
-								program.Labels[l] = instruction;
-								//Console.WriteLine("\n\n\n" + label + "\n\n\n");
-							}
-							labels.Clear();
-						}*/
 						break;
+
 					case TokenType.PseudoOp:
 						ParsePseudoInstruction(stream);
 						break;
+
 					case TokenType.Label:
 						Label label = ParseLabel(stream);
 						program.Add(label);
-						//if (!string.IsNullOrEmpty(label)) labels.Add(label);
-						//Console.WriteLine("\n\n\n" + label + "\n\n\n");
 						break;
+
 					case TokenType.Comment:
 					case TokenType.LineSeperator:
 						stream.Dequeue();
 						break;
+
 					default:
 						Fail(stream.First.Value, TokenType.Opcode);
 						break;
@@ -400,16 +388,12 @@ namespace FTG.Studios.BISC.Asm
 
 		static void Fail(Token token)
 		{
-			//Console.Error.WriteLine($"Invalid token: {token}");
-			//Environment.Exit(1);
 			throw new ArgumentException($"Invalid token: {token}");
 
 		}
 
 		static void Fail(Token token, TokenType expected)
 		{
-			//Console.Error.WriteLine($"Invalid token: {token} (expected {expected})");
-			//Environment.Exit(1);
 			throw new ArgumentException($"Invalid token: {token} (expected {expected})");
 		}
 

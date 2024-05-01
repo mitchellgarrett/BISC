@@ -10,8 +10,6 @@ namespace FTG.Studios.BISC.Asm
 
 		readonly List<Assembloid> assembloids;
 
-		readonly Dictionary<string, object> symbolTable;
-
 		public int SizeInBytes { get; private set; }
 
 		public Program()
@@ -104,6 +102,16 @@ namespace FTG.Studios.BISC.Asm
 			if (machine_code.Count != SizeInBytes) throw new ArgumentException($"Machine code length: {machine_code.Count}, expected length: {SizeInBytes}");
 
 			return machine_code.ToArray();
+		}
+
+		public override string ToString()
+		{
+			string output = string.Empty;
+			foreach (Assembloid assembloid in assembloids)
+			{
+				output += $"{assembloid}\n";
+			}
+			return output;
 		}
 	}
 }
