@@ -35,20 +35,20 @@ namespace FTG.Studios.BISC.Asm
 		public const string data_string = ".STRING";
 		public const string data_zero = ".ZERO";
 
-		public static Opcode? GetOpcode(string Mnemonic)
+		public static Opcode? GetOpcode(string mnemonic)
 		{
 			for (Opcode opcode = 0; (int)opcode < Enum.GetValues(typeof(Opcode)).Length; opcode++)
 			{
-				if (Mnemonic == opcode.ToString()) return opcode;
+				if (mnemonic == opcode.ToString()) return opcode;
 			}
 			return null;
 		}
 
-		public static Register? GetRegister(string Mnemonic)
+		public static Register? GetRegister(string mnemonic)
 		{
 			for (Register reg = 0; (int)reg < Enum.GetValues(typeof(Register)).Length; reg++)
 			{
-				if (Mnemonic == reg.ToString()) return reg;
+				if (mnemonic == reg.ToString()) return reg;
 			}
 			return null;
 		}
