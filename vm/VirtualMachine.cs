@@ -175,7 +175,7 @@ namespace FTG.Studios.BISC.VM
 		public void ExecuteFrom(UInt32 address)
 		{
 			pc = address;
-			while (ExecuteAt(pc)) ;
+			while (ExecuteNext()) ;
 		}
 
 		/// <summary>
@@ -236,6 +236,8 @@ namespace FTG.Studios.BISC.VM
 		bool SYS(byte opcode, byte arg0, byte arg1, byte arg2)
 		{
 			if (opcode != ((byte)Opcode.SYS) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+
+			// TODO: Handle syscall
 
 			pc += 4;
 			return true;

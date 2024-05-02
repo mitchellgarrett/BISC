@@ -44,8 +44,7 @@ System
 ------
 hlt
 nop
-sys  arg0 (reg)
-sys  arg0 (imm)*
+sys
 call arg0 (reg)
 call arg0 (imm)*
 ret

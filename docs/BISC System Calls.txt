@@ -1,53 +1,67 @@
 ﻿BISC System Calls
 -----------------
-0 - clear terminal
+clear terminal
+  - r0 = 0x00
 
-1 - set video mode
-  - r0 = 0 (text mode)
-  - r0 = 1 (graphics mode)
+set video mode
+  - r0 = 0x01
+  - r1 = 0 (text mode)
+  - r1 = 1 (graphics mode)
 
-2 - set cursor size
-  - r0 = 0 (cursor small)
-  - r0 = 1 (cursor medium)
-  - r0 = 2 (cursor large)
+set cursor size
+  - r0 = 0x02
+  - r1 = 0 (cursor small)
+  - r1 = 1 (cursor medium)
+  - r1 = 2 (cursor large)
 
-3 - set cursor blink
-  - r0 = 0 (cursor off)
-  - r0 = 1 (cursor on)
-  - r0 = 2 (cursor blink)
+set cursor blink
+  - r0 = 0x03
+  - r1 = 0 (cursor off)
+  - r1 = 1 (cursor on)
+  - r1 = 2 (cursor blink)
 
-4 - set cursor position
-  - r0 = row
-  - r1 = column
+set cursor position
+  - r0 = 0x04
+  - r1 = row
+  - r2 = column
 
-5 - set background color
-  - r0 = rgb color
+set background color
+  - r0 = 0x05
+  - r1 = rgb color
 
-6 - set foreground color
-  - r0 = rgb color
+set foreground color
+  - r0 = 0x06
+  - r1 = rgb color
 
-7 - write character
-  - r0 = character
+write character
+  - r0 = 0x07
+  - r1 = character
 
-8 - write string
-  - r0 = string address
-  - r1 = string length
+write string
+  - r0 = 0x08
+  - r1 = string address
+  - r2 = string length
 
-9 - write pixel
-  - r0 = y
-  - r1 = x
-  - r2 = rgb color
+write pixel
+  - r0 = 0x09
+  - r1 = y
+  - r2 = x
+  - r3 = rgb color
 
-A - read character
- - r0 - character
- - r1 - shift, control, alt
+read character
+  - r0 = 0x0A
+  - r1 >= character
+  - r2 <= shift, control, alt
 
-B - read mouse position
-  - r0 - x
-  - r1 - y
+read mouse position
+  - r0 = 0x0B
+  - r1 <= x
+  - r2 <= y
 
-C - read mouse button press
-  - r0 - mouse button 0, 1, 2 pressed
+read mouse button press
+  - r0 = 0x0C
+  - r1 <= mouse button 0, 1, 2 pressed
 
-D - read mouse buttom release
-  - r0 - mouse button 0, 1, 2 released
+read mouse buttom release
+  - r0 = 0x0D
+  - r1 <= mouse button 0, 1, 2 released
