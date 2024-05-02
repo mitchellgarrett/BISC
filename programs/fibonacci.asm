@@ -1,7 +1,8 @@
 ; calculates nth Fibonacci number
 ; returns Fibonacci number in rv
 
-li r0, 30       ; get nth fibo number
+ldi sp, 0x0FFF ; initialize stack
+ldi r0, 30     ; get nth fibo number
 call fibonacci ; call fibonacci function
 hlt            ; exit program
 

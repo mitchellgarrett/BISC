@@ -111,14 +111,18 @@ hlt
 
 ; write char
 write_char:
-	muli t0, r1, 80
-	add t0, t0, r0
-	addi t0, t0, 0x4010
-	stb r2, t0[0]
+	push r7
+	muli r7, r1, 80
+	add r7, r7, r0
+	addi r7, r7, 0x4010
+	stb r2, r7[0]
+	pop r7
 	ret
 
 ; read char
 read_char:
-	ldi t0, 0x4000
-	ldb rv, t0[12]
+	push r7
+	ldi r7, 0x4000
+	ldb rv, r7[12]
+	pop r7
 	ret

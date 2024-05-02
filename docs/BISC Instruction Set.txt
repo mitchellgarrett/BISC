@@ -12,10 +12,8 @@ fp - frame pointer
 ra - return address
 rv - return value
 ri - temporary immediate register
-r0-r7 - general-purpose registers
-t0-t7 - temporary registers
-f0-f7 - general-purpose floating-point registers
-ft0-ft7 - temporary floating-point registers
+r0-r7 - general purpose registers
+f0-f7 - general purpose floating point registers
 
 ------------------------
 Control Status Registers [WIP]

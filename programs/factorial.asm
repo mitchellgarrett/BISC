@@ -2,6 +2,7 @@
 ; the purpose of this program
 ; is to display recursion
 
+ldi sp, 0x0FFF ; initialize stack
 ldi r0, 5 ; factorial to calculate
 call factorial
 hlt

@@ -13,8 +13,9 @@ NOP - No Operation (N)
   - Skips to next instruction by incrementing the Program Counter (PC) register by 4.
   - pc += 4
 
-SYS arg0 (reg) - System Call
-  - Executes the system call indexed by the value of arg0.
+SYS - System Call (N)
+  - Executes the system call indexed by the value of r0.
+  - Registers r1-r7 may be used as arguments or to store results.
 
 CALL arg0 (reg) - Call Function
   - The Return Address (RA) register is set to the current PC value.

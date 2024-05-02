@@ -12,9 +12,7 @@ namespace FTG.Studios.BISC
 		public static readonly string[] REGISTER_NAMES = {
 			"pc", "sp", "gp", "fp", "ra", "rv", "ti", "ta",
 			"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-			"t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7",
 			//"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
-			//"ft0", "ft1", "ft2", "ft3", "ft4", "ft5", "ft6", "ft7",
 		};
 
 		public static int NUM_REGISTERS { get { return REGISTER_NAMES.Length; } }
@@ -81,7 +79,7 @@ namespace FTG.Studios.BISC
 		public static readonly InstructionFormat[] instruction_formats = {
 			InstructionFormat.N, // NOP
 			InstructionFormat.N, // HLT
-			InstructionFormat.R, // SYS
+			InstructionFormat.N, // SYS
 			InstructionFormat.R, // CALL
 			InstructionFormat.N, // RET
 
