@@ -1,2 +1,2 @@
-ldi r0, 5
+ldi r0, '\n' ;comment
 hlt

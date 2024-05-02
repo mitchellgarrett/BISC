@@ -23,7 +23,6 @@ namespace FTG.Studios.BISC.Asm
 
 			Token token;
 			string current_word = string.Empty;
-			bool parse_comment = false;
 			for (int i = 0; i < source.Length; i++)
 			{
 				char c = source[i];
@@ -37,38 +36,56 @@ namespace FTG.Studios.BISC.Asm
 					continue;
 				}
 
-				// Continue parsing comment until end of line
-				if (parse_comment && c != Syntax.line_seperator)
+				// Check for comment and skip rest of line
+				if (c == Syntax.comment)
 				{
-					current_word += c;
+					if (!string.IsNullOrEmpty(current_word)) tokens.Add(BuildToken(current_word));
+
+					current_word = c.ToString();
+					while ((c = source[++i]) != Syntax.line_seperator)
+					{
+						current_word += c;
+						charno++;
+					}
+				}
+
+				// Check for character literal
+				if (c == Syntax.single_quote)
+				{
+					if (!string.IsNullOrEmpty(current_word)) tokens.Add(BuildToken(current_word));
+
+					current_word = c.ToString();
+					current_word += source[++i];
+					if (source[i] == '\\')
+					{
+						current_word += source[++i];
+						charno++;
+					}
+					current_word += source[++i];
+					charno += 2;
+
+					// We have an issue
+					//if (source[i] != Syntax.single_quote)
+
 					continue;
 				}
 
+				// Check for string literal
+
 				if (c == Syntax.line_seperator)
 				{
-					if (parse_comment) parse_comment = false;
-					if (!string.IsNullOrEmpty(current_word))
-						tokens.Add(BuildToken(current_word));
+					if (!string.IsNullOrEmpty(current_word)) tokens.Add(BuildToken(current_word));
+
 					tokens.Add(new Token(TokenType.LineSeperator, lineno, charno));
+
 					current_word = string.Empty;
 					lineno++;
 					charno = 0;
 					continue;
 				}
 
-				if (c == Syntax.comment)
-				{
-					parse_comment = true;
-					current_word += c;
-					continue;
-				}
-
 				if (char.IsWhiteSpace(c))
 				{
-					// TODO: this doesn't work, find another way
-					// Check if space is inside single quotes
-					if (i > 0 && i < source.Length - 1 && c == ' ' && source[i - 1] == Syntax.single_quote && source[i + 1] == Syntax.single_quote) continue;
-
 					if (!string.IsNullOrEmpty(current_word))
 					{
 						tokens.Add(BuildToken(current_word));
