@@ -85,8 +85,8 @@ namespace FTG.Studios.BISC.VM
 				if (relative_address >= memory.Length) data[i] = 0;
 				else
 				{
-					int row = (int)((relative_address) / Width);
-					int col = (int)((relative_address) % Width);
+					int row = (int)(relative_address / Width);
+					int col = (int)(relative_address % Width);
 					data[i] = memory[row, col];
 				}
 			}
@@ -127,8 +127,8 @@ namespace FTG.Studios.BISC.VM
 				UInt32 relative_address = address + (UInt32)i - CharacterDataAddress;
 				if (relative_address < memory.Length)
 				{
-					int row = (int)((relative_address) / Width);
-					int col = (int)((relative_address) % Width);
+					int row = (int)(relative_address / Width);
+					int col = (int)(relative_address % Width);
 					memory[row, col] = data[i];
 					Refresh(row, col);
 				}

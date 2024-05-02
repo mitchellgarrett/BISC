@@ -19,6 +19,8 @@ namespace FTG.Studios.BISC.Asm
 			AssemblerResult result = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
 			BEEF.ObjectFile beef = ToBEEF(result);
 			BEEF.ObjectFile.Serialize(beef, file_name + ".exe");
+
+			Console.WriteLine(result);
 			Console.WriteLine(beef);
 		}
 
@@ -29,7 +31,7 @@ namespace FTG.Studios.BISC.Asm
 
 		static BEEF.ObjectFile ToBEEF(AssemblerResult program)
 		{
-			byte[] machine_code = program.Assemble();
+
 
 			BEEF.ObjectFile obj = new BEEF.ObjectFile();
 			obj.FileHeader = new BEEF.FileHeader()
@@ -49,9 +51,12 @@ namespace FTG.Studios.BISC.Asm
 				Flags = BEEF.SectionFlag.Readable | BEEF.SectionFlag.Writable | BEEF.SectionFlag.Code | BEEF.SectionFlag.Executable,
 				Offset = 14 + 32,
 				Address = 0,
-				Size = (UInt32)machine_code.Length,
+				Size = 0,
 				Name = ".text"
 			};
+
+			byte[] machine_code = program.Assemble();
+			obj.SectionHeaders[0].Size = (UInt32)machine_code.Length;
 
 			obj.SectionData = new byte[1][];
 			obj.SectionData[0] = machine_code;

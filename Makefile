@@ -6,7 +6,7 @@ BUILD_DIR = build
 
 ASM_DIR = asm
 ASM_EXE = bisc-asm.exe
-ASM_SRC = $(wildcard $(ASM_DIR)/*.cs) $(wildcard $(ASM_DIR)/Assembloids/*.cs) $(CMN_SRC)
+ASM_SRC = $(wildcard $(ASM_DIR)/*.cs) $(wildcard $(ASM_DIR)/AssemblerData/*.cs) $(CMN_SRC)
 
 VM_DIR = vm
 VM_EXE = bisc-vm.exe

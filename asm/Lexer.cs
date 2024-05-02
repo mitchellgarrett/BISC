@@ -29,12 +29,15 @@ namespace FTG.Studios.BISC.Asm
 				char c = source[i];
 				charno++;
 
+
+				// Skip carriage returns
 				if (c == Syntax.carriage_return)
 				{
 					charno--;
 					continue;
 				}
 
+				// Continue parsing comment until end of line
 				if (parse_comment && c != Syntax.line_seperator)
 				{
 					current_word += c;
@@ -62,6 +65,10 @@ namespace FTG.Studios.BISC.Asm
 
 				if (char.IsWhiteSpace(c))
 				{
+					// TODO: this doesn't work, find another way
+					// Check if space is inside single quotes
+					if (i > 0 && i < source.Length - 1 && c == ' ' && source[i - 1] == Syntax.single_quote && source[i + 1] == Syntax.single_quote) continue;
+
 					if (!string.IsNullOrEmpty(current_word))
 					{
 						tokens.Add(BuildToken(current_word));

@@ -148,13 +148,13 @@ namespace FTG.Studios.BISC.VM
 		static void PrintStack()
 		{
 			Console.SetCursorPosition(32, 2);
-			for (int y = 0, i = 0; y < VirtualMachine.STACK_SIZE / 16; y++)
+			for (int y = 0, i = 0; y < 256 / 16; y++)
 			{
 				Console.SetCursorPosition(26, 2 + y);
 				Console.Write("0x{0:x2}:", y * 16);
 				for (int x = 0; x < 4; x++, i += 4)
 				{
-					UInt32 value = vm.GetMemory32((UInt32)(VirtualMachine.STACK_START + i));
+					UInt32 value = vm.GetMemory32((UInt32)i);
 					Console.SetCursorPosition(32 + x * 9, 2 + y);
 					Console.Write("{0:x8}", value);
 				}

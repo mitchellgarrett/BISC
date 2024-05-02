@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace FTG.Studios.BISC.Asm
 {
@@ -62,6 +64,13 @@ namespace FTG.Studios.BISC.Asm
 		static Instruction ParseDirective(LinkedList<Token> tokens)
 		{
 			Token directive = tokens.Dequeue();
+			MatchFail(directive, TokenType.Directive);
+
+			switch (directive.Mnemonic)
+			{
+
+			}
+
 			return null;
 		}
 
@@ -97,8 +106,77 @@ namespace FTG.Studios.BISC.Asm
 					int number_of_zero_bytes = (int)value.Value;
 					data = new byte[number_of_zero_bytes];
 					return new Binary(data);
+
+				case Syntax.data_string:
+
+					MatchFail(value, TokenType.DoubleQuote);
+
+					// TODO: Fix to work for all strings
+					value = tokens.Dequeue();
+					//MatchFail(value, TokenType.Invalid);
+
+					data = ParseString(value.Mnemonic);
+
+					value = tokens.Dequeue();
+					MatchFail(value, TokenType.DoubleQuote);
+
+					return new Binary(data);
 			}
 			return null;
+		}
+
+		static byte[] ParseString(string value)
+		{
+			List<byte> bytes = new List<byte>(value.Length);
+
+			for (int i = 0; i < value.Length; i++)
+			{
+				if (value[i] != '\\')
+				{
+					bytes.Add((byte)value[i]);
+					continue;
+				}
+
+				if (i >= value.Length - 1) throw new ArgumentException($"Invalid string \"{value}\"");
+
+				switch (value[i + 1])
+				{
+					case '0':
+						bytes.Add((byte)'\0');
+						break;
+
+					case 'b':
+						bytes.Add((byte)'\b');
+						break;
+
+					case 't':
+						bytes.Add((byte)'\t');
+						break;
+
+					case 'n':
+						bytes.Add((byte)'\n');
+						break;
+
+					case 'r':
+						bytes.Add((byte)'\r');
+						break;
+
+					case '\\':
+						bytes.Add((byte)'\\');
+						break;
+
+					case '"':
+						bytes.Add((byte)'"');
+						break;
+
+					default: throw new ArgumentException($"Invalid string \"{value}\"");
+				}
+
+				// Increment index to skip rest of escape sequence
+				i++;
+			}
+
+			return bytes.ToArray();
 		}
 
 		/// <summary>

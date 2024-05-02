@@ -24,10 +24,6 @@ namespace FTG.Studios.BISC.VM
 		UInt32 ti { get => registers[(int)Register.TI]; set { registers[(int)Register.TI] = value; } }
 		UInt32 ta { get => registers[(int)Register.TA]; set { registers[(int)Register.TA] = value; } }
 
-		public const UInt32 STACK_SIZE = 256;
-		public const UInt32 STACK_END = STACK_SIZE;
-		public const UInt32 STACK_START = STACK_END - STACK_SIZE;
-
 		readonly Memory memory;
 
 		public bool IsRunning { get; private set; }
@@ -144,7 +140,6 @@ namespace FTG.Studios.BISC.VM
 			memory.Reset();
 
 			pc = 0;
-			sp = STACK_END;
 			IsRunning = true;
 		}
 
