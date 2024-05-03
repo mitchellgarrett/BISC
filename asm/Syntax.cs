@@ -27,6 +27,7 @@ namespace FTG.Studios.BISC.Asm
 		public const string macro_literal = @"(%hi|%lo)\({0}\)";
 
 		public const char directive_prefix = '%';
+		public const char macro_expansion_prefix = '$';
 		public const char data_prefix = '.';
 
 		public const string data_byte = ".BYTE";

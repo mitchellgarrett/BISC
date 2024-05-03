@@ -158,7 +158,6 @@ namespace FTG.Studios.BISC.Asm
 				case Syntax.close_bracket: return new Token(TokenType.CloseBracket, lineno, charno);
 				case Syntax.label_delimeter: return new Token(TokenType.LabelDelimeter, lineno, charno);
 				case Syntax.double_quote: return new Token(TokenType.DoubleQuote, lineno, charno);
-				case Syntax.comment: return new Token(TokenType.Comment, lineno, charno);
 			}
 
 			return new Token(TokenType.Invalid, lexeme.ToString(), null, lineno, charno);
@@ -203,11 +202,6 @@ namespace FTG.Studios.BISC.Asm
 			)
 			{
 				return new Token(TokenType.Immediate, lexeme, Assembler.ParseImmediate(lexeme), lineno, charno);
-			}
-
-			if (Regex.IsMatch(lexeme, Syntax.string_literal))
-			{
-				return new Token(TokenType.String, lexeme, null, lineno, charno);
 			}
 
 			if (Regex.IsMatch(lexeme, Syntax.identifer))
