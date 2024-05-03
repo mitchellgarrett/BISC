@@ -40,4 +40,10 @@ vm: $(VM_EXE) $(ASM_EXE)
 	@mono $(BUILD_DIR)/$(VM_EXE) $(FILE)
 
 clean:
-	@rm -r $(BUILD_DIR)
+	@rm -rf $(BUILD_DIR)
+	@rm -rf $(ASM_DIR)/obj
+	@rm -rf $(ASM_DIR)/bin
+	@rm -rf $(VM_DIR)/obj
+	@rm -rf $(VM_DIR)/bin
+	@rm -f programs/*.exe
+	@rm -f programs/*.bin

@@ -111,9 +111,8 @@ namespace FTG.Studios.BISC.Asm
 
 					MatchFail(value, TokenType.DoubleQuote);
 
-					// TODO: Fix to work for all strings
 					value = tokens.Dequeue();
-					//MatchFail(value, TokenType.Invalid);
+					MatchFail(value, TokenType.String);
 
 					data = ParseString(value.Mnemonic);
 

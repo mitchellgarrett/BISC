@@ -103,4 +103,4 @@ print_char:
 
 ;%section .data
 
-THIS_IS_A_STRING: .string "howdy\r\nworld\0"
+THIS_IS_A_STRING: .string "howdy world\0"

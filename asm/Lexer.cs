@@ -23,9 +23,9 @@ namespace FTG.Studios.BISC.Asm
 
 			Token token;
 			string current_word = string.Empty;
-			for (int i = 0; i < source.Length; i++)
+			for (int source_index = 0; source_index < source.Length; source_index++)
 			{
-				char c = source[i];
+				char c = source[source_index];
 				charno++;
 
 
@@ -42,11 +42,21 @@ namespace FTG.Studios.BISC.Asm
 					if (!string.IsNullOrEmpty(current_word)) tokens.Add(BuildToken(current_word));
 
 					current_word = c.ToString();
-					while ((c = source[++i]) != Syntax.line_seperator)
+					while ((c = source[++source_index]) != Syntax.line_seperator)
 					{
 						current_word += c;
 						charno++;
 					}
+
+					tokens.Add(new Token(TokenType.Comment, current_word, null, lineno, charno));
+
+					tokens.Add(new Token(TokenType.LineSeperator, lineno, charno));
+
+					current_word = string.Empty;
+					lineno++;
+					charno = 0;
+
+					continue;
 				}
 
 				// Check for character literal
@@ -55,13 +65,13 @@ namespace FTG.Studios.BISC.Asm
 					if (!string.IsNullOrEmpty(current_word)) tokens.Add(BuildToken(current_word));
 
 					current_word = c.ToString();
-					current_word += source[++i];
-					if (source[i] == '\\')
+					current_word += source[++source_index];
+					if (source[source_index] == '\\')
 					{
-						current_word += source[++i];
+						current_word += source[++source_index];
 						charno++;
 					}
-					current_word += source[++i];
+					current_word += source[++source_index];
 					charno += 2;
 
 					// We have an issue
@@ -71,7 +81,30 @@ namespace FTG.Studios.BISC.Asm
 				}
 
 				// Check for string literal
+				if (c == Syntax.double_quote)
+				{
+					if (!string.IsNullOrEmpty(current_word)) tokens.Add(BuildToken(current_word));
 
+					tokens.Add(new Token(TokenType.DoubleQuote, lineno, charno));
+
+					// Loop until closing double quote
+					// Skip escaped double quotes
+					current_word = string.Empty;
+					while (source[++source_index] != Syntax.double_quote || source[source_index - 1] == '\\')
+					{
+						// TODO: Check for line feed and throw error
+						current_word += source[source_index];
+						charno++;
+					}
+					tokens.Add(new Token(TokenType.String, current_word, null, lineno, charno));
+
+					tokens.Add(new Token(TokenType.DoubleQuote, lineno, charno));
+					current_word = string.Empty;
+
+					continue;
+				}
+
+				// Handle line feed
 				if (c == Syntax.line_seperator)
 				{
 					if (!string.IsNullOrEmpty(current_word)) tokens.Add(BuildToken(current_word));
@@ -84,6 +117,7 @@ namespace FTG.Studios.BISC.Asm
 					continue;
 				}
 
+				// Handle whitespace
 				if (char.IsWhiteSpace(c))
 				{
 					if (!string.IsNullOrEmpty(current_word))
@@ -171,14 +205,14 @@ namespace FTG.Studios.BISC.Asm
 				return new Token(TokenType.Immediate, lexeme, Assembler.ParseImmediate(lexeme), lineno, charno);
 			}
 
+			if (Regex.IsMatch(lexeme, Syntax.string_literal))
+			{
+				return new Token(TokenType.String, lexeme, null, lineno, charno);
+			}
+
 			if (Regex.IsMatch(lexeme, Syntax.identifer))
 			{
 				return new Token(TokenType.Label, lexeme, null, lineno, charno);
-			}
-
-			if (lexeme.Length > 0 && lexeme[0] == Syntax.comment)
-			{
-				return new Token(TokenType.Comment, lexeme, null, lineno, charno);
 			}
 
 			return new Token(TokenType.Invalid, lexeme, null, lineno, charno);
