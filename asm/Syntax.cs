@@ -22,13 +22,15 @@ namespace FTG.Studios.BISC.Asm
 		public const string binary_literal = @"^(0b|0B)[01]+$";
 		public const string decimal_literal = @"^((\d+(\.\d*)?)|(\.\d+))$";
 		public const string char_literal = @"^'([ -~]|\\0|\\b|\\t|\\n|\\r)'$";
-		public const string string_literal = @"^""[a-zA-Z0-9]+""$";
 
 		public const string macro_literal = @"(%hi|%lo)\({0}\)";
 
 		public const char directive_prefix = '%';
-		public const char macro_expansion_prefix = '$';
+		public const char macro_expansion_operator = '$';
 		public const char data_prefix = '.';
+
+		public const string directive_section = "SECTION";
+		public const string directive_define = "DEFINE";
 
 		public const string data_byte = ".BYTE";
 		public const string data_half = ".HALF";
@@ -56,7 +58,7 @@ namespace FTG.Studios.BISC.Asm
 
 		public static bool IsImmediate(this TokenType type)
 		{
-			return type == TokenType.Label || type == TokenType.Immediate;
+			return type == TokenType.Identifier || type == TokenType.Immediate;
 		}
 	}
 }

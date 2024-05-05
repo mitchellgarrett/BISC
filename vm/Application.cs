@@ -119,8 +119,10 @@ namespace FTG.Studios.BISC.VM
 			vm.SetRegister(Register.PC, entry_point);
 			for (int s = 0; s < program.FileHeader.SectionCount; s++)
 			{
-				BEEF.SectionHeader header = program.SectionHeaders[s];
-				UInt32 section_address = header.Address;
+				BEEF.SectionHeader sheader = program.SectionHeaders[s];
+				if (sheader.Type != BEEF.SectionType.Program) continue;
+
+				UInt32 section_address = sheader.Address;
 				for (UInt32 b = 0; b < program.SectionData[s].Length; b++)
 				{
 					byte value = program.SectionData[s][b];

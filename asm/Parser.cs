@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace FTG.Studios.BISC.Asm
 {
@@ -10,23 +8,28 @@ namespace FTG.Studios.BISC.Asm
 	{
 
 		/// <summary>
+		/// Name of current file being assembled; for debugging purposes.
+		/// </summary>
+		static string file_name;
+
+		/// <summary>
 		/// Parse a program from a list of tokens.
 		/// </summary>
 		/// <param name="tokens">Tokens to parse.</param>
 		/// <returns>A BISC program.</returns>
-		public static AssemblerResult Parse(List<Token> tokens)
+		public static AssemblerResult Parse(List<Token> tokens, string file_name)
 		{
+			Parser.file_name = file_name;
 			LinkedList<Token> stream = new LinkedList<Token>(tokens);
-			List<string> labels = new List<string>();
-
 			AssemblerResult program = new AssemblerResult();
 
 			while (stream.Count > 0)
 			{
 				switch (stream.Peek().Type)
 				{
-					case TokenType.Directive:
-						ParseDirective(stream);
+					case TokenType.DirectivePrefix:
+						Directive directive = ParseDirective(stream);
+						program.Add(directive);
 						break;
 
 					case TokenType.DataInitializer:
@@ -43,7 +46,7 @@ namespace FTG.Studios.BISC.Asm
 						ParsePseudoInstruction(stream);
 						break;
 
-					case TokenType.Label:
+					case TokenType.Identifier:
 						Label label = ParseLabel(stream);
 						program.Add(label);
 						break;
@@ -54,24 +57,49 @@ namespace FTG.Studios.BISC.Asm
 						break;
 
 					default:
-						Fail(stream.First.Value, TokenType.Opcode);
+						Fail(stream.First.Value, TokenType.Opcode, $"Invalid opcode '{stream.First.Value.Mnemonic}'");
 						break;
 				}
 			}
 			return program;
 		}
 
-		static Instruction ParseDirective(LinkedList<Token> tokens)
+		static Directive ParseDirective(LinkedList<Token> tokens)
 		{
-			Token directive = tokens.Dequeue();
-			MatchFail(directive, TokenType.Directive);
+			MatchFail(tokens.Dequeue(), TokenType.DirectivePrefix, $"Expected '{Syntax.directive_prefix}'");
 
-			switch (directive.Mnemonic)
+			Token operation = tokens.Dequeue();
+			MatchFail(operation, TokenType.Identifier, $"Expected directive keyword after '{Syntax.directive_prefix}'");
+
+			switch (operation.Mnemonic.ToUpper())
 			{
-
+				case Syntax.directive_section: return ParseSectionInitialization(tokens);
+				case Syntax.directive_define: return ParseMacroDefinition(tokens);
 			}
 
 			return null;
+		}
+
+		static Section ParseSectionInitialization(LinkedList<Token> tokens)
+		{
+			Token identifier = tokens.Dequeue();
+			// These are being lexed as data initializers rn
+			//MatchFail(identifier, TokenType.Identifier);
+
+			return new Section(identifier.Mnemonic.ToLower());
+		}
+
+		// FIXME: This sucks
+		static ConstantDefinition ParseMacroDefinition(LinkedList<Token> tokens)
+		{
+			Token identifier = tokens.Dequeue();
+			MatchFail(identifier, TokenType.Identifier, $"Expected valid identifier after '%define'");
+
+			// TODO: Make this more generic; replace with expression
+			Token value = tokens.Dequeue();
+			MatchFail(value, TokenType.Immediate, $"Expected immediate after constant definition");
+
+			return new ConstantDefinition(identifier.Mnemonic, value);
 		}
 
 		static Binary ParseDataInitializer(LinkedList<Token> tokens)
@@ -83,41 +111,49 @@ namespace FTG.Studios.BISC.Asm
 			switch (operation.Mnemonic)
 			{
 				case Syntax.data_byte:
-					MatchFail(value, TokenType.Immediate);
+					MatchFail(value, TokenType.Immediate, "Expected valid byte value after '.byte' initializer");
 					int data_byte = (int)value.Value;
 					data = new byte[1];
 					data[0] = (byte)data_byte;
 					return new Binary(data);
 
 				case Syntax.data_half:
-					MatchFail(value, TokenType.Immediate);
+					MatchFail(value, TokenType.Immediate, "Expected valid 16 bit value after '.half' initializer");
 					int data_half = (int)value.Value;
 					data = Specification.DisassembleInteger16((UInt16)data_half);
 					return new Binary(data);
 
 				case Syntax.data_word:
-					MatchFail(value, TokenType.Immediate);
+					MatchFail(value, TokenType.Immediate, "Expected valid 32 bit value after '.word' initializer");
 					int data_word = (int)value.Value;
 					data = Specification.DisassembleInteger32((UInt32)data_word);
 					return new Binary(data);
 
 				case Syntax.data_zero:
-					MatchFail(value, TokenType.Immediate);
+					MatchFail(value, TokenType.Immediate, "Expected valid immediate value after '.zero. initializer");
 					int number_of_zero_bytes = (int)value.Value;
 					data = new byte[number_of_zero_bytes];
 					return new Binary(data);
 
 				case Syntax.data_string:
 
-					MatchFail(value, TokenType.DoubleQuote);
+					MatchFail(value, TokenType.DoubleQuote, $"Expected '{Syntax.double_quote}' after '.string' initializer");
 
 					value = tokens.Dequeue();
-					MatchFail(value, TokenType.String);
+					MatchFail(value, TokenType.String, $"Invalid string \"{value.Mnemonic}\"");
 
-					data = ParseString(value.Mnemonic);
+					data = null;
+					try
+					{
+						data = ParseString(value.Mnemonic);
+					}
+					catch (ArgumentException)
+					{
+						Fail(value, TokenType.String, $"Invalid string \"{value.Mnemonic}\"");
+					}
 
 					value = tokens.Dequeue();
-					MatchFail(value, TokenType.DoubleQuote);
+					MatchFail(value, TokenType.DoubleQuote, $"String must end with '{Syntax.double_quote}'");
 
 					return new Binary(data);
 			}
@@ -136,7 +172,7 @@ namespace FTG.Studios.BISC.Asm
 					continue;
 				}
 
-				if (i >= value.Length - 1) throw new ArgumentException($"Invalid string \"{value}\"");
+				if (i >= value.Length - 1) throw new ArgumentException();
 
 				switch (value[i + 1])
 				{
@@ -168,7 +204,7 @@ namespace FTG.Studios.BISC.Asm
 						bytes.Add((byte)'"');
 						break;
 
-					default: throw new ArgumentException($"Invalid string \"{value}\"");
+					default: throw new ArgumentException();
 				}
 
 				// Increment index to skip rest of escape sequence
@@ -201,7 +237,7 @@ namespace FTG.Studios.BISC.Asm
 			if (tokens.Count > 0)
 			{
 				if (Match(tokens.Peek(), TokenType.Comment)) tokens.Dequeue();
-				if (tokens.Count > 0) MatchFail(tokens.Dequeue(), TokenType.LineSeperator);
+				if (tokens.Count > 0) MatchFail(tokens.Dequeue(), TokenType.LineSeperator, $"Expected newline after instruction '{inst.Opcode}'");
 			}
 
 			return inst;
@@ -215,7 +251,7 @@ namespace FTG.Studios.BISC.Asm
 		static NInstruction ParseNInstruction(LinkedList<Token> tokens)
 		{
 			Token opcode = tokens.Dequeue();
-			MatchFail(opcode, TokenType.Opcode);
+			MatchFail(opcode, TokenType.Opcode, $"Invalid opcode '{opcode.Mnemonic}'");
 
 			return new NInstruction((Opcode)opcode.Value.Value);
 		}
@@ -228,10 +264,10 @@ namespace FTG.Studios.BISC.Asm
 		static RInstruction ParseRInstruction(LinkedList<Token> tokens)
 		{
 			Token opcode = tokens.Dequeue();
-			MatchFail(opcode, TokenType.Opcode);
+			MatchFail(opcode, TokenType.Opcode, $"Invalid opcode '{opcode.Mnemonic}'");
 
 			Token register = tokens.Dequeue();
-			MatchFail(register, TokenType.Register);
+			MatchFail(register, TokenType.Register, $"Invalid register '{register.Mnemonic}' after opcode '{opcode.Mnemonic}'");
 
 			return new RInstruction((Opcode)opcode.Value.Value, register);
 		}
@@ -244,15 +280,15 @@ namespace FTG.Studios.BISC.Asm
 		static IInstruction ParseIInstruction(LinkedList<Token> tokens)
 		{
 			Token opcode = tokens.Dequeue();
-			MatchFail(opcode, TokenType.Opcode);
+			MatchFail(opcode, TokenType.Opcode, $"Invalid opcode '{opcode.Mnemonic}'");
 
 			Token register = tokens.Dequeue();
-			MatchFail(register, TokenType.Register);
+			MatchFail(register, TokenType.Register, $"Invalid register '{register.Mnemonic}' after opcode '{opcode.Mnemonic}'");
 
-			MatchFail(tokens.Dequeue(), TokenType.Seperator);
+			MatchFail(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after '{register.Mnemonic}'");
 
 			Token immediate = tokens.Dequeue();
-			if (!Match(immediate, TokenType.Immediate) && !Match(immediate, TokenType.Label)) Fail(immediate, TokenType.Immediate);
+			if (!Match(immediate, TokenType.Immediate) && !Match(immediate, TokenType.Identifier)) Fail(immediate, TokenType.Immediate, $"Expected immediate value after '{Syntax.seperator}'");
 
 			return new IInstruction((Opcode)opcode.Value.Value, register, immediate);
 		}
@@ -265,22 +301,22 @@ namespace FTG.Studios.BISC.Asm
 		static MInstruction ParseMInstruction(LinkedList<Token> tokens)
 		{
 			Token opcode = tokens.Dequeue();
-			MatchFail(opcode, TokenType.Opcode);
+			MatchFail(opcode, TokenType.Opcode, $"Invalid opcode '{opcode.Mnemonic}'");
 
 			Token destination_register = tokens.Dequeue();
-			MatchFail(destination_register, TokenType.Register);
+			MatchFail(destination_register, TokenType.Register, $"Invalid register '{destination_register.Mnemonic}' after opcode '{opcode.Mnemonic}'");
 
-			MatchFail(tokens.Dequeue(), TokenType.Seperator);
+			MatchFail(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after '{destination_register.Mnemonic}'");
 
 			Token source_register = tokens.Dequeue();
-			MatchFail(source_register, TokenType.Register);
+			MatchFail(source_register, TokenType.Register, $"Invalid register '{source_register.Mnemonic}' after '{Syntax.seperator}'");
 
-			MatchFail(tokens.Dequeue(), TokenType.OpenBracket);
+			MatchFail(tokens.Dequeue(), TokenType.OpenBracket, $"Expected '{Syntax.open_bracket}' after register {source_register.Mnemonic}");
 
 			Token offset = tokens.Dequeue();
-			if (!Match(offset, TokenType.Immediate) && !Match(offset, TokenType.Label)) Fail(offset, TokenType.Immediate);
+			if (!Match(offset, TokenType.Immediate) && !Match(offset, TokenType.Identifier)) Fail(offset, TokenType.Immediate, $"Invalid offset value '{offset.Mnemonic}' after '{Syntax.open_bracket}'");
 
-			MatchFail(tokens.Dequeue(), TokenType.CloseBracket);
+			MatchFail(tokens.Dequeue(), TokenType.CloseBracket, $"Expected '{Syntax.open_bracket}' after offset {offset.Mnemonic}");
 
 			return new MInstruction((Opcode)opcode.Value.Value, destination_register, source_register, offset);
 		}
@@ -293,15 +329,15 @@ namespace FTG.Studios.BISC.Asm
 		static DInstruction ParseDInstruction(LinkedList<Token> tokens)
 		{
 			Token opcode = tokens.Dequeue();
-			MatchFail(opcode, TokenType.Opcode);
+			MatchFail(opcode, TokenType.Opcode, $"Invalid opcode '{opcode.Mnemonic}'");
 
 			Token destination_register = tokens.Dequeue();
-			MatchFail(destination_register, TokenType.Register);
+			MatchFail(destination_register, TokenType.Register, $"Invalid register '{destination_register.Mnemonic}' after opcode '{opcode.Mnemonic}'");
 
-			MatchFail(tokens.Dequeue(), TokenType.Seperator);
+			MatchFail(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after '{destination_register.Mnemonic}'");
 
 			Token source_register = tokens.Dequeue();
-			MatchFail(source_register, TokenType.Register);
+			MatchFail(source_register, TokenType.Register, $"Invalid register '{source_register.Mnemonic}' after '{Syntax.seperator}'");
 
 			return new DInstruction((Opcode)opcode.Value.Value, destination_register, source_register);
 		}
@@ -314,20 +350,20 @@ namespace FTG.Studios.BISC.Asm
 		static TInstruction ParseTInstruction(LinkedList<Token> tokens)
 		{
 			Token opcode = tokens.Dequeue();
-			MatchFail(opcode, TokenType.Opcode);
+			MatchFail(opcode, TokenType.Opcode, $"Invalid opcode '{opcode.Mnemonic}'");
 
 			Token destination_register = tokens.Dequeue();
-			MatchFail(destination_register, TokenType.Register);
+			MatchFail(destination_register, TokenType.Register, $"Invalid register '{destination_register.Mnemonic}' after opcode '{opcode.Mnemonic}'");
 
-			MatchFail(tokens.Dequeue(), TokenType.Seperator);
+			MatchFail(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after '{destination_register.Mnemonic}'");
 
 			Token source_register_a = tokens.Dequeue();
-			MatchFail(source_register_a, TokenType.Register);
+			MatchFail(source_register_a, TokenType.Register, $"Invalid register '{source_register_a.Mnemonic}' after '{Syntax.seperator}'");
 
-			MatchFail(tokens.Dequeue(), TokenType.Seperator);
+			MatchFail(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after '{source_register_a.Mnemonic}'");
 
 			Token source_register_b = tokens.Dequeue();
-			MatchFail(source_register_b, TokenType.Register);
+			MatchFail(source_register_b, TokenType.Register, $"Invalid register '{source_register_a.Mnemonic}' after '{Syntax.seperator}'");
 
 			return new TInstruction((Opcode)opcode.Value.Value, destination_register, source_register_a, source_register_b);
 		}
@@ -339,7 +375,7 @@ namespace FTG.Studios.BISC.Asm
 		static void ParsePseudoInstruction(LinkedList<Token> tokens)
 		{
 			Token pseudo_op = tokens.Dequeue();
-			MatchFail(pseudo_op, TokenType.PseudoOp);
+			MatchFail(pseudo_op, TokenType.PseudoOp, $"Invalid opcode '{pseudo_op.Mnemonic}'");
 
 			List<Token> args = new List<Token>();
 			while (tokens.Count > 0)
@@ -374,12 +410,12 @@ namespace FTG.Studios.BISC.Asm
 								if (temp_stream.Count == 0 || !Match(temp_stream.Peek(), TokenType.Register)) valid = false;
 								else temp_args.Add(temp_stream.Dequeue());
 								if (temp_stream.Count == 0 || !Match(temp_stream.Dequeue(), TokenType.OpenBracket)) valid = false;
-								if (temp_stream.Count == 0 || (!Match(temp_stream.Peek(), TokenType.Immediate) && !Match(temp_stream.Peek(), TokenType.Label))) valid = false;
+								if (temp_stream.Count == 0 || (!Match(temp_stream.Peek(), TokenType.Immediate) && !Match(temp_stream.Peek(), TokenType.Identifier))) valid = false;
 								else temp_args.Add(temp_stream.Dequeue());
 								if (temp_stream.Count == 0 || !Match(temp_stream.Dequeue(), TokenType.CloseBracket)) valid = false;
 								break;
 							case ArgumentType.Immediate32:
-								if (temp_stream.Count == 0 || (!Match(temp_stream.Peek(), TokenType.Immediate) && !Match(temp_stream.Peek(), TokenType.Label))) valid = false;
+								if (temp_stream.Count == 0 || (!Match(temp_stream.Peek(), TokenType.Immediate) && !Match(temp_stream.Peek(), TokenType.Identifier))) valid = false;
 								else temp_args.Add(temp_stream.Dequeue());
 								break;
 						}
@@ -404,7 +440,7 @@ namespace FTG.Studios.BISC.Asm
 				}
 				else
 				{
-					Fail(pseudo_op, TokenType.Opcode);
+					Fail(pseudo_op, TokenType.Opcode, $"Invalid opcode '{pseudo_op.Mnemonic}'");
 				}
 				tokens.AddFirst(new Token(TokenType.LineSeperator, pseudo_op.LineNo, 0));
 				for (int v = args.Count - 1; v >= 0; v--)
@@ -448,8 +484,9 @@ namespace FTG.Studios.BISC.Asm
 		static Label ParseLabel(LinkedList<Token> tokens)
 		{
 			Token label = tokens.Dequeue();
-			MatchFail(label, TokenType.Label);
-			MatchFail(tokens.Dequeue(), TokenType.LabelDelimeter);
+			MatchFail(label, TokenType.Identifier, $"Invalid label identifier '{label.Mnemonic}'");
+
+			MatchFail(tokens.Dequeue(), TokenType.LabelDelimeter, $"Expected '{Syntax.label_delimeter}' after label definition '{label.Mnemonic}'");
 			return new Label(label.Mnemonic);
 		}
 
@@ -458,20 +495,14 @@ namespace FTG.Studios.BISC.Asm
 			return token.Type == type;
 		}
 
-		static void MatchFail(Token token, TokenType type)
+		static void MatchFail(Token token, TokenType type, string message)
 		{
-			if (!Match(token, type)) Fail(token, type);
+			if (!Match(token, type)) Fail(token, type, message);
 		}
 
-		static void Fail(Token token)
+		static void Fail(Token token, TokenType expected, string message)
 		{
-			throw new ArgumentException($"Invalid token: {token}");
-
-		}
-
-		static void Fail(Token token, TokenType expected)
-		{
-			throw new ArgumentException($"Invalid token: {token} (expected {expected})");
+			throw new AssemblerSyntaxErrorException($"\u001b[1m{file_name}:{token.LineNo}:{token.CharNo}: \u001b[31merror:\u001b[39m {message}\u001b[0m");
 		}
 
 		static Token Dequeue(this LinkedList<Token> tokens)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FTG.Studios.BISC.Asm
 {
@@ -7,35 +8,49 @@ namespace FTG.Studios.BISC.Asm
 	public class AssemblerResult
 	{
 
-		public readonly List<AssemblerData> Data;
+		public readonly List<SectionData> SectionData;
+
+		readonly Dictionary<string, BEEF.SectionFlag> default_section_flags = new Dictionary<string, BEEF.SectionFlag>() {
+			{".text", BEEF.SectionFlag.Readable | BEEF.SectionFlag.Executable },
+			{".data", BEEF.SectionFlag.Readable | BEEF.SectionFlag.Writable | BEEF.SectionFlag.InitData }
+		};
 
 		public int SizeInBytes { get; private set; }
 
 		public AssemblerResult()
 		{
-			Data = new List<AssemblerData>();
+			SectionData = new List<SectionData>();
+
+			// Initialize with .text section
+			SectionData.Add(new SectionData(".text"));
 		}
 
 		public void Add(AssemblerData data)
 		{
-			SizeInBytes += data.Size;
-			Data.Add(data);
-		}
+			if (data is Section)
+			{
+				Section section = data as Section;
+				if (section.Identifier == SectionData.Last().Identifier) return;
 
-		public void RemoveAt(int index)
-		{
-			SizeInBytes -= Data[index].Size;
-			Data.RemoveAt(index);
+				SectionData.Add(new SectionData(section.Identifier));
+				return;
+			}
+
+			SizeInBytes += data.Size;
+			SectionData.Last().Add(data);
 		}
 
 		Label GetLabel(string identifer)
 		{
-			foreach (AssemblerData data in Data)
+			foreach (var section in SectionData)
 			{
-				if (data is Label)
+				foreach (var data in section.Data)
 				{
-					Label label = data as Label;
-					if (label.Identifier == identifer) return label;
+					if (data is Label)
+					{
+						Label label = data as Label;
+						if (label.Identifier == identifer) return label;
+					}
 				}
 			}
 			return null;
@@ -44,77 +59,123 @@ namespace FTG.Studios.BISC.Asm
 		public void AssignAddresses()
 		{
 			UInt32 address = 0;
-			foreach (AssemblerData data in Data)
+			foreach (var section in SectionData)
 			{
-				data.Address = address;
-				address += (UInt32)data.Size;
+				foreach (var data in section.Data)
+				{
+					data.Address = address;
+					address += (UInt32)data.Size;
+				}
 			}
 		}
 
 		public void ResolveUndefinedSymboles()
 		{
-			foreach (AssemblerData data in Data)
+			foreach (var section in SectionData)
 			{
-				if (!data.HasUndefinedSymbol) continue;
-				if (!(data is Instruction)) continue;
-
-				if (data is IInstruction)
+				foreach (var data in section.Data)
 				{
-					IInstruction iinstruction = data as IInstruction;
+					if (!data.HasUndefinedSymbol) continue;
+					if (!(data is Instruction)) continue;
 
-					Token immediate = iinstruction.Immediate;
-					if (immediate.Type == TokenType.Label && !immediate.Value.HasValue)
+					if (data is IInstruction)
 					{
-						Label label = GetLabel(immediate.Mnemonic);
+						IInstruction iinstruction = data as IInstruction;
 
-						if (label == null) throw new ArgumentException($"(Ln: {immediate.LineNo}, Ch: {immediate.CharNo}) Undefined symbol: '{immediate.Mnemonic}'\n'{iinstruction}'");
+						Token immediate = iinstruction.Immediate;
+						if (immediate.Type == TokenType.Identifier && !immediate.Value.HasValue)
+						{
+							Label label = GetLabel(immediate.Mnemonic);
 
-						immediate.Value = label.Address;
-						immediate.Type = TokenType.Immediate;
+							if (label == null) throw new ArgumentException($"(Ln: {immediate.LineNo}, Ch: {immediate.CharNo}) Undefined symbol: '{immediate.Mnemonic}'\n'{iinstruction}'");
 
-						iinstruction.Immediate = immediate;
+							immediate.Value = label.Address;
+							immediate.Type = TokenType.Immediate;
+
+							iinstruction.Immediate = immediate;
+						}
 					}
-				}
 
-				if (data is MInstruction)
-				{
-					MInstruction minstruction = data as MInstruction;
-
-					Token offset = minstruction.Offset;
-					if (offset.Type == TokenType.Label && !offset.Value.HasValue)
+					if (data is MInstruction)
 					{
-						Label label = GetLabel(offset.Mnemonic);
+						MInstruction minstruction = data as MInstruction;
 
-						if (label == null) throw new ArgumentException($"(Ln: {offset.LineNo}, Ch: {offset.CharNo}) Undefined symbol: '{offset.Mnemonic}'\n'{minstruction}'");
+						Token offset = minstruction.Offset;
+						if (offset.Type == TokenType.Identifier && !offset.Value.HasValue)
+						{
+							Label label = GetLabel(offset.Mnemonic);
 
-						offset.Value = label.Address;
-						offset.Type = TokenType.Immediate;
+							if (label == null) throw new ArgumentException($"(Ln: {offset.LineNo}, Ch: {offset.CharNo}) Undefined symbol: '{offset.Mnemonic}'\n'{minstruction}'");
 
-						minstruction.Offset = offset;
+							offset.Value = label.Address;
+							offset.Type = TokenType.Immediate;
+
+							minstruction.Offset = offset;
+						}
 					}
 				}
 			}
 		}
 
-		public byte[] Assemble()
+		public BEEF.ObjectFile Assemble()
 		{
-			List<byte> machine_code = new List<byte>();
-			foreach (AssemblerData data in Data)
+			int section_count = SectionData.Count;
+
+			BEEF.ObjectFile obj = new BEEF.ObjectFile();
+			obj.FileHeader = new BEEF.FileHeader()
 			{
-				machine_code.AddRange(data.Assemble());
+				MagicNumber = BEEF.FileHeader.MAGIC_NUMBER,
+				Architecture = 0xb,
+				Endianness = BEEF.Endianness.Little,
+				EntryPoint = 0,
+				SectionTableOffset = 14,
+				SectionCount = (UInt16)section_count
+			};
+
+			obj.SectionHeaders = new BEEF.SectionHeader[section_count];
+			obj.SectionData = new byte[section_count][];
+
+			UInt32 section_offset = (UInt32)(14 + 32 * section_count);
+			UInt32 section_address = 0;
+			for (int section_index = 0; section_index < section_count; section_index++)
+			{
+				string section_name = SectionData[section_index].Identifier;
+				byte[] section_data = SectionData[section_index].Assemble();
+
+				BEEF.SectionFlag section_flags;
+				if (!default_section_flags.TryGetValue(section_name, out section_flags)) section_flags = BEEF.SectionFlag.None;
+
+				BEEF.SectionHeader sheader = new BEEF.SectionHeader()
+				{
+					Type = BEEF.SectionType.Program,
+					Flags = section_flags,
+					Offset = section_offset,
+					Address = section_address,
+					Size = (UInt32)section_data.Length,
+					Name = section_name
+				};
+
+				obj.SectionHeaders[section_index] = sheader;
+				obj.SectionData[section_index] = section_data;
+
+				section_offset += (UInt32)section_data.Length;
+				section_address += (UInt32)section_data.Length;
 			}
 
-			if (machine_code.Count != SizeInBytes) throw new ArgumentException($"Machine code length: {machine_code.Count}, expected length: {SizeInBytes}");
-
-			return machine_code.ToArray();
+			return obj;
 		}
 
 		public override string ToString()
 		{
 			string output = string.Empty;
-			foreach (AssemblerData data in Data)
+			foreach (var section in SectionData)
 			{
-				output += $"{data}\n";
+				output += $"{section}\n";
+				foreach (var data in section.Data)
+				{
+					output += $"{data}\n";
+				}
+				return output;
 			}
 			return output;
 		}

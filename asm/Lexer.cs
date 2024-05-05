@@ -157,7 +157,8 @@ namespace FTG.Studios.BISC.Asm
 				case Syntax.open_bracket: return new Token(TokenType.OpenBracket, lineno, charno);
 				case Syntax.close_bracket: return new Token(TokenType.CloseBracket, lineno, charno);
 				case Syntax.label_delimeter: return new Token(TokenType.LabelDelimeter, lineno, charno);
-				case Syntax.double_quote: return new Token(TokenType.DoubleQuote, lineno, charno);
+				case Syntax.directive_prefix: return new Token(TokenType.DirectivePrefix, lineno, charno);
+				case Syntax.macro_expansion_operator: return new Token(TokenType.MacroExpansionOperator, lineno, charno);
 			}
 
 			return new Token(TokenType.Invalid, lexeme.ToString(), null, lineno, charno);
@@ -167,10 +168,10 @@ namespace FTG.Studios.BISC.Asm
 		{
 			string lexeme_upper = lexeme.ToUpper();
 
-			if (lexeme_upper[0] == Syntax.directive_prefix)
+			/*if (lexeme_upper[0] == Syntax.directive_prefix)
 			{
 				return new Token(TokenType.Directive, lexeme_upper, null, lineno, charno);
-			}
+			}*/
 
 			if (lexeme_upper[0] == Syntax.data_prefix)
 			{
@@ -206,7 +207,7 @@ namespace FTG.Studios.BISC.Asm
 
 			if (Regex.IsMatch(lexeme, Syntax.identifer))
 			{
-				return new Token(TokenType.Label, lexeme, null, lineno, charno);
+				return new Token(TokenType.Identifier, lexeme, null, lineno, charno);
 			}
 
 			return new Token(TokenType.Invalid, lexeme, null, lineno, charno);

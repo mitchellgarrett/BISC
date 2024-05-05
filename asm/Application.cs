@@ -16,52 +16,16 @@ namespace FTG.Studios.BISC.Asm
 			}
 
 			string file_name = args[0];
-			AssemblerResult result = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
-			BEEF.ObjectFile beef = ToBEEF(result);
+			AssemblerResult result = Assembler.Assemble(file_name + ".asm", File.ReadAllText(file_name + ".asm"));
+			BEEF.ObjectFile beef = result.Assemble();
 			BEEF.ObjectFile.Serialize(beef, file_name + ".exe");
 
-			Console.WriteLine(result);
 			Console.WriteLine(beef);
 		}
 
 		static void PrintHelp()
 		{
 			Console.WriteLine("Usage: bisc-asm file");
-		}
-
-		static BEEF.ObjectFile ToBEEF(AssemblerResult program)
-		{
-
-
-			BEEF.ObjectFile obj = new BEEF.ObjectFile();
-			obj.FileHeader = new BEEF.FileHeader()
-			{
-				MagicNumber = BEEF.FileHeader.MAGIC_NUMBER,
-				Architecture = 0xb,
-				Endianness = BEEF.Endianness.Little,
-				EntryPoint = 0,
-				SectionTableOffset = 14,
-				SectionCount = 1
-			};
-
-			obj.SectionHeaders = new BEEF.SectionHeader[1];
-			obj.SectionHeaders[0] = new BEEF.SectionHeader()
-			{
-				Type = BEEF.SectionType.Program,
-				Flags = BEEF.SectionFlag.Readable | BEEF.SectionFlag.Writable | BEEF.SectionFlag.Code | BEEF.SectionFlag.Executable,
-				Offset = 14 + 32,
-				Address = 0,
-				Size = 0,
-				Name = ".text"
-			};
-
-			byte[] machine_code = program.Assemble();
-			obj.SectionHeaders[0].Size = (UInt32)machine_code.Length;
-
-			obj.SectionData = new byte[1][];
-			obj.SectionData[0] = machine_code;
-
-			return obj;
 		}
 	}
 }

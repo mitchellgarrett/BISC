@@ -34,7 +34,7 @@ Include a file's contents in the current file
 %include "file_name"
 
 Define a constant
-%define constant_name, value
+%define constant_name = value
 
 Define a macro
 %define macro_name arg0, ...

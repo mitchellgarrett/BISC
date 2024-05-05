@@ -4,15 +4,15 @@ namespace FTG.Studios.BISC.Asm
 	public static class Optimizer
 	{
 
-		public static void Optimize(AssemblerResult program)
+		/*public static void Optimize(AssemblerResult program)
 		{
-			for (int i = 0; i < program.Data.Count; i++)
+			for (int i = 0; i < program.SectionData.Count; i++)
 			{
-				if (!(program.Data[i] is IInstruction current_iinstruction)) continue;
+				if (!(program.SectionData[i] is IInstruction current_iinstruction)) continue;
 
-				if (i < program.Data.Count - 1)
+				if (i < program.SectionData.Count - 1)
 				{
-					if (!(program.Data[i + 1] is IInstruction next_iinstruction)) continue;
+					if (!(program.SectionData[i + 1] is IInstruction next_iinstruction)) continue;
 
 
 					// If current inst is LLI, next inst is LUI, both have same dest reg, and next inst loads 0
@@ -25,6 +25,6 @@ namespace FTG.Studios.BISC.Asm
 					}
 				}
 			}
-		}
+		}*/
 	}
 }

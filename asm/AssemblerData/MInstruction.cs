@@ -17,7 +17,7 @@ namespace FTG.Studios.BISC.Asm
 			Offset = immediate;
 
 			// Has undefined symbol if the given immediate value is a label that has not yet been defined
-			HasUndefinedSymbol = immediate.Type == TokenType.Label && !immediate.Value.HasValue;
+			HasUndefinedSymbol = immediate.Type == TokenType.Identifier && !immediate.Value.HasValue;
 		}
 
 		public override byte[] Assemble()

@@ -1,4 +1,4 @@
-;%section .text
+%section .text
 
 ; initialize stack pointer
 ldi sp, 0x0fff
@@ -101,6 +101,6 @@ print_char:
 	pop r7
 	ret
 
-;%section .data
+%section .data
 
 THIS_IS_A_STRING: .string "howdy world\0"

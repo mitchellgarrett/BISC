@@ -1,14 +1,11 @@
 namespace FTG.Studios.BISC.Asm
 {
 
-	public class Directive : AssemblerData
+	public abstract class Directive : AssemblerData
 	{
 
-		public string Identifier;
-
-		public Directive(string identifer)
+		public Directive()
 		{
-			Identifier = identifer;
 			Size = 0;
 			HasUndefinedSymbol = false;
 		}
