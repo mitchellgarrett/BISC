@@ -8,18 +8,14 @@ namespace FTG.Studios.BISC.Asm
 	public static class Lexer
 	{
 
-		static int lineno = 1;
+		static int lineno;
 		static int charno;
-
-		public static void Reset()
-		{
-			lineno = 1;
-		}
 
 		public static List<Token> Tokenize(string source)
 		{
 			List<Token> tokens = new List<Token>();
-			charno = 1;
+			lineno = 1;
+			charno = 0;
 
 			Token token;
 			string current_word = string.Empty;
@@ -48,7 +44,8 @@ namespace FTG.Studios.BISC.Asm
 						charno++;
 					}
 
-					tokens.Add(new Token(TokenType.Comment, current_word, null, lineno, charno));
+					charno++;
+					tokens.Add(new Token(TokenType.Comment, current_word, null, lineno, charno - current_word.Length));
 
 					tokens.Add(new Token(TokenType.LineSeperator, lineno, charno));
 
@@ -96,7 +93,9 @@ namespace FTG.Studios.BISC.Asm
 						current_word += source[source_index];
 						charno++;
 					}
-					tokens.Add(new Token(TokenType.String, current_word, null, lineno, charno));
+
+					charno++;
+					tokens.Add(new Token(TokenType.String, current_word, null, lineno, charno - current_word.Length));
 
 					tokens.Add(new Token(TokenType.DoubleQuote, lineno, charno));
 					current_word = string.Empty;
@@ -175,25 +174,25 @@ namespace FTG.Studios.BISC.Asm
 
 			if (lexeme_upper[0] == Syntax.data_prefix)
 			{
-				return new Token(TokenType.DataInitializer, lexeme_upper, null, lineno, charno);
+				return new Token(TokenType.DataInitializer, lexeme_upper, null, lineno, charno - lexeme.Length);
 			}
 
 			for (int index = 0; index < Specification.pseudo_instruction_names.Length; index++)
 			{
 				if (lexeme_upper == Specification.pseudo_instruction_names[index])
-					return new Token(TokenType.PseudoOp, lexeme_upper, (UInt32)index, lineno, charno);
+					return new Token(TokenType.PseudoOp, lexeme_upper, (UInt32)index, lineno, charno - lexeme.Length);
 			}
 
 			Opcode? opcode;
 			if ((opcode = Syntax.GetOpcode(lexeme_upper)).HasValue)
 			{
-				return new Token(TokenType.Opcode, opcode.ToString(), (UInt32)opcode.Value, lineno, charno);
+				return new Token(TokenType.Opcode, opcode.ToString(), (UInt32)opcode.Value, lineno, charno - lexeme.Length);
 			}
 
 			Register? register;
 			if ((register = Syntax.GetRegister(lexeme_upper)).HasValue)
 			{
-				return new Token(TokenType.Register, register.ToString(), (UInt32)register.Value, lineno, charno);
+				return new Token(TokenType.Register, register.ToString(), (UInt32)register.Value, lineno, charno - lexeme.Length);
 			}
 
 			if (Regex.IsMatch(lexeme, Syntax.integer_literal) ||
@@ -202,15 +201,15 @@ namespace FTG.Studios.BISC.Asm
 				Regex.IsMatch(lexeme, Syntax.char_literal)
 			)
 			{
-				return new Token(TokenType.Immediate, lexeme, Assembler.ParseImmediate(lexeme), lineno, charno);
+				return new Token(TokenType.Immediate, lexeme, Assembler.ParseImmediate(lexeme), lineno, charno - lexeme.Length);
 			}
 
 			if (Regex.IsMatch(lexeme, Syntax.identifer))
 			{
-				return new Token(TokenType.Identifier, lexeme, null, lineno, charno);
+				return new Token(TokenType.Identifier, lexeme, null, lineno, charno - lexeme.Length);
 			}
 
-			return new Token(TokenType.Invalid, lexeme, null, lineno, charno);
+			return new Token(TokenType.Invalid, lexeme, null, lineno, charno - lexeme.Length);
 		}
 	}
 }
