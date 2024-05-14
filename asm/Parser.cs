@@ -112,26 +112,27 @@ namespace FTG.Studios.BISC.Asm
 			{
 				case Syntax.data_byte:
 					MatchFail(value, TokenType.Immediate, "Expected valid byte value after '.byte' initializer");
-					int data_byte = (int)value.Value;
-					data = new byte[1];
-					data[0] = (byte)data_byte;
+					byte data_byte = (byte)(UInt32)value.Value;
+					data = new byte[1] { data_byte };
 					return new Binary(data);
 
 				case Syntax.data_half:
 					MatchFail(value, TokenType.Immediate, "Expected valid 16 bit value after '.half' initializer");
-					int data_half = (int)value.Value;
-					data = Specification.DisassembleInteger16((UInt16)data_half);
+					UInt16 data_half = (UInt16)(UInt32)value.Value;
+					//data = Specification.DisassembleInteger16((UInt16)data_half);
+					data = data_half.Disassemble();
 					return new Binary(data);
 
 				case Syntax.data_word:
 					MatchFail(value, TokenType.Immediate, "Expected valid 32 bit value after '.word' initializer");
-					int data_word = (int)value.Value;
-					data = Specification.DisassembleInteger32((UInt32)data_word);
+					UInt32 data_word = (UInt32)value.Value;
+					//data = Specification.DisassembleInteger32((UInt32)data_word);
+					data = data_word.Disassemble();
 					return new Binary(data);
 
 				case Syntax.data_zero:
 					MatchFail(value, TokenType.Immediate, "Expected valid immediate value after '.zero. initializer");
-					int number_of_zero_bytes = (int)value.Value;
+					UInt32 number_of_zero_bytes = (UInt32)value.Value;
 					data = new byte[number_of_zero_bytes];
 					return new Binary(data);
 
