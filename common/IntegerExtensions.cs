@@ -8,6 +8,17 @@ namespace FTG.Studios.BISC.Asm
 	{
 
 		/// <summary>
+		/// Takes a byte array and, if on a big endian machine, flips it, otherwise returns the original array.
+		/// </summary>
+		/// <param name="bytes">Array to flip.</param>
+		/// <returns>Byte array into little-endian order.</returns>
+		public static byte[] Endianize(this byte[] bytes)
+		{
+			if (!BitConverter.IsLittleEndian) return bytes.Reverse().ToArray();
+			return bytes;
+		}
+
+		/// <summary>
 		/// Assembles a 16-bit integer from two bytes supplied in little-endian order.
 		/// </summary>
 		/// <param name="bytes">Byte array of two bytes in little-endian order.</param>
