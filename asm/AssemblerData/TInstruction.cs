@@ -18,6 +18,7 @@ namespace FTG.Studios.BISC.Asm
 			HasUndefinedSymbol = false;
 		}
 
+		// TODO: Skip the conversion and just put the bytes into a byte array
 		public override byte[] Assemble()
 		{
 			UInt32 machine_code = (UInt32)Opcode;
@@ -26,7 +27,7 @@ namespace FTG.Studios.BISC.Asm
 			machine_code |= SourceRegisterA.Value.Value << 16;
 			machine_code |= SourceRegisterB.Value.Value << 24;
 
-			return Specification.DisassembleInteger32(machine_code);
+			return machine_code.DisassembleUInt32();
 		}
 
 		public override string ToString()

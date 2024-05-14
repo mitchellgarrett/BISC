@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using FTG.Studios.BISC.Asm;
 
 namespace FTG.Studios.BISC.VM
 {
@@ -89,7 +90,7 @@ namespace FTG.Studios.BISC.VM
 			byte[] data = { 0, 0 };
 			memory.Read(address, ref data);
 
-			return Specification.AssembleInteger16(data[0], data[1]);
+			return data.AssembleUInt16();
 		}
 
 		public UInt32 GetMemory32(UInt32 address)
@@ -97,7 +98,7 @@ namespace FTG.Studios.BISC.VM
 			byte[] data = { 0, 0, 0, 0 };
 			memory.Read(address, ref data);
 
-			return Specification.AssembleInteger32(data[0], data[1], data[2], data[3]);
+			return data.AssembleUInt32();
 		}
 
 		public void SetMemory8(UInt32 address, UInt32 value)
@@ -108,13 +109,13 @@ namespace FTG.Studios.BISC.VM
 
 		public void SetMemory16(UInt32 address, UInt32 value)
 		{
-			byte[] data = Specification.DisassembleInteger16((UInt16)value);
+			byte[] data = value.DisassembleUInt16();
 			memory.Write(address, data);
 		}
 
 		public void SetMemory32(UInt32 address, UInt32 value)
 		{
-			byte[] data = Specification.DisassembleInteger32(value);
+			byte[] data = value.DisassembleUInt32();
 			memory.Write(address, data);
 		}
 
@@ -188,7 +189,7 @@ namespace FTG.Studios.BISC.VM
 			//Console.WriteLine("Executing instruction: 0x{0:x8}", instruction);
 
 			// Decompose instruction into its byte parameters
-			byte[] bytes = Specification.DisassembleInteger32(instruction);
+			byte[] bytes = instruction.DisassembleUInt32();
 
 			byte opcode = bytes[0];
 			byte arg0 = bytes[1];
@@ -269,7 +270,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (opcode != ((byte)Opcode.LLI) || !IsValidRegister(arg0)) return false;
 
-			UInt16 imm = Specification.AssembleInteger16(arg1, arg2);
+			UInt16 imm = new byte[] { arg1, arg2 }.AssembleUInt16();
 			registers[arg0] = imm;
 			pc += 4;
 			return true;
@@ -279,7 +280,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (opcode != ((byte)Opcode.LUI) || !IsValidRegister(arg0)) return false;
 
-			UInt16 imm = Specification.AssembleInteger16(arg1, arg2);
+			UInt16 imm = new byte[] { arg1, arg2 }.AssembleUInt16();
 			registers[arg0] = (UInt32)((registers[arg0] & 0xFFFF) | (UInt32)(imm << 16));
 			pc += 4;
 			return true;

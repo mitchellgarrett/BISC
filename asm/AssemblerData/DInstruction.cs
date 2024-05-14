@@ -23,7 +23,7 @@ namespace FTG.Studios.BISC.Asm
 			machine_code |= DestinationRegister.Value.Value << 8;
 			machine_code |= SourceRegister.Value.Value << 16;
 
-			return Specification.DisassembleInteger32(machine_code);
+			return machine_code.DisassembleUInt32();
 		}
 
 		public override string ToString()

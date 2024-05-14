@@ -9,16 +9,70 @@ namespace FTG.Studios.BISC.Test
 	public class AssemblerTest
 	{
 
+		// TODO: Get rid of these functions and use the extension methods
+
+		/// <summary>
+		/// Assembles a 16-bit integer from two bytes supplied in little-endian order.
+		/// </summary>
+		/// <param name="a">Least significant byte.</param>
+		/// <param name="b">Most significant byte.</param>
+		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
+		public static UInt16 AssembleInteger16(byte a, byte b)
+		{
+			if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt16(new byte[] { b, a }, 0);
+			return BitConverter.ToUInt16(new byte[] { a, b }, 0);
+		}
+
+		/// <summary>
+		/// Assembles a 32-bit integer from four bytes supplied in little-endian order.
+		/// </summary>
+		/// <param name="a">Least significant byte.</param>
+		/// <param name="b">Second byte.</param>
+		/// <param name="c">Third byte.</param>
+		/// <param name="d">Most significant byte.</param>
+		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
+		public static UInt32 AssembleInteger32(byte a, byte b, byte c, byte d)
+		{
+			if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt32(new byte[] { d, c, b, a }, 0);
+			return BitConverter.ToUInt32(new byte[] { a, b, c, d }, 0);
+		}
+
+		/// <summary>
+		/// Disassembles a 16-bit integer into two bytes in little-endian order.
+		/// </summary>
+		/// <param name="value">16-bit integer.</param>
+		/// <returns>A byte array of two bytes in little-endian order.</returns>
+		public static byte[] DisassembleInteger16(UInt16 value)
+		{
+			byte[] bytes = BitConverter.GetBytes(value);
+			if (!BitConverter.IsLittleEndian) Array.Reverse(bytes);
+			return bytes;
+		}
+
+		/// <summary>
+		/// Disassembles a 32-bit integer into four bytes in little-endian order.
+		/// </summary>
+		/// <param name="value">16-bit integer.</param>
+		/// <returns>A byte array of four bytes in little-endian order.</returns>
+		public static byte[] DisassembleInteger32(UInt32 value)
+		{
+			byte[] bytes = BitConverter.GetBytes(value);
+			if (!BitConverter.IsLittleEndian) Array.Reverse(bytes);
+			return bytes;
+		}
+
 		UInt32 AssembleInstruction(byte a, byte b, byte c, byte d)
 		{
-			return Specification.AssembleInteger32(a, b, c, d);
+			return AssembleInteger32(a, b, c, d);
 		}
 
 		UInt32 AssembleInstruction(byte a, byte b, UInt16 c)
 		{
-			byte[] cd = Specification.DisassembleInteger16(c);
-			return Specification.AssembleInteger32(a, b, cd[0], cd[1]);
+			byte[] cd = DisassembleInteger16(c);
+			return AssembleInteger32(a, b, cd[0], cd[1]);
 		}
+
+		const string file_name = "test";
 
 		[SetUp]
 		public void SetUp()

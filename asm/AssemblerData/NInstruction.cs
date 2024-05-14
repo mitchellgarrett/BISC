@@ -13,7 +13,7 @@ namespace FTG.Studios.BISC.Asm
 
 		public override byte[] Assemble()
 		{
-			return Specification.DisassembleInteger32((UInt32)Opcode);
+			return ((UInt32)Opcode).DisassembleUInt32();
 		}
 
 		public override string ToString()

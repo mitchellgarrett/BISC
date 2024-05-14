@@ -120,14 +120,14 @@ namespace FTG.Studios.BISC.Asm
 					MatchFail(value, TokenType.Immediate, "Expected valid 16 bit value after '.half' initializer");
 					UInt16 data_half = (UInt16)(UInt32)value.Value;
 					//data = Specification.DisassembleInteger16((UInt16)data_half);
-					data = data_half.Disassemble();
+					data = data_half.DisassembleUInt16();
 					return new Binary(data);
 
 				case Syntax.data_word:
 					MatchFail(value, TokenType.Immediate, "Expected valid 32 bit value after '.word' initializer");
 					UInt32 data_word = (UInt32)value.Value;
 					//data = Specification.DisassembleInteger32((UInt32)data_word);
-					data = data_word.Disassemble();
+					data = data_word.DisassembleUInt32();
 					return new Binary(data);
 
 				case Syntax.data_zero:

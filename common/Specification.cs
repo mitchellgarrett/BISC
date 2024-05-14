@@ -17,56 +17,6 @@ namespace FTG.Studios.BISC
 
 		public static int NUM_REGISTERS { get { return REGISTER_NAMES.Length; } }
 
-		/// <summary>
-		/// Assembles a 16-bit integer from two bytes supplied in little-endian order.
-		/// </summary>
-		/// <param name="a">Least significant byte.</param>
-		/// <param name="b">Most significant byte.</param>
-		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
-		public static UInt16 AssembleInteger16(byte a, byte b)
-		{
-			if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt16(new byte[] { b, a }, 0);
-			return BitConverter.ToUInt16(new byte[] { a, b }, 0);
-		}
-
-		/// <summary>
-		/// Assembles a 32-bit integer from four bytes supplied in little-endian order.
-		/// </summary>
-		/// <param name="a">Least significant byte.</param>
-		/// <param name="b">Second byte.</param>
-		/// <param name="c">Third byte.</param>
-		/// <param name="d">Most significant byte.</param>
-		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
-		public static UInt32 AssembleInteger32(byte a, byte b, byte c, byte d)
-		{
-			if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt32(new byte[] { d, c, b, a }, 0);
-			return BitConverter.ToUInt32(new byte[] { a, b, c, d }, 0);
-		}
-
-		/// <summary>
-		/// Disassembles a 16-bit integer into two bytes in little-endian order.
-		/// </summary>
-		/// <param name="value">16-bit integer.</param>
-		/// <returns>A byte array of two bytes in little-endian order.</returns>
-		public static byte[] DisassembleInteger16(UInt16 value)
-		{
-			byte[] bytes = BitConverter.GetBytes(value);
-			if (!BitConverter.IsLittleEndian) Array.Reverse(bytes);
-			return bytes;
-		}
-
-		/// <summary>
-		/// Disassembles a 32-bit integer into four bytes in little-endian order.
-		/// </summary>
-		/// <param name="value">16-bit integer.</param>
-		/// <returns>A byte array of four bytes in little-endian order.</returns>
-		public static byte[] DisassembleInteger32(UInt32 value)
-		{
-			byte[] bytes = BitConverter.GetBytes(value);
-			if (!BitConverter.IsLittleEndian) Array.Reverse(bytes);
-			return bytes;
-		}
-
 		public static readonly ArgumentType[][] instruction_format_definitions = {
 			new ArgumentType[] { },                                                                     // N
 			new ArgumentType[] { ArgumentType.Register },                                               // R

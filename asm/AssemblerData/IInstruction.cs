@@ -29,7 +29,7 @@ namespace FTG.Studios.BISC.Asm
 			if (Opcode == Opcode.LUI) machine_code |= ((Immediate.Value.Value >> 16) & 0xFFFF) << 16;
 			else machine_code |= (Immediate.Value.Value & 0xFFFF) << 16;
 
-			return Specification.DisassembleInteger32(machine_code);
+			return machine_code.DisassembleUInt32();
 		}
 
 		public override string ToString()

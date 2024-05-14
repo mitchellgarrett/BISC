@@ -18,7 +18,7 @@ namespace FTG.Studios.BISC.Asm
 		{
 			UInt32 machine_code = (UInt32)Opcode;
 			machine_code |= Register.Value.Value << 8;
-			return Specification.DisassembleInteger32(machine_code);
+			return machine_code.DisassembleUInt32();
 		}
 
 		public override string ToString()
