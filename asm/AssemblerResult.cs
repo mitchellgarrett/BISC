@@ -121,6 +121,7 @@ namespace FTG.Studios.BISC.Asm
 		{
 			int section_count = SectionData.Count;
 
+			// Initialize object file header with standard values
 			BEEF.ObjectFile obj = new BEEF.ObjectFile();
 			obj.FileHeader = new BEEF.FileHeader()
 			{
@@ -135,6 +136,7 @@ namespace FTG.Studios.BISC.Asm
 			obj.SectionHeaders = new BEEF.SectionHeader[section_count];
 			obj.SectionData = new byte[section_count][];
 
+			// Iterate over sections and build section header
 			UInt32 section_offset = (UInt32)(14 + 32 * section_count);
 			UInt32 section_address = 0;
 			for (int section_index = 0; section_index < section_count; section_index++)
@@ -145,6 +147,7 @@ namespace FTG.Studios.BISC.Asm
 				BEEF.SectionFlag section_flags;
 				if (!default_section_flags.TryGetValue(section_name, out section_flags)) section_flags = BEEF.SectionFlag.None;
 
+				// Initialize section header
 				BEEF.SectionHeader sheader = new BEEF.SectionHeader()
 				{
 					Type = BEEF.SectionType.Program,
