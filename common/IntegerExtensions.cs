@@ -42,6 +42,16 @@ namespace FTG.Studios.BISC.Asm
 			return BitConverter.ToUInt32(bytes, 0);
 		}
 
+		public static UInt16 AssembleUInt16(this (byte, byte) bytes)
+		{
+			return new byte[] { bytes.Item1, bytes.Item2 }.AssembleUInt16();
+		}
+
+		public static UInt32 AssembleUInt32(this (byte, byte, byte, byte) bytes)
+		{
+			return new byte[] { bytes.Item1, bytes.Item2, bytes.Item3, bytes.Item4 }.AssembleUInt32();
+		}
+
 		/// <summary>
 		/// Disassembles a 16-bit integer into two bytes in little-endian order.
 		/// </summary>

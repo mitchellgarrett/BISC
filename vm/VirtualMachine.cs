@@ -270,7 +270,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (opcode != ((byte)Opcode.LLI) || !IsValidRegister(arg0)) return false;
 
-			UInt16 imm = new byte[] { arg1, arg2 }.AssembleUInt16();
+			UInt16 imm = (arg1, arg2).AssembleUInt16();
 			registers[arg0] = imm;
 			pc += 4;
 			return true;
@@ -280,7 +280,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (opcode != ((byte)Opcode.LUI) || !IsValidRegister(arg0)) return false;
 
-			UInt16 imm = new byte[] { arg1, arg2 }.AssembleUInt16();
+			UInt16 imm = (arg1, arg2).AssembleUInt16();
 			registers[arg0] = (UInt32)((registers[arg0] & 0xFFFF) | (UInt32)(imm << 16));
 			pc += 4;
 			return true;

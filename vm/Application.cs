@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using FTG.Studios.BISC.Asm;
 
 namespace FTG.Studios.BISC.VM
 {
@@ -165,7 +166,7 @@ namespace FTG.Studios.BISC.VM
 
 		static void PrintInstruction(UInt32 instruction)
 		{
-			byte[] bytes = Specification.DisassembleInteger32(instruction);
+			byte[] bytes = instruction.DisassembleUInt32();
 
 			byte opcode = bytes[0];
 			string output = ((Opcode)opcode).ToString().ToLower() + ' ';
@@ -187,7 +188,7 @@ namespace FTG.Studios.BISC.VM
 						break;
 
 					case ArgumentType.Immediate16:
-						UInt16 imm = Specification.AssembleInteger16(bytes[i + 1], bytes[i + 2]);
+						UInt16 imm = (bytes[i + 1], bytes[i + 2]).AssembleUInt16();
 						output += string.Format("0x{0:x4}", imm);
 						break;
 				}
