@@ -501,7 +501,7 @@ namespace FTG.Studios.BISC.Asm
 
 		static void Fail(Token token, TokenType expected, string message)
 		{
-			throw new AssemblerSyntaxErrorException($"\u001b[1m{file_name}:{token.LineNo}:{token.CharNo}: \u001b[31merror:\u001b[39m {message}\u001b[0m");
+			throw new SyntaxErrorException($"\u001b[1m{file_name}:{token.LineNo}:{token.CharNo}: \u001b[31merror:\u001b[39m {message}\u001b[0m");
 		}
 
 		static Token Dequeue(this LinkedList<Token> tokens)

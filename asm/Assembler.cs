@@ -26,7 +26,7 @@ namespace FTG.Studios.BISC.Asm
 			{
 				program = Parser.Parse(tokens, file_name);
 			}
-			catch (AssemblerSyntaxErrorException exception)
+			catch (SyntaxErrorException exception)
 			{
 				Console.Error.WriteLine(exception.Message);
 				Environment.Exit(1);
