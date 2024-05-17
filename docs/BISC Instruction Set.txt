@@ -18,27 +18,27 @@ f0-f7 - general purpose floating point registers
 ------------------------
 Control Status Registers [WIP]
 ------------------------
-0x00, mid - model number of this CPU
-0x01, ccl - CPU cycle count
-0x02, cch - upper 32-bits of cycle count
+0x00, mid   - model number of this CPU
+0x01, ccl   - CPU cycle count
+0x02, cch   - upper 32-bits of cycle count
 0x03, instl - instruction count
 0x04, insth - upper 32-bits of instruction count
-tid - thread id
+0x05, tid   - thread id
 
-0x10, evec - exception vector address
+0x10, evec  - exception vector address
 0x11, etype - exception type
-0x12, epc - exception PC
-0x13, eval - exception value
+0x12, epc   - exception PC
+0x13, eval  - exception value
 
-0x10, tvec - trap vector address
-0x11, ttype - trap type
-0x12, tpc - trap PC
-0x13, tval - trap value
+0x20, tvec  - trap vector address
+0x21, ttype - trap type
+0x22, tpc   - trap PC
+0x23, tval  - trap value
 
-0x10, svec - system call vector address
-0x11, stype - system call type
-0x12, spc - system call PC
-0x13, sval - system call value
+0x30, svec  - system call vector address
+0x31, stype - system call type
+0x32, spc   - system call PC
+0x33, sval  - system call value
 
 ------------------
 General Formatting
