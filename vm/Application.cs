@@ -74,13 +74,6 @@ namespace FTG.Studios.BISC.VM
 				bool success = vm.ExecuteNext();
 				inst_count++;
 
-				/*
-				UInt32 instruction = program[vm.GetRegister((int)Register.PC) / 4];
-				bool success = vm.ExecuteInstruction(instruction);
-				inst_count++;
-				if (vm.GetRegister((int)Register.PC) >= program.Length * 4) vm.Halt();
-				*/
-
 				if (options.HasFlag(Flags.Debug))
 				{
 					Console.Clear();
@@ -101,15 +94,13 @@ namespace FTG.Studios.BISC.VM
 			}
 			else if (options.HasFlag(Flags.Stat))
 			{
+				UInt32 return_value = vm.GetRegister(Register.RV);
 				sw.Stop();
 				Console.WriteLine("Program complete...");
+				Console.WriteLine($"Return value: 0x{return_value:x8}");
 				Console.WriteLine($"Execution time: {sw.Elapsed.TotalSeconds}s");
 				Console.WriteLine($"Instruction count: {inst_count} ({Math.Round(inst_count / sw.Elapsed.TotalMilliseconds, 2)}/ms)");
 				Console.WriteLine($"Cycle time: {Math.Round(inst_count / sw.Elapsed.TotalSeconds / 1000, 2)}kHz");
-			}
-			else
-			{
-				Console.SetCursorPosition(0, Console.WindowHeight - 1);
 			}
 		}
 

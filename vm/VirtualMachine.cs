@@ -172,10 +172,11 @@ namespace FTG.Studios.BISC.VM
 		/// Executes 32-bit BISC instructions starting at the given address.
 		/// </summary>
 		/// <param name="address">The memory addrerss to start execution from.</param>
-		public void ExecuteFrom(UInt32 address)
+		public UInt32 ExecuteFrom(UInt32 address)
 		{
 			pc = address;
 			while (ExecuteNext()) ;
+			return rv;
 		}
 
 		/// <summary>
