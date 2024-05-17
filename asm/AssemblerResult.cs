@@ -12,7 +12,7 @@ namespace FTG.Studios.BISC.Asm
 
 		readonly Dictionary<string, BEEF.SectionFlag> default_section_flags = new Dictionary<string, BEEF.SectionFlag>() {
 			{".text", BEEF.SectionFlag.Readable | BEEF.SectionFlag.Executable },
-			{".data", BEEF.SectionFlag.Readable | BEEF.SectionFlag.Writable | BEEF.SectionFlag.InitData }
+			{".data", BEEF.SectionFlag.Readable | BEEF.SectionFlag.Writable | BEEF.SectionFlag.InititializedData }
 		};
 
 		public int SizeInBytes { get; private set; }
@@ -129,7 +129,7 @@ namespace FTG.Studios.BISC.Asm
 				Architecture = 0xb,
 				Endianness = BEEF.Endianness.Little,
 				EntryPoint = 0,
-				SectionTableOffset = 14,
+				SectionTableOffset = BEEF.FileHeader.SizeInBytes,
 				SectionCount = (UInt16)section_count
 			};
 
@@ -137,7 +137,7 @@ namespace FTG.Studios.BISC.Asm
 			obj.SectionData = new byte[section_count][];
 
 			// Iterate over sections and build section header
-			UInt32 section_offset = (UInt32)(14 + 32 * section_count);
+			UInt32 section_offset = (UInt32)(BEEF.FileHeader.SizeInBytes + BEEF.SectionHeader.SizeInBytes * section_count);
 			UInt32 section_address = 0;
 			for (int section_index = 0; section_index < section_count; section_index++)
 			{
