@@ -71,7 +71,17 @@ namespace FTG.Studios.BISC.VM
 				}
 
 				UInt32 instruction = vm.GetMemory32(vm.GetRegister(Register.PC));
-				bool success = vm.ExecuteNext();
+
+				bool success = false;
+				try
+				{
+					success = vm.ExecuteNext();
+				}
+				catch (IllegalExecutionException exception)
+				{
+					Console.Error.WriteLine(exception.Message);
+					Environment.Exit(1);
+				}
 				inst_count++;
 
 				if (options.HasFlag(Flags.Debug))
