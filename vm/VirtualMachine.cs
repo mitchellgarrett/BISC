@@ -164,18 +164,20 @@ namespace FTG.Studios.BISC.VM
 		/// <returns>True if the instruction at the given address is valid, false otherwise.</returns>
 		public bool ExecuteAt(UInt32 address)
 		{
-			UInt32 instruction = GetMemory32(address);
-			return ExecuteInstruction(instruction);
+			byte[] bytes = new byte[4];
+			memory.Read(address, ref bytes);
+			return ExecuteInstruction(bytes[0], bytes[1], bytes[2], bytes[3]);
 		}
 
 		/// <summary>
 		/// Executes 32-bit BISC instructions starting at the given address.
 		/// </summary>
 		/// <param name="address">The memory addrerss to start execution from.</param>
+		/// <returns>The value of the RV register at the end of execution.</returns>
 		public UInt32 ExecuteFrom(UInt32 address)
 		{
 			pc = address;
-			while (ExecuteNext()) ;
+			while (IsRunning && ExecuteNext()) ;
 			return rv;
 		}
 
@@ -186,20 +188,25 @@ namespace FTG.Studios.BISC.VM
 		/// <returns>True if the given instruction is valid, false otherwise.</returns>
 		public bool ExecuteInstruction(UInt32 instruction)
 		{
-			//Console.WriteLine("Executing instruction: 0x{0:x8}", instruction);
-
 			// Decompose instruction into its byte parameters
 			byte[] bytes = instruction.DisassembleUInt32();
+			return ExecuteInstruction(bytes[0], bytes[1], bytes[2], bytes[3]);
+		}
 
-			byte opcode = bytes[0];
-			byte arg0 = bytes[1];
-			byte arg1 = bytes[2];
-			byte arg2 = bytes[3];
-
+		/// <summary>
+		/// Executes a single 32-bit BISC instruction.
+		/// </summary>
+		/// <param name="opcode">Opcode of the instruction to execute.</param>
+		/// <param name="arg0">First instruction argument.</param>
+		/// <param name="arg1">Second instruction argument.</param>
+		/// <param name="arg2">Third instruction argument.</param>
+		/// <returns>True if the given instruction is valid, false otherwise.</returns>
+		public bool ExecuteInstruction(byte opcode, byte arg0, byte arg1, byte arg2)
+		{
 			if (opcode >= instructions.Length || !instructions[opcode](arg0, arg1, arg2))
 			{
-				// Set debug register to illegal execution
-				Console.Error.WriteLine($"Illegal execution: 0x{instruction:x8}");
+				// TODO: Set debug register to illegal execution
+				Console.Error.WriteLine($"Illegal execution: 0x{opcode:x2}{arg0:x2}{arg1:x2}{arg2:x2}");
 				return false;
 			}
 
