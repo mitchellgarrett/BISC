@@ -1,12 +1,12 @@
 namespace FTG.Studios.BISC.Asm
 {
 
-	public class Binary : AssemblerData
+	public class BinaryData : AssemblerData
 	{
 
 		public byte[] Data;
 
-		public Binary(byte[] data)
+		public BinaryData(byte[] data)
 		{
 			Data = data;
 			Size = Data.Length;

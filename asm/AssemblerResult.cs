@@ -27,9 +27,9 @@ namespace FTG.Studios.BISC.Asm
 
 		public void Add(AssemblerData data)
 		{
-			if (data is Section)
+			if (data is SectionDirective)
 			{
-				Section section = data as Section;
+				SectionDirective section = data as SectionDirective;
 				if (section.Identifier == SectionData.Last().Identifier) return;
 
 				SectionData.Add(new SectionData(section.Identifier));

@@ -1,16 +1,18 @@
 namespace FTG.Studios.BISC.Asm
 {
 
-	public class ConstantDefinition : Directive
+	public class SectionDirective : Directive
 	{
-		public string Identifier;
-		public Token Value;
 
-		public ConstantDefinition(string identifer, Token value)
+		public string Identifier;
+
+		public SectionDirective(string identifer)
 		{
 			Identifier = identifer;
-			Value = value;
+			Size = 0;
+			HasUndefinedSymbol = false;
 		}
+
 		public override byte[] Assemble()
 		{
 			return new byte[] { };
@@ -18,7 +20,7 @@ namespace FTG.Studios.BISC.Asm
 
 		public override string ToString()
 		{
-			return $"{Identifier} = {Value}";
+			return $"{Identifier}: 0x{Address:x8}";
 		}
 	}
 }

@@ -33,7 +33,7 @@ namespace FTG.Studios.BISC.Asm
 						break;
 
 					case TokenType.DataInitializer:
-						Binary binary = ParseDataInitializer(stream);
+						BinaryData binary = ParseDataInitializer(stream);
 						program.Add(binary);
 						break;
 
@@ -80,17 +80,17 @@ namespace FTG.Studios.BISC.Asm
 			return null;
 		}
 
-		static Section ParseSectionInitialization(LinkedList<Token> tokens)
+		static SectionDirective ParseSectionInitialization(LinkedList<Token> tokens)
 		{
 			Token identifier = tokens.Dequeue();
 			// These are being lexed as data initializers rn
 			//MatchFail(identifier, TokenType.Identifier);
 
-			return new Section(identifier.Mnemonic.ToLower());
+			return new SectionDirective(identifier.Mnemonic.ToLower());
 		}
 
 		// FIXME: This sucks
-		static ConstantDefinition ParseMacroDefinition(LinkedList<Token> tokens)
+		static ConstantDefinitionDirective ParseMacroDefinition(LinkedList<Token> tokens)
 		{
 			Token identifier = tokens.Dequeue();
 			MatchFail(identifier, TokenType.Identifier, $"Expected valid identifier after '%define'");
@@ -99,10 +99,10 @@ namespace FTG.Studios.BISC.Asm
 			Token value = tokens.Dequeue();
 			MatchFail(value, TokenType.Immediate, $"Expected immediate after constant definition");
 
-			return new ConstantDefinition(identifier.Mnemonic, value);
+			return new ConstantDefinitionDirective(identifier.Mnemonic, value);
 		}
 
-		static Binary ParseDataInitializer(LinkedList<Token> tokens)
+		static BinaryData ParseDataInitializer(LinkedList<Token> tokens)
 		{
 			Token operation = tokens.Dequeue();
 			Token value = tokens.Dequeue();
@@ -114,27 +114,27 @@ namespace FTG.Studios.BISC.Asm
 					MatchFail(value, TokenType.Immediate, "Expected valid byte value after '.byte' initializer");
 					byte data_byte = (byte)(UInt32)value.Value;
 					data = new byte[1] { data_byte };
-					return new Binary(data);
+					return new BinaryData(data);
 
 				case Syntax.data_half:
 					MatchFail(value, TokenType.Immediate, "Expected valid 16 bit value after '.half' initializer");
 					UInt16 data_half = (UInt16)(UInt32)value.Value;
 					//data = Specification.DisassembleInteger16((UInt16)data_half);
 					data = data_half.DisassembleUInt16();
-					return new Binary(data);
+					return new BinaryData(data);
 
 				case Syntax.data_word:
 					MatchFail(value, TokenType.Immediate, "Expected valid 32 bit value after '.word' initializer");
 					UInt32 data_word = (UInt32)value.Value;
 					//data = Specification.DisassembleInteger32((UInt32)data_word);
 					data = data_word.DisassembleUInt32();
-					return new Binary(data);
+					return new BinaryData(data);
 
 				case Syntax.data_zero:
 					MatchFail(value, TokenType.Immediate, "Expected valid immediate value after '.zero. initializer");
 					UInt32 number_of_zero_bytes = (UInt32)value.Value;
 					data = new byte[number_of_zero_bytes];
-					return new Binary(data);
+					return new BinaryData(data);
 
 				case Syntax.data_string:
 
@@ -156,7 +156,7 @@ namespace FTG.Studios.BISC.Asm
 					value = tokens.Dequeue();
 					MatchFail(value, TokenType.DoubleQuote, $"String must end with '{Syntax.double_quote}'");
 
-					return new Binary(data);
+					return new BinaryData(data);
 			}
 			return null;
 		}
