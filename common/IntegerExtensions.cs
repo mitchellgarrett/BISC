@@ -21,7 +21,7 @@ namespace FTG.Studios.BISC
 		/// <summary>
 		/// Assembles a 16-bit integer from two bytes supplied in little-endian order.
 		/// </summary>
-		/// <param name="bytes">Byte array of two bytes in little-endian order.</param>
+		/// <param name="bytes">Array of two bytes in little-endian order.</param>
 		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
 		public static UInt16 AssembleUInt16(this byte[] bytes)
 		{
@@ -33,7 +33,7 @@ namespace FTG.Studios.BISC
 		/// <summary>
 		/// Assembles a 32-bit integer from four bytes supplied in little-endian order.
 		/// </summary>
-		/// <param name="bytes">Byte array of four bytes in little-endian order.</param>
+		/// <param name="bytes">Array of four bytes in little-endian order.</param>
 		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
 		public static UInt32 AssembleUInt32(this byte[] bytes)
 		{
@@ -42,11 +42,21 @@ namespace FTG.Studios.BISC
 			return BitConverter.ToUInt32(bytes, 0);
 		}
 
+		/// <summary>
+		/// Assembles a 16-bit integer from two bytes supplied in little-endian order.
+		/// </summary>
+		/// <param name="bytes">Tuple of two bytes in little-endian order.</param>
+		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
 		public static UInt16 AssembleUInt16(this (byte, byte) bytes)
 		{
 			return new byte[] { bytes.Item1, bytes.Item2 }.AssembleUInt16();
 		}
 
+		/// <summary>
+		/// Assembles a 32-bit integer from four bytes supplied in little-endian order.
+		/// </summary>
+		/// <param name="bytes">Tuple of four bytes in little-endian order.</param>
+		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
 		public static UInt32 AssembleUInt32(this (byte, byte, byte, byte) bytes)
 		{
 			return new byte[] { bytes.Item1, bytes.Item2, bytes.Item3, bytes.Item4 }.AssembleUInt32();
