@@ -10,7 +10,7 @@ namespace FTG.Studios.BISC.VM
 	public class VirtualMachine
 	{
 
-		delegate bool InstructionHandler(byte opcode, byte arg0, byte arg1, byte arg2);
+		delegate bool InstructionHandler(byte arg0, byte arg1, byte arg2);
 		InstructionHandler[] instructions;
 
 		UInt32[] registers;
@@ -196,7 +196,7 @@ namespace FTG.Studios.BISC.VM
 			byte arg1 = bytes[2];
 			byte arg2 = bytes[3];
 
-			if (opcode >= instructions.Length || !instructions[opcode](opcode, arg0, arg1, arg2))
+			if (opcode >= instructions.Length || !instructions[opcode](arg0, arg1, arg2))
 			{
 				// Set debug register to illegal execution
 				Console.Error.WriteLine($"Illegal execution: 0x{instruction:x8}");
@@ -209,25 +209,25 @@ namespace FTG.Studios.BISC.VM
 		#region Instructions
 
 		#region System Instructions
-		bool NOP(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool NOP(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.NOP) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+			if (arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
 
 			pc += 4;
 			return true;
 		}
 
-		bool HLT(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool HLT(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.HLT) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+			if (arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
 
 			Halt();
 			return true;
 		}
 
-		bool SYS(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool SYS(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.SYS) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+			if (arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
 
 			// TODO: Handle syscall
 
@@ -235,9 +235,9 @@ namespace FTG.Studios.BISC.VM
 			return true;
 		}
 
-		bool CALL(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool CALL(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.CALL) || !IsValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
+			if (!IsValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
 
 			// Set return address to next instruction
 			ra = pc + 4;
@@ -246,9 +246,9 @@ namespace FTG.Studios.BISC.VM
 			return true;
 		}
 
-		bool RET(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool RET(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.RET) || arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+			if (arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
 
 			// Jump to return address
 			pc = ra;
@@ -257,9 +257,9 @@ namespace FTG.Studios.BISC.VM
 		#endregion
 
 		#region Load Instructions
-		bool LLI(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool LLI(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.LLI) || !IsValidRegister(arg0)) return false;
+			if (!IsValidRegister(arg0)) return false;
 
 			UInt16 imm = (arg1, arg2).AssembleUInt16();
 			registers[arg0] = imm;
@@ -267,9 +267,9 @@ namespace FTG.Studios.BISC.VM
 			return true;
 		}
 
-		bool LUI(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool LUI(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.LUI) || !IsValidRegister(arg0)) return false;
+			if (!IsValidRegister(arg0)) return false;
 
 			UInt16 imm = (arg1, arg2).AssembleUInt16();
 			registers[arg0] = (UInt32)((registers[arg0] & 0xFFFF) | (UInt32)(imm << 16));
@@ -277,9 +277,9 @@ namespace FTG.Studios.BISC.VM
 			return true;
 		}
 
-		bool MOV(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool MOV(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.MOV) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
 			registers[arg0] = registers[arg1];
 			pc += 4;
@@ -288,9 +288,9 @@ namespace FTG.Studios.BISC.VM
 		#endregion
 
 		#region Memory Instructions
-		bool LDW(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool LDW(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.LDW) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
 			UInt32 addr = (UInt32)(registers[arg1] + offset);
@@ -300,9 +300,9 @@ namespace FTG.Studios.BISC.VM
 			return true;
 		}
 
-		bool LDH(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool LDH(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.LDH) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
 			UInt32 addr = (UInt32)(registers[arg1] + offset);
@@ -312,9 +312,9 @@ namespace FTG.Studios.BISC.VM
 			return true;
 		}
 
-		bool LDB(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool LDB(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.LDB) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
 			UInt32 addr = (UInt32)(registers[arg1] + offset);
@@ -324,9 +324,9 @@ namespace FTG.Studios.BISC.VM
 			return true;
 		}
 
-		bool STW(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool STW(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.STW) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
 			UInt32 addr = (UInt32)(registers[arg1] + offset);
@@ -335,9 +335,9 @@ namespace FTG.Studios.BISC.VM
 			return true;
 		}
 
-		bool STH(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool STH(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.STH) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
 			UInt32 addr = (UInt32)(registers[arg1] + offset);
@@ -346,9 +346,9 @@ namespace FTG.Studios.BISC.VM
 			return true;
 		}
 
-		bool STB(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool STB(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.STB) || !IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
 			UInt32 addr = (UInt32)(registers[arg1] + offset);
@@ -359,45 +359,45 @@ namespace FTG.Studios.BISC.VM
 		#endregion
 
 		#region Arithmetic Instructions
-		bool ADD(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool ADD(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.ADD) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			registers[arg0] = registers[arg1] + registers[arg2];
 			pc += 4;
 			return true;
 		}
 
-		bool SUB(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool SUB(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.SUB) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			registers[arg0] = registers[arg1] - registers[arg2];
 			pc += 4;
 			return true;
 		}
 
-		bool MUL(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool MUL(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.MUL) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			registers[arg0] = registers[arg1] * registers[arg2];
 			pc += 4;
 			return true;
 		}
 
-		bool DIV(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool DIV(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.DIV) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			registers[arg0] = registers[arg1] / registers[arg2];
 			pc += 4;
 			return true;
 		}
 
-		bool MOD(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool MOD(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.MOD) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			registers[arg0] = registers[arg1] % registers[arg2];
 			pc += 4;
@@ -406,27 +406,27 @@ namespace FTG.Studios.BISC.VM
 		#endregion
 
 		#region Negation Instructions
-		bool NOT(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool NOT(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.NOT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
 			registers[arg0] = registers[arg1] != 0 ? 0u : 1u;
 			pc += 4;
 			return true;
 		}
 
-		bool NEG(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool NEG(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.NEG) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
 			registers[arg0] = (registers[arg1] ^ 0xFFFFFFFF) + 1;
 			pc += 4;
 			return true;
 		}
 
-		bool INV(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool INV(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.INV) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
 			registers[arg0] = registers[arg1] ^ 0xFFFFFFFF;
 			pc += 4;
@@ -435,163 +435,163 @@ namespace FTG.Studios.BISC.VM
 		#endregion
 
 		#region Logical Instructions
-		bool AND(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool AND(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.AND) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			registers[arg0] = registers[arg1] & registers[arg2];
 			pc += 4;
 			return true;
 		}
 
-		bool OR(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool OR(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.OR) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			registers[arg0] = registers[arg1] | registers[arg2];
 			pc += 4;
 			return true;
 		}
 
-		bool XOR(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool XOR(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.XOR) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			registers[arg0] = registers[arg1] ^ registers[arg2];
 			pc += 4;
 			return true;
 		}
 
-		bool BSL(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool BSL(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.BSL) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] << (Int32)registers[arg2];
+			registers[arg0] = registers[arg1] << (int)registers[arg2];
 			pc += 4;
 			return true;
 		}
 
-		bool BSR(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool BSR(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.BSR) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] >> (Int32)registers[arg2];
+			registers[arg0] = registers[arg1] >> (int)registers[arg2];
 			pc += 4;
 			return true;
 		}
 		#endregion
 
 		#region Jump Instructions
-		bool JMP(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JMP(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JMP) || !IsValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
+			if (!IsValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
 
 			pc = registers[arg0];
 			return true;
 		}
 
-		bool JEZ(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JEZ(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JEZ) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
 			if (registers[arg1] == 0) pc = registers[arg0];
 			else pc += 4;
 			return true;
 		}
 
-		bool JNZ(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JNZ(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JNZ) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
 			if (registers[arg1] != 0) pc = registers[arg0];
 			else pc += 4;
 			return true;
 		}
 
-		bool JEQ(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JEQ(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JEQ) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			if (registers[arg1] == registers[arg2]) pc = registers[arg0];
 			else pc += 4;
 			return true;
 		}
 
-		bool JNE(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JNE(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JNE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			if (registers[arg1] != registers[arg2]) pc = registers[arg0];
 			else pc += 4;
 			return true;
 		}
 
-		bool JGT(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JGT(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JGT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			if ((int)registers[arg1] > (int)registers[arg2]) pc = registers[arg0];
 			else pc += 4;
 			return true;
 		}
 
-		bool JLT(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JLT(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JLT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			if ((int)registers[arg1] < (int)registers[arg2]) pc = registers[arg0];
 			else pc += 4;
 			return true;
 		}
 
-		bool JGE(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JGE(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JGE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			if ((int)registers[arg1] >= (int)registers[arg2]) pc = registers[arg0];
 			else pc += 4;
 			return true;
 		}
 
-		bool JLE(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JLE(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JLE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			if ((int)registers[arg1] <= (int)registers[arg2]) pc = registers[arg0];
 			else pc += 4;
 			return true;
 		}
 
-		bool JGTU(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JGTU(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JGT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			if (registers[arg1] > registers[arg2]) pc = registers[arg0];
 			else pc += 4;
 			return true;
 		}
 
-		bool JLTU(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JLTU(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JLT) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			if (registers[arg1] < registers[arg2]) pc = registers[arg0];
 			else pc += 4;
 			return true;
 		}
 
-		bool JGEU(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JGEU(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JGE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			if (registers[arg1] >= registers[arg2]) pc = registers[arg0];
 			else pc += 4;
 			return true;
 		}
 
-		bool JLEU(byte opcode, byte arg0, byte arg1, byte arg2)
+		bool JLEU(byte arg0, byte arg1, byte arg2)
 		{
-			if (opcode != ((byte)Opcode.JLE) || !IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			if (registers[arg1] <= registers[arg2]) pc = registers[arg0];
 			else pc += 4;
