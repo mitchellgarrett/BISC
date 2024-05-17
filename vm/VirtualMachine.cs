@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using FTG.Studios.BISC.Asm;
 
 namespace FTG.Studios.BISC.VM
 {
@@ -33,6 +32,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			this.memory = memory;
 			Initialize();
+			Reset();
 		}
 
 		void Initialize()
@@ -48,7 +48,6 @@ namespace FTG.Studios.BISC.VM
 				JGT, JLT, JGE, JLE,
 				JGTU, JLTU, JGEU, JLEU
 			};
-			Reset();
 		}
 
 		public UInt32 GetRegister(int reg)
@@ -196,19 +195,10 @@ namespace FTG.Studios.BISC.VM
 			byte arg1 = bytes[2];
 			byte arg2 = bytes[3];
 
-			if (opcode >= 0 && opcode < instructions.Length)
+			if (opcode >= instructions.Length || !instructions[opcode](opcode, arg0, arg1, arg2))
 			{
-				if (!instructions[opcode](opcode, arg0, arg1, arg2))
-				{
-					// Set debug register to illegeal execution
-					Console.Error.WriteLine($"Illegal execution: 0x{instruction:x8}");
-					return false;
-				}
-			}
-			else
-			{
-				// Set debug register to illegal instruction
-				Console.Error.WriteLine($"Illegal instruction: 0x{instruction:x8}");
+				// Set debug register to illegal execution
+				Console.Error.WriteLine($"Illegal execution: 0x{instruction:x8}");
 				return false;
 			}
 

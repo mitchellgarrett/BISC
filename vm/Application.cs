@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using FTG.Studios.BISC.Asm;
 
 namespace FTG.Studios.BISC.VM
 {

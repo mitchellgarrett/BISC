@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace FTG.Studios.BISC.Asm
+namespace FTG.Studios.BISC
 {
 
 	public static class IntegerExtensions
@@ -37,7 +37,7 @@ namespace FTG.Studios.BISC.Asm
 		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
 		public static UInt32 AssembleUInt32(this byte[] bytes)
 		{
-			if (bytes.Length != 2) throw new ArgumentException("Length of byte array passed to byte[].Assemble32 must be 4.");
+			if (bytes.Length != 4) throw new ArgumentException("Length of byte array passed to byte[].Assemble32 must be 4.");
 			if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt32(bytes.Reverse().ToArray(), 0);
 			return BitConverter.ToUInt32(bytes, 0);
 		}
