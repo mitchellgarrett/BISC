@@ -35,10 +35,15 @@ Control Status Registers [WIP]
 0x22, tpc   - trap PC
 0x23, tval  - trap value
 
-0x30, svec  - system call vector address
-0x31, stype - system call type
-0x32, spc   - system call PC
-0x33, sval  - system call value
+0x30, ivec  - interrupt vector address
+0x31, itype - interrupt type
+0x32, ipc   - interrupt PC
+0x33, ival  - interrupt value
+
+0x40, svec  - system call vector address
+0x41, stype - system call type
+0x42, spc   - system call PC
+0x43, sval  - system call value
 
 ------------------
 General Formatting
