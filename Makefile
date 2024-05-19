@@ -12,6 +12,8 @@ VM_DIR = vm
 VM_EXE = bisc-vm.exe
 VM_SRC = $(wildcard $(VM_DIR)/*.cs) $(CMN_SRC)
 
+TEST_DIR = test
+
 CSC_FLAGS = -errorendlocation
 FILE ?= programs/console
 
@@ -41,9 +43,9 @@ vm: $(VM_EXE) $(ASM_EXE)
 
 clean:
 	@rm -rf $(BUILD_DIR)
-	@rm -rf $(ASM_DIR)/obj
-	@rm -rf $(ASM_DIR)/bin
-	@rm -rf $(VM_DIR)/obj
-	@rm -rf $(VM_DIR)/bin
+	@rm -rf obj bin
+	@rm -rf $(ASM_DIR)/obj $(ASM_DIR)/bin
+	@rm -rf $(VM_DIR)/obj $(VM_DIR)/bin
+	@rm -rf $(TEST_DIR)/obj $(TEST_DIR)/bin
 	@rm -f programs/*.exe
 	@rm -f programs/*.bin
