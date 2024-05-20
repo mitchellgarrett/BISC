@@ -117,7 +117,15 @@ namespace FTG.Studios.BISC.Asm
 			}
 		}
 
-		public BEEF.ObjectFile Assemble()
+		public byte[] ToBinary() {
+			List<byte> data = new List<byte>(SizeInBytes);
+			foreach (SectionData section in SectionData) {
+				data.AddRange(section.Assemble());
+            }
+			return data.ToArray();
+        }
+
+		public BEEF.ObjectFile ToObjectFile()
 		{
 			int section_count = SectionData.Count;
 

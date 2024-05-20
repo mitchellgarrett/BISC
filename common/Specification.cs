@@ -82,7 +82,7 @@ namespace FTG.Studios.BISC
 
 		public static readonly string[] pseudo_instruction_names = new string[] {
 			"LDI", "LRA",
-			"SYS", "CALL",
+			"CALL",
 			"LW", "LH", "LB", "SW", "SH", "SB",
 			"PUSH", "PUSH", "PUSHW", "PUSHW", "PUSHB", "PUSHB",
 			"POP", "POPW", "POPB",
@@ -101,7 +101,6 @@ namespace FTG.Studios.BISC
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // LDI {imm}
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // LRA {imm}
 			
-			new ArgumentType[] { ArgumentType.Immediate32 },                                               // SYS {imm}
 			new ArgumentType[] { ArgumentType.Immediate32 },                                               // CALL {imm}
 			
 			new ArgumentType[] { ArgumentType.Register, ArgumentType.Immediate32 },                        // LDW {reg}, {imm}
@@ -193,7 +192,6 @@ namespace FTG.Studios.BISC
 			new string[] { "LLI {0}, {1}", "LUI {0}, {1}" },
 			new string[] { "LDI {0}, {1}" },                            // LRA {imm}
 			
-			new string[] { "LDI ti, {0}", "SYS ti" },                   // SYS {imm}
 			new string[] { "LDI ta, {0}", "CALL ta" },                  // CALL {imm}
 			
 			new string[] { "LDI ti, {1}", "LDW {0}, ti[0]" },           // LDW {reg}, {imm}

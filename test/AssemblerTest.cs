@@ -83,97 +83,80 @@ namespace FTG.Studios.BISC.Test
 		[Test]
 		public void AssembleInstruction()
 		{
-			UInt32[] expected = new UInt32[] { AssembleInstruction((byte)Opcode.NOP, 0, 0, 0) };
-			UInt32[] actual = Assembler.Assemble("nop");
-			Console.WriteLine($"Expected: 0x{expected[0]:x8}\nActual: 0x{actual[0]:x8}");
+			byte[] expected = new byte[] { (byte)Opcode.NOP, 0, 0, 0 };
+			byte[] actual = Assembler.Assemble(file_name, "nop").ToBinary();
+
 			Assert.IsNotNull(actual);
 			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
-		public void AssembleInstruction_Invalid()
+		public void AssembleInstruction_Invalid_ThrowsException()
 		{
-			Assert.Throws<ArgumentException>(() => Assembler.Assemble("this is an invalid instruction"));
+			Assert.Throws<SyntaxErrorException>(() => Assembler.Assemble(file_name, "this is an invalid instruction"));
 		}
 
 		#region Pseduo Instructions
 		[Test]
-		public void LDIp()
+		public void Pseduo_LDI_To_LLI_LUI()
 		{
-			Register reg = Register.R0;
-			UInt32 imm = 0xbabecafe;
-			byte[] immb = Specification.DisassembleInteger32(imm);
-			UInt32[] actual = Assembler.Assemble($"ldi {reg}, {imm}");
+			Register register = Register.R0;
+			UInt32 immediate = 0xbabecafe;
+			byte[] immediate_bytes = immediate.DisassembleUInt32();
+			byte[] actual = Assembler.Assemble(file_name, $"ldi {register}, {immediate}").ToBinary();
 
-			UInt32[] expected = {
-				AssembleInstruction((byte)Opcode.LLI, (byte)reg, immb[0], immb[1]),
-				AssembleInstruction((byte)Opcode.LUI, (byte)reg, immb[2], immb[3])
+			byte[] expected = {
+				(byte)Opcode.LLI, (byte)register, immediate_bytes[0], immediate_bytes[1],
+				(byte)Opcode.LUI, (byte)register, immediate_bytes[2], immediate_bytes[3]
 			};
 
 			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
-		public void LRAp()
+		public void Pseudo_LRA_To_LLI_LUI()
 		{
-			Register reg = Register.R0;
-			UInt32 imm = 0xbabecafe;
-			byte[] immb = Specification.DisassembleInteger32(imm);
-			UInt32[] actual = Assembler.Assemble($"lra {reg}, {imm}");
+			Register register = Register.R0;
+			UInt32 immediate = 0xbabecafe;
+			byte[] immediate_bytes = immediate.DisassembleUInt32();
+			byte[] actual = Assembler.Assemble(file_name, $"lra {register}, {immediate}").ToBinary();
 
-			UInt32[] expected = {
-				AssembleInstruction((byte)Opcode.LLI, (byte)reg, immb[0], immb[1]),
-				AssembleInstruction((byte)Opcode.LUI, (byte)reg, immb[2], immb[3])
+			byte[] expected = {
+				(byte)Opcode.LLI, (byte)register, immediate_bytes[0], immediate_bytes[1],
+				(byte)Opcode.LUI, (byte)register, immediate_bytes[2], immediate_bytes[3]
 			};
 
 			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
-		public void SYSp()
+		public void Pseudo_CALL_Immediate_To_LDI_Immediate_Call_Register()
 		{
-			UInt32 imm = 0xbabecafe;
-			byte[] immb = Specification.DisassembleInteger32(imm);
-			UInt32[] actual = Assembler.Assemble($"sys {imm}");
+			UInt32 immediate = 0xbabecafe;
+			byte[] immediate_bytes = immediate.DisassembleUInt32();
+			byte[] actual = Assembler.Assemble(file_name, $"call {immediate}").ToBinary();
 
-			UInt32[] expected = {
-				AssembleInstruction((byte)Opcode.LLI, (byte)Register.RI, immb[0], immb[1]),
-				AssembleInstruction((byte)Opcode.LUI, (byte)Register.RI, immb[2], immb[3]),
-				AssembleInstruction((byte)Opcode.SYS, (byte)Register.RI, 0, 0)
+			byte[] expected = {
+				(byte)Opcode.LLI, (byte)Register.TA, immediate_bytes[0], immediate_bytes[1],
+				(byte)Opcode.LUI, (byte)Register.TA, immediate_bytes[2], immediate_bytes[3],
+				(byte)Opcode.CALL, (byte)Register.TA, 0, 0
 			};
 
 			Assert.AreEqual(expected, actual);
 		}
 
 		[Test]
-		public void CALLp0()
-		{
-			UInt32 imm = 0xbabecafe;
-			byte[] immb = Specification.DisassembleInteger32(imm);
-			UInt32[] actual = Assembler.Assemble($"call {imm}");
-
-			UInt32[] expected = {
-				AssembleInstruction((byte)Opcode.LLI, (byte)Register.RI, immb[0], immb[1]),
-				AssembleInstruction((byte)Opcode.LUI, (byte)Register.RI, immb[2], immb[3]),
-				AssembleInstruction((byte)Opcode.CALL, (byte)Register.RI, 0, 0)
-			};
-
-			Assert.AreEqual(expected, actual);
-		}
-
-		[Test]
-		public void CALLp1()
+		public void Pseudo_CALL_Label_To_LDI_Immediate_Call_Register()
 		{
 			string label = "label";
-			UInt32 imm = 0xc;
-			byte[] immb = Specification.DisassembleInteger32(imm);
-			UInt32[] actual = Assembler.Assemble($"call {label}\n{label}:\nnop");
+			UInt32 address = 0x00000000;
+			byte[] address_bytes = address.DisassembleUInt32();
+			byte[] actual = Assembler.Assemble(file_name, $"{label}:\ncall {label}").ToBinary();
 
-			UInt32[] expected = {
-				AssembleInstruction((byte)Opcode.LLI, (byte)Register.RI, immb[0], immb[1]),
-				AssembleInstruction((byte)Opcode.LUI, (byte)Register.RI, immb[2], immb[3]),
-				AssembleInstruction((byte)Opcode.CALL, (byte)Register.RI, 0, 0),
-				AssembleInstruction((byte)Opcode.NOP, 0, 0, 0)
+			byte[] expected = {
+				(byte)Opcode.LLI, (byte)Register.TA, address_bytes[0], address_bytes[1],
+				(byte)Opcode.LUI, (byte)Register.TA, address_bytes[2], address_bytes[3],
+				(byte)Opcode.CALL, (byte)Register.TA, 0, 0
 			};
 
 			Assert.AreEqual(expected, actual);
@@ -182,10 +165,10 @@ namespace FTG.Studios.BISC.Test
 
 		#region System Instructions
 		[Test]
-		public void NOP()
+		public void Op_NOP()
 		{
-			UInt32[] expected = { AssembleInstruction((byte)Opcode.NOP, 0, 0, 0) };
-			UInt32[] actual = Assembler.Assemble("nop");
+			byte[] expected = { (byte)Opcode.NOP, 0, 0, 0 };
+			byte[] actual = Assembler.Assemble(file_name, "nop").ToBinary();
 			Assert.AreEqual(expected, actual);
 		}
 		#endregion

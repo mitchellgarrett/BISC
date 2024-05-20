@@ -21,16 +21,7 @@ namespace FTG.Studios.BISC.Asm
 
 			foreach (var token in tokens) Console.WriteLine(token);
 
-			AssemblerResult program = null;
-			try
-			{
-				program = Parser.Parse(tokens, file_name);
-			}
-			catch (SyntaxErrorException exception)
-			{
-				Console.Error.WriteLine(exception.Message);
-				Environment.Exit(1);
-			}
+			AssemblerResult program = Parser.Parse(tokens, file_name);
 
 			// First-pass optimizations
 			//Optimizer.Optimize(program);

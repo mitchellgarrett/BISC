@@ -42,7 +42,7 @@ namespace FTG.Studios.BISC.VM
 				HLT, NOP, SYS, CALL, RET,
 				LLI, LUI, MOV,
 				LDW, LDH, LDB, STW, STH, STB,
-				ADD, SUB, MUL, DIV, MOD,
+				ADD, SUB, MUL, MULH, MULHU, DIV, DIVU, MOD, MODU,
 				NOT, NEG, INV, AND, OR, XOR, BSL, BSR,
 				JMP, JEZ, JNZ, JEQ, JNE,
 				JGT, JLT, JGE, JLE,
@@ -392,8 +392,31 @@ namespace FTG.Studios.BISC.VM
 			return true;
 		}
 
-		bool DIV(byte arg0, byte arg1, byte arg2)
-		{
+		bool MULH(byte arg0, byte arg1, byte arg2) {
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+			registers[arg0] = (UInt32)((int)registers[arg1] * (int)registers[arg2] >> 32);
+			pc += 4;
+			return true;
+		}
+
+		bool MULHU(byte arg0, byte arg1, byte arg2) {
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+			registers[arg0] = (UInt32)(((int)registers[arg1] * (int)registers[arg2]) >> 32);
+			pc += 4;
+			return true;
+		}
+
+		bool DIV(byte arg0, byte arg1, byte arg2) {
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+			registers[arg0] = (UInt32)((int)registers[arg1] / (int)registers[arg2]);
+			pc += 4;
+			return true;
+		}
+
+		bool DIVU(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			registers[arg0] = registers[arg1] / registers[arg2];
@@ -403,6 +426,14 @@ namespace FTG.Studios.BISC.VM
 
 		bool MOD(byte arg0, byte arg1, byte arg2)
 		{
+			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
+
+			registers[arg0] = (UInt32)((int)registers[arg1] % (int)registers[arg2]);
+			pc += 4;
+			return true;
+		}
+
+		bool MODU(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
 			registers[arg0] = registers[arg1] % registers[arg2];
