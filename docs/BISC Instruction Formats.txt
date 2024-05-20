@@ -8,7 +8,7 @@ Instruction (N) Format
 0       8                     31
 
 Register (R) Format
- opcode    dst        null        
+ opcode    reg        null        
 |-------|-------|--------------|
 0       8      16             31
 

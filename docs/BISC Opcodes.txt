@@ -4,7 +4,7 @@ Mnemonic  |  Opcode  | Format
 -----------------------------
 hlt       | 00000000 |   N
 nop       | 01000000 |   N
-sys       | 02rr0000 |   R
+sys       | 02000000 |   N
 call      | 03rr0000 |   R
 ret       | 04000000 |   N
 lli       | 05rriiii |   I
@@ -19,8 +19,12 @@ stb       | 0Drrrrii |   M
 add       | 0Errrrrr |   T
 sub       | 0Frrrrrr |   T
 mul       | 10rrrrrr |   T
+mulh       | 10rrrrrr |   T
+mulhu       | 10rrrrrr |   T
 div       | 11rrrrrr |   T
+divu       | 11rrrrrr |   T
 mod       | 12rrrrrr |   T
+modu       | 11rrrrrr |   T
 not       | 13rrrr00 |   D
 neg       | 14rrrr00 |   D
 inv       | 15rrrr00 |   D

@@ -14,11 +14,15 @@ VM_SRC = $(wildcard $(VM_DIR)/*.cs) $(CMN_SRC)
 
 TEST_DIR = test
 
+DOCS_DIR = docs
+DOCS_SRC = $(wildcard $(DOCS_DIR)/*.tex)
+DOCS_BUILD_DIR = $(BUILD_DIR)/docs
+
 CSC_FLAGS = -errorendlocation
 FILE ?= programs/console
 
 .PHONY: all
-all: $(ASM_EXE) $(VM_EXE)
+all: $(ASM_EXE) $(VM_EXE) 
 
 .PHONY: help
 help:
@@ -40,6 +44,12 @@ asm: $(ASM_EXE)
 vm: $(VM_EXE) $(ASM_EXE)
 	@mono $(BUILD_DIR)/$(ASM_EXE) $(FILE)
 	@mono $(BUILD_DIR)/$(VM_EXE) $(FILE)
+
+docs:
+	@mkdir -p $(DOCS_BUILD_DIR)
+	@latexmk -pdf -outdir=$(DOCS_BUILD_DIR) $(DOCS_SRC)
+
+docs: $(DOCS_SRC)
 
 clean:
 	@rm -rf $(BUILD_DIR)

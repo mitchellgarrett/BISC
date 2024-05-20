@@ -1,0 +1,122 @@
+\documentclass{report}
+
+\usepackage{bytefield}
+\usepackage{lmodern}
+
+\begin{document}
+
+% Select ldmodern 'light' font
+\ttfamily
+\fontseries{l}\selectfont
+
+\begin{center}
+	\large \textbf{BISC Instruction Formats}
+\end{center}
+
+\vspace{3ex}
+
+\begin{center}
+	\textbf{Instruction (N) Format}
+
+	\vspace{3ex}
+
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 31} \\
+		\begin{leftwordgroup}{}
+		\bitbox{8}{opcode} & 
+		\bitbox{24}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\vspace{3ex}
+
+\begin{center}
+	\textbf{Register (R) Format}
+	
+	\vspace{3ex}
+
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{}
+		\bitbox{8}{opcode} & 
+		\bitbox{8}{rd} &
+		\bitbox{16}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\vspace{3ex}
+
+\begin{center}
+	\textbf{Register-Immediate (I) Format}
+
+	\vspace{3ex}
+
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{}
+		\bitbox{8}{opcode} & 
+		\bitbox{8}{rd} &
+		\bitbox{16}{immediate}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\vspace{3ex}
+
+\begin{center}
+	\textbf{Memory (M) Format}
+	
+	\vspace{3ex}
+	
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{}
+		\bitbox{8}{opcode} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs}
+		\bitbox{8}{offset}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\vspace{3ex}
+
+\begin{center}
+	\textbf{Double Register (D) Format}
+
+	\vspace{3ex}
+
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{}
+		\bitbox{8}{opcode} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs} &
+		\bitbox{8}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\vspace{3ex}
+
+\begin{center}
+	\textbf{Triple Register (T) Format}
+
+	\vspace{3ex}
+
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{}
+			\bitbox{8}{opcode} & 
+			\bitbox{8}{rd} &
+			\bitbox{8}{rs\textsubscript{0}}
+			\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\vspace{3ex}
+
+\end{document}
