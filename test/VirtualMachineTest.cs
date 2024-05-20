@@ -19,13 +19,6 @@ namespace FTG.Studios.BISC.Test {
 			return regs;
 		}
 
-		void CompareRegisterStates(UInt32[] expected, UInt32[] actual) {
-			Assert.AreEqual(expected.Length, actual.Length);
-			for (int i = 0; i < expected.Length; i++) {
-				Assert.AreEqual(expected[i], actual[i]);
-			}
-		}
-
 		[SetUp]
 		public void SetUp() {
 			address_start = 0x1000;
