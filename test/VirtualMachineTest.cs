@@ -531,7 +531,7 @@ namespace FTG.Studios.BISC.Test {
 		public void MULH() {
 			Register source_register_a = Register.R0;
 			Register source_register_b = Register.R1;
-			Register destination_rregister = Register.R2;
+			Register destination_register = Register.R2;
 
 			UInt32 value_a = 0xbabecafe;
 			UInt32 value_b = 0xcafebabe;
@@ -540,7 +540,7 @@ namespace FTG.Studios.BISC.Test {
 			vm.SetRegister(source_register_a, value_a);
 			vm.SetRegister(source_register_b, value_b);
 
-			UInt32 instruction = ((byte)Opcode.MULH, (byte)destination_rregister, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32 instruction = ((byte)Opcode.MULH, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
 			UInt32[] expected_state = GetRegisterState();
 			Assert.IsTrue(vm.ExecuteInstruction(instruction));
 			UInt32[] actual_state = GetRegisterState();
@@ -549,7 +549,7 @@ namespace FTG.Studios.BISC.Test {
 			expected_state[(int)Register.PC] += 4;
 
 			// Dst should be expected value
-			expected_state[(int)destination_rregister] = expected;
+			expected_state[(int)destination_register] = expected;
 
 			// Check registers match previous register state
 			Assert.AreEqual(expected_state, actual_state);
