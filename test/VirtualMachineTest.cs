@@ -1006,5 +1006,399 @@ namespace FTG.Studios.BISC.Test {
 			Assert.AreEqual(expected_state, actual_state);
 		}
 		#endregion
+
+		#region Logical Instructions
+		[Test]
+		public void AND_0_And_0_Returns_0() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 0;
+			UInt32 value_b = 0;
+			UInt32 expected = 0;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.AND, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void AND_1_And_1_Returns_1() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 1;
+			UInt32 value_b = 1;
+			UInt32 expected = 1;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.AND, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void AND_1_And_0_Returns_0() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 1;
+			UInt32 value_b = 0;
+			UInt32 expected = 0;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.AND, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void AND_0_And_1_Returns_0() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 0;
+			UInt32 value_b = 1;
+			UInt32 expected = 0;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.AND, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void AND_F0F0F0F0_And_F0F0F0F0_Returns_F0F0F0F0() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 0xF0F0F0F0;
+			UInt32 value_b = 0xF0F0F0F0;
+			UInt32 expected = 0xF0F0F0F0;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.AND, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void AND_F0F0F0F0_And_0F0F0F0F_Returns_0() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 0xF0F0F0F0;
+			UInt32 value_b = 0x0F0F0F0F;
+			UInt32 expected = 0;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.AND, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void AND_Random_value() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 0x36481937;
+			UInt32 value_b = 0x94829374;
+			UInt32 expected = value_a & value_b;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.AND, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void OR_0_And_0_Returns_0() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 0;
+			UInt32 value_b = 0;
+			UInt32 expected = 0;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.OR, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void OR_1_And_1_Returns_1() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 1;
+			UInt32 value_b = 1;
+			UInt32 expected = 1;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.OR, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void OR_1_And_0_Returns_1() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 1;
+			UInt32 value_b = 0;
+			UInt32 expected = 1;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.OR, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void OR_0_And_1_Returns_1() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 0;
+			UInt32 value_b = 1;
+			UInt32 expected = 1;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.OR, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void OR_F0F0F0F0_And_F0F0F0F0_Returns_F0F0F0F0() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 0xF0F0F0F0;
+			UInt32 value_b = 0xF0F0F0F0;
+			UInt32 expected = 0xF0F0F0F0;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.OR, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void OR_F0F0F0F0_And_0F0F0F0F_Returns_FFFFFFFF() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 0xF0F0F0F0;
+			UInt32 value_b = 0x0F0F0F0F;
+			UInt32 expected = 0xFFFFFFFF;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.OR, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+
+		[Test]
+		public void OR_Random_value() {
+			Register source_register_a = Register.R0;
+			Register source_register_b = Register.R1;
+			Register destination_register = Register.R2;
+
+			UInt32 value_a = 0x58594027;
+			UInt32 value_b = 0x89432934;
+			UInt32 expected = value_a | value_b;
+
+			vm.SetRegister(source_register_a, value_a);
+			vm.SetRegister(source_register_b, value_b);
+
+			UInt32 instruction = ((byte)Opcode.OR, (byte)destination_register, (byte)source_register_a, (byte)source_register_b).AssembleUInt32();
+			UInt32[] expected_state = GetRegisterState();
+			Assert.IsTrue(vm.ExecuteInstruction(instruction));
+			UInt32[] actual_state = GetRegisterState();
+
+			// PC should be incremented by 4
+			expected_state[(int)Register.PC] += 4;
+
+			// Dst should be expected value
+			expected_state[(int)destination_register] = expected;
+
+			// Check registers match previous register state
+			Assert.AreEqual(expected_state, actual_state);
+		}
+		#endregion
 	}
 }
