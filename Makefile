@@ -15,7 +15,8 @@ VM_SRC = $(wildcard $(VM_DIR)/*.cs) $(CMN_SRC)
 TEST_DIR = test
 
 DOCS_DIR = docs
-DOCS_SRC = $(wildcard $(DOCS_DIR)/*.tex)
+#DOCS_SRC = $(wildcard $(DOCS_DIR)/*.tex)
+DOCS_SRC = $(DOCS_DIR)/bisc-manual.tex
 DOCS_BUILD_DIR = $(BUILD_DIR)/docs
 
 CSC_FLAGS = -errorendlocation

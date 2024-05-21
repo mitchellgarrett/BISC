@@ -471,7 +471,7 @@ namespace FTG.Studios.BISC.VM
 		}
 		#endregion
 
-		#region Logical Instructions
+		#region Bitwise Instructions
 		bool AND(byte arg0, byte arg1, byte arg2)
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;

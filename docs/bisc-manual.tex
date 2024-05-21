@@ -1,0 +1,32 @@
+\documentclass{article}
+
+\usepackage{import}
+\usepackage[hidelinks]{hyperref}
+
+\usepackage{lmodern}
+\usepackage{bytefield}
+
+\hypersetup{
+    linktoc=all
+}
+
+\title{\textbf{BISC Instruction Set Manual}}
+\author{Mitchell Garrett}
+\date{May 21, 2024}
+
+\begin{document}
+	
+% Select ldmodern 'light' font
+%\ttfamily
+%\fontseries{l}\selectfont
+
+\maketitle
+
+\tableofcontents
+
+\include{bisc-registers}
+\include{bisc-instruction-reference}
+\include{bisc-instruction-formats}
+\include{bisc-instructions}
+
+\end{document}

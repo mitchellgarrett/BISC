@@ -1,0 +1,97 @@
+\section{Instruction Reference}
+
+\begin{center}
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		\textbf{Opcode} & \textbf{Mnemonic} & \textbf{Instruction} & \textbf{Action}\\
+		\hline
+		0x00 & \hyperref[sec:HLT]{HLT} & Halt & Halts CPU execution\\
+		\hline
+		0x01 & \hyperref[sec:NOP]{NOP} & No Operation & pc := pc + 4\\
+		\hline
+		0x02 & \hyperref[sec:SYS]{SYS} & System Call & Calls operating system\\
+		\hline
+		0x03 & \hyperref[sec:CALL]{CALL} & Function Call & ra := pc, pc = rs\\
+		\hline
+		0x04 & \hyperref[sec:RET]{RET} & Return & pc := ra\\
+		\hline
+		0x05 & \hyperref[sec:LLI]{LLI} & Load Lower Immediate & rd[0..15] := imm16\\
+		\hline
+		0x06 & \hyperref[sec:LUI]{LUI} & Load Upper Immediate & rd[16..31] := imm16\\
+		\hline
+		0x07 & \hyperref[sec:MOV]{MOV} & Move & rd := rs\\
+		\hline
+		0x08 & \hyperref[sec:LDW]{LDW} & Load Word & mem[rd + offset] = rs\\
+		\hline
+		0x09 & \hyperref[sec:LDH]{LDH} & Load Half Word & mem[rd + offset] = rs[0..15]\\
+		\hline
+		0x0A & \hyperref[sec:LDB]{LDB} & Load Byte & mem[rd + offset] = rs[0..7]\\
+		\hline
+		0x0B & \hyperref[sec:STW]{STW} & Store Word & rd := mem[rs + offset]\\
+		\hline
+		0x0C & \hyperref[sec:STH]{STH} & Store Half Word & rd[0..15] := mem[rs + offset]\\
+		\hline
+		0x0D & \hyperref[sec:STB]{STB} & Store Byte & rd[0..7] := mem[rs + offset]\\
+		\hline
+		0x0E & \hyperref[sec:ADD]{ADD} & Add & rd := rs\textsubscript{0} $+$ rs\textsubscript{1}\\
+		\hline
+		0x0F & \hyperref[sec:SUB]{SUB} & Subtract & rd := rs\textsubscript{0} $-$ rs\textsubscript{1}\\
+		\hline
+		0x10 & \hyperref[sec:MUL]{MUL} & Multiply & rd := rs\textsubscript{0} $\cdot$ rs\textsubscript{1}\\
+		\hline
+		0x11 & \hyperref[sec:MULH]{MULH} & Multiply High & rd := rs\textsubscript{0}[16..31] $\cdot$ rs\textsubscript{1}[16..31]\\
+		\hline
+		0x12 & \hyperref[sec:MULHU]{MULHU} & Multiply High Unsigned & rd := rs\textsubscript{0}[16..31] $+$ rs\textsubscript{1}[16..31]\\
+		\hline
+		0x13 & \hyperref[sec:DIV]{DIV} & Divide & rd := rs\textsubscript{0} $\div$ rs\textsubscript{1}\\
+		\hline
+		0x14 & \hyperref[sec:DIVU]{DIVU} & Divide Unsigned & rd := rs\textsubscript{0} $\div$ rs\textsubscript{1}\\
+		\hline
+		0x15 & \hyperref[sec:MOD]{MOD} & Modulo & rd := rs\textsubscript{0} \% rs\textsubscript{1}\\
+		\hline
+		0x16 & \hyperref[sec:MODU]{MODU} & Modulo Unsigned & rd := rs\textsubscript{0} \% rs\textsubscript{1}\\
+		\hline
+		0x17 & \hyperref[sec:NOT]{NOT} & Logical Not & if rs = 0, rd := 1, else rd := 0\\
+		\hline
+		0x18 & \hyperref[sec:NEG]{NEG} & Integer Negate & rd := -1 $\cdot$ rs\\
+		\hline
+		0x19 & \hyperref[sec:INV]{INV} & Bitwise Invert & rd := rs $\oplus$ rs\\
+		\hline
+		0x1A & \hyperref[sec:AND]{AND} & Bitwise And & rd := rs\textsubscript{0} $\land$ rs\textsubscript{1}\\
+		\hline
+		0x1B & \hyperref[sec:OR]{OR} & Bitwise Or & rd := rs\textsubscript{0} $\lor$ rs\textsubscript{1}\\
+		\hline
+		0x1C & \hyperref[sec:XOR]{XOR} & Bitwise Exclusive Or & rd := rs\textsubscript{0} $\oplus$ rs\textsubscript{1}\\
+		\hline
+		0x1D & \hyperref[sec:BSL]{BSL} & Bit Shift Left & rd := rs\textsubscript{0} << rs\textsubscript{1}\\
+		\hline
+		0x1E & \hyperref[sec:BSR]{BSR} & Bit Shift Right & rd := rs\textsubscript{0} >> rs\textsubscript{1}\\
+		\hline
+		0x1F & \hyperref[sec:JMP]{JMP} & Jump & pc := rd\\
+		\hline
+		0x20 & \hyperref[sec:JEZ]{JEZ} & Jump If Zero & if rs = 0, pc := rd\\
+		\hline
+		0x21 & \hyperref[sec:JNZ]{JNZ} & Jump If Not Zero & if rs != 0, pc := rd\\
+		\hline
+		0x22 & \hyperref[sec:JEQ]{JEQ} & Jump If Equal & if rs\textsubscript{0} = rs\textsubscript{1}, pc := rd\\
+		\hline
+		0x23 & \hyperref[sec:JNE]{JNE} & Jump If Not Equal & if rs\textsubscript{0} $\neq$ rs\textsubscript{1}, pc := rd\\
+		\hline
+		0x24 & \hyperref[sec:JGT]{JGT} & Jump If Greater Than & if rs\textsubscript{0} $>$ rs\textsubscript{1}, pc := rd\\
+		\hline
+		0x25 & \hyperref[sec:JLT]{JLT} & Jump If Less Than & if rs\textsubscript{0} $<$ rs\textsubscript{1}, pc := rd\\
+		\hline
+		0x26 & \hyperref[sec:JGE]{JGE} & Jump If Greater Or Equal & if rs\textsubscript{0} $\geq$ rs\textsubscript{1}, pc := rd\\
+		\hline
+		0x27 & \hyperref[sec:JLE]{JLE} & Jump If Greater Or Less & if rs\textsubscript{0} $\leq$ rs\textsubscript{1}, pc := rd\\
+		\hline
+		0x28 & \hyperref[sec:JGTU]{JGTU} & Jump If Greater Than Unsigned & if rs\textsubscript{0} $\geq$ rs\textsubscript{1}, pc := rd\\
+		\hline
+		0x29 & \hyperref[sec:JLTU]{JLTU} & Jump If Less Than Unsigned & if rs\textsubscript{0} $\leq$ rs\textsubscript{1}, pc := rd\\
+		\hline
+		0x2A & \hyperref[sec:JGEU]{JGEU} & Jump If Greater Or Equal Unsigned & if rs\textsubscript{0} $\geq$ rs\textsubscript{1}, pc := rd\\
+		\hline
+		0x2B & \hyperref[sec:JLEU]{JLEU} & Jump If Less Or Equal Unsigned & if rs\textsubscript{0} $\leq$ rs\textsubscript{1}, pc := rd\\
+		\hline
+	\end{tabular}
+\end{center}
