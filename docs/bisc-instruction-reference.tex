@@ -15,11 +15,13 @@
 		\hline
 		0x04 & \hyperref[sec:RET]{RET} & Return & pc := ra\\
 		\hline
+		\hline
 		0x05 & \hyperref[sec:LLI]{LLI} & Load Lower Immediate & rd[0..15] := imm16\\
 		\hline
 		0x06 & \hyperref[sec:LUI]{LUI} & Load Upper Immediate & rd[16..31] := imm16\\
 		\hline
 		0x07 & \hyperref[sec:MOV]{MOV} & Move & rd := rs\\
+		\hline
 		\hline
 		0x08 & \hyperref[sec:LDW]{LDW} & Load Word & mem[rd + offset] = rs\\
 		\hline
@@ -32,6 +34,7 @@
 		0x0C & \hyperref[sec:STH]{STH} & Store Half Word & rd[0..15] := mem[rs + offset]\\
 		\hline
 		0x0D & \hyperref[sec:STB]{STB} & Store Byte & rd[0..7] := mem[rs + offset]\\
+		\hline
 		\hline
 		0x0E & \hyperref[sec:ADD]{ADD} & Add & rd := rs\textsubscript{0} $+$ rs\textsubscript{1}\\
 		\hline
@@ -51,11 +54,13 @@
 		\hline
 		0x16 & \hyperref[sec:MODU]{MODU} & Modulo Unsigned & rd := rs\textsubscript{0} \% rs\textsubscript{1}\\
 		\hline
+		\hline
 		0x17 & \hyperref[sec:NOT]{NOT} & Logical Not & if rs = 0, rd := 1, else rd := 0\\
 		\hline
 		0x18 & \hyperref[sec:NEG]{NEG} & Integer Negate & rd := -1 $\cdot$ rs\\
 		\hline
-		0x19 & \hyperref[sec:INV]{INV} & Bitwise Invert & rd := rs $\oplus$ rs\\
+		0x19 & \hyperref[sec:INV]{INV} & Bitwise Invert & rd := rs $\oplus$ 0xffffffff\\
+		\hline
 		\hline
 		0x1A & \hyperref[sec:AND]{AND} & Bitwise And & rd := rs\textsubscript{0} $\land$ rs\textsubscript{1}\\
 		\hline
@@ -66,6 +71,7 @@
 		0x1D & \hyperref[sec:BSL]{BSL} & Bit Shift Left & rd := rs\textsubscript{0} << rs\textsubscript{1}\\
 		\hline
 		0x1E & \hyperref[sec:BSR]{BSR} & Bit Shift Right & rd := rs\textsubscript{0} >> rs\textsubscript{1}\\
+		\hline
 		\hline
 		0x1F & \hyperref[sec:JMP]{JMP} & Jump & pc := rd\\
 		\hline
