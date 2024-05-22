@@ -27,8 +27,8 @@ namespace FTG.Studios.BISC
 		};
 
 		public static readonly InstructionFormat[] instruction_formats = {
-			InstructionFormat.N, // NOP
 			InstructionFormat.N, // HLT
+			InstructionFormat.N, // NOP
 			InstructionFormat.N, // SYS
 			InstructionFormat.R, // CALL
 			InstructionFormat.N, // RET
@@ -47,8 +47,12 @@ namespace FTG.Studios.BISC
 			InstructionFormat.T, // ADD
 			InstructionFormat.T, // SUB
 			InstructionFormat.T, // MUL
+			InstructionFormat.T, // MULH
+			InstructionFormat.T, // MULHU
 			InstructionFormat.T, // DIV
+			InstructionFormat.T, // DIVU
 			InstructionFormat.T, // MOD
+			InstructionFormat.T, // MODU
 
 			InstructionFormat.D, // NOT
 			InstructionFormat.D, // NEG
@@ -83,7 +87,7 @@ namespace FTG.Studios.BISC
 		public static readonly string[] pseudo_instruction_names = new string[] {
 			"LDI", "LRA",
 			"CALL",
-			"LW", "LH", "LB", "SW", "SH", "SB",
+			"LDW", "LDH", "LDB", "STW", "STH", "STB",
 			"PUSH", "PUSH", "PUSHW", "PUSHW", "PUSHB", "PUSHB",
 			"POP", "POPW", "POPB",
 			"ADDI", "ADDI", "SUBI", "SUBI", "MULI", "MULI", "DIVI", "DIVI", "MODI",
