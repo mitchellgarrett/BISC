@@ -13,16 +13,11 @@ namespace FTG.Studios.BISC.VM
 		delegate bool InstructionHandler(byte arg0, byte arg1, byte arg2);
 		InstructionHandler[] instructions;
 
-		UInt32[] registers;
+		RegisterValue[] registers;
 
-		UInt32 pc { get => registers[(int)Register.PC]; set { registers[(int)Register.PC] = value; } }
-		UInt32 sp { get => registers[(int)Register.SP]; set { registers[(int)Register.SP] = value; } }
-		UInt32 gp { get => registers[(int)Register.GP]; set { registers[(int)Register.GP] = value; } }
-		UInt32 fp { get => registers[(int)Register.FP]; set { registers[(int)Register.FP] = value; } }
-		UInt32 ra { get => registers[(int)Register.RA]; set { registers[(int)Register.RA] = value; } }
-		UInt32 rv { get => registers[(int)Register.RV]; set { registers[(int)Register.RV] = value; } }
-		UInt32 ti { get => registers[(int)Register.TI]; set { registers[(int)Register.TI] = value; } }
-		UInt32 ta { get => registers[(int)Register.TA]; set { registers[(int)Register.TA] = value; } }
+		UInt32 pc { get => registers[(int)Register.PC].UValue; set { registers[(int)Register.PC].UValue = value; } }
+		UInt32 ra { get => registers[(int)Register.RA].UValue; set { registers[(int)Register.RA].UValue = value; } }
+		UInt32 rv { get => registers[(int)Register.RV].UValue; set { registers[(int)Register.RV].UValue = value; } }
 
 		readonly Memory memory;
 
@@ -37,7 +32,7 @@ namespace FTG.Studios.BISC.VM
 
 		void Initialize()
 		{
-			registers = new UInt32[Specification.NUM_REGISTERS];
+			registers = new RegisterValue[Specification.NUM_REGISTERS];
 			instructions = new InstructionHandler[] {
 				HLT, NOP, SYS, CALL, RET,
 				LLI, LUI, MOV,
@@ -52,23 +47,23 @@ namespace FTG.Studios.BISC.VM
 
 		public UInt32 GetRegister(int reg)
 		{
-			if (reg >= 0 && reg < Specification.NUM_REGISTERS) return registers[reg];
+			if (reg >= 0 && reg < Specification.NUM_REGISTERS) return registers[reg].UValue;
 			return 0xFFFFFFFF;
 		}
 
 		public UInt32 GetRegister(Register reg)
 		{
-			return registers[(int)reg];
+			return registers[(int)reg].UValue;
 		}
 
 		public void SetRegister(int reg, UInt32 val)
 		{
-			if (reg >= 0 && reg < Specification.NUM_REGISTERS) registers[reg] = val;
+			if (reg >= 0 && reg < Specification.NUM_REGISTERS) registers[reg].UValue = val;
 		}
 
 		public void SetRegister(Register reg, UInt32 val)
 		{
-			registers[(int)reg] = val;
+			registers[(int)reg].UValue = val;
 		}
 
 		bool IsValidRegister(byte reg)
@@ -134,7 +129,7 @@ namespace FTG.Studios.BISC.VM
 			// Zero out the registers.
 			for (int i = 0; i < registers.Length; i++)
 			{
-				registers[i] = 0;
+				registers[i].UValue = 0;
 			}
 
 			memory.Reset();
@@ -248,7 +243,7 @@ namespace FTG.Studios.BISC.VM
 			// Set return address to next instruction
 			ra = pc + 4;
 			// Jump to called address
-			pc = registers[arg0];
+			pc = registers[arg0].UValue;
 			return true;
 		}
 
@@ -268,7 +263,7 @@ namespace FTG.Studios.BISC.VM
 			if (!IsValidRegister(arg0)) return false;
 
 			UInt16 imm = (arg1, arg2).AssembleUInt16();
-			registers[arg0] = imm;
+			registers[arg0].UValue = imm;
 			pc += 4;
 			return true;
 		}
@@ -278,7 +273,7 @@ namespace FTG.Studios.BISC.VM
 			if (!IsValidRegister(arg0)) return false;
 
 			UInt16 imm = (arg1, arg2).AssembleUInt16();
-			registers[arg0] = (UInt32)((registers[arg0] & 0xFFFF) | (UInt32)(imm << 16));
+			registers[arg0].UValue = (UInt32)((registers[arg0].UValue & 0xFFFF) | (UInt32)(imm << 16));
 			pc += 4;
 			return true;
 		}
@@ -287,7 +282,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
-			registers[arg0] = registers[arg1];
+			registers[arg0].UValue = registers[arg1].UValue;
 			pc += 4;
 			return true;
 		}
@@ -299,9 +294,9 @@ namespace FTG.Studios.BISC.VM
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
-			UInt32 addr = (UInt32)(registers[arg1] + offset);
+			UInt32 addr = (UInt32)(registers[arg1].UValue + offset);
 			UInt32 value = GetMemory32(addr);
-			registers[arg0] = value;
+			registers[arg0].UValue = value;
 			pc += 4;
 			return true;
 		}
@@ -311,9 +306,9 @@ namespace FTG.Studios.BISC.VM
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
-			UInt32 addr = (UInt32)(registers[arg1] + offset);
+			UInt32 addr = (UInt32)(registers[arg1].UValue + offset);
 			UInt16 value = GetMemory16(addr);
-			registers[arg0] = value;
+			registers[arg0].UValue = value;
 			pc += 4;
 			return true;
 		}
@@ -323,9 +318,9 @@ namespace FTG.Studios.BISC.VM
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
-			UInt32 addr = (UInt32)(registers[arg1] + offset);
+			UInt32 addr = (UInt32)(registers[arg1].UValue + offset);
 			byte value = GetMemory8(addr);
-			registers[arg0] = value;
+			registers[arg0].UValue = value;
 			pc += 4;
 			return true;
 		}
@@ -335,8 +330,8 @@ namespace FTG.Studios.BISC.VM
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
-			UInt32 addr = (UInt32)(registers[arg1] + offset);
-			SetMemory32(addr, registers[arg0]);
+			UInt32 addr = (UInt32)(registers[arg1].UValue + offset);
+			SetMemory32(addr, registers[arg0].UValue);
 			pc += 4;
 			return true;
 		}
@@ -346,8 +341,8 @@ namespace FTG.Studios.BISC.VM
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
-			UInt32 addr = (UInt32)(registers[arg1] + offset);
-			SetMemory16(addr, registers[arg0]);
+			UInt32 addr = (UInt32)(registers[arg1].UValue + offset);
+			SetMemory16(addr, registers[arg0].UValue);
 			pc += 4;
 			return true;
 		}
@@ -357,8 +352,8 @@ namespace FTG.Studios.BISC.VM
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1)) return false;
 
 			sbyte offset = (sbyte)arg2;
-			UInt32 addr = (UInt32)(registers[arg1] + offset);
-			SetMemory8(addr, registers[arg0]);
+			UInt32 addr = (UInt32)(registers[arg1].UValue + offset);
+			SetMemory8(addr, registers[arg0].UValue);
 			pc += 4;
 			return true;
 		}
@@ -369,7 +364,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] + registers[arg2];
+			registers[arg0].UValue = registers[arg1].UValue + registers[arg2].UValue;
 			pc += 4;
 			return true;
 		}
@@ -378,7 +373,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] - registers[arg2];
+			registers[arg0].UValue = registers[arg1].UValue - registers[arg2].UValue;
 			pc += 4;
 			return true;
 		}
@@ -387,7 +382,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] * registers[arg2];
+			registers[arg0].UValue = registers[arg1].UValue * registers[arg2].UValue;
 			pc += 4;
 			return true;
 		}
@@ -395,7 +390,7 @@ namespace FTG.Studios.BISC.VM
 		bool MULH(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = (UInt32)((int)registers[arg1] * (int)registers[arg2] >> 32);
+			registers[arg0].IValue = (registers[arg1].IValue * registers[arg2].IValue) >> 32;
 			pc += 4;
 			return true;
 		}
@@ -403,7 +398,7 @@ namespace FTG.Studios.BISC.VM
 		bool MULHU(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = (UInt32)(((int)registers[arg1] * (int)registers[arg2]) >> 32);
+			registers[arg0].UValue = (registers[arg1].UValue * registers[arg2].UValue) >> 32;
 			pc += 4;
 			return true;
 		}
@@ -411,7 +406,7 @@ namespace FTG.Studios.BISC.VM
 		bool DIV(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = (UInt32)((int)registers[arg1] / (int)registers[arg2]);
+			registers[arg0].IValue = registers[arg1].IValue / registers[arg2].IValue;
 			pc += 4;
 			return true;
 		}
@@ -419,7 +414,7 @@ namespace FTG.Studios.BISC.VM
 		bool DIVU(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] / registers[arg2];
+			registers[arg0].UValue = registers[arg1].UValue / registers[arg2].UValue;
 			pc += 4;
 			return true;
 		}
@@ -428,7 +423,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = (UInt32)((int)registers[arg1] % (int)registers[arg2]);
+			registers[arg0].IValue = registers[arg1].IValue % registers[arg2].IValue;
 			pc += 4;
 			return true;
 		}
@@ -436,7 +431,7 @@ namespace FTG.Studios.BISC.VM
 		bool MODU(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] % registers[arg2];
+			registers[arg0].UValue = registers[arg1].UValue % registers[arg2].UValue;
 			pc += 4;
 			return true;
 		}
@@ -447,7 +442,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
-			registers[arg0] = registers[arg1] != 0 ? 0u : 1u;
+			registers[arg0].UValue = registers[arg1].UValue != 0 ? 0u : 1u;
 			pc += 4;
 			return true;
 		}
@@ -456,7 +451,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
-			registers[arg0] = (registers[arg1] ^ 0xFFFFFFFF) + 1;
+			registers[arg0].IValue = registers[arg1].IValue * -1;
 			pc += 4;
 			return true;
 		}
@@ -465,7 +460,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
-			registers[arg0] = registers[arg1] ^ 0xFFFFFFFF;
+			registers[arg0].UValue = registers[arg1].UValue ^ 0xFFFFFFFF;
 			pc += 4;
 			return true;
 		}
@@ -476,7 +471,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] & registers[arg2];
+			registers[arg0].UValue = registers[arg1].UValue & registers[arg2].UValue;
 			pc += 4;
 			return true;
 		}
@@ -485,7 +480,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] | registers[arg2];
+			registers[arg0].UValue = registers[arg1].UValue | registers[arg2].UValue;
 			pc += 4;
 			return true;
 		}
@@ -494,7 +489,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] ^ registers[arg2];
+			registers[arg0].UValue = registers[arg1].UValue ^ registers[arg2].UValue;
 			pc += 4;
 			return true;
 		}
@@ -503,7 +498,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] << (int)registers[arg2];
+			registers[arg0].UValue = registers[arg1].UValue << registers[arg2].IValue;
 			pc += 4;
 			return true;
 		}
@@ -512,7 +507,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0] = registers[arg1] >> (int)registers[arg2];
+			registers[arg0].UValue = registers[arg1].UValue >> registers[arg2].IValue;
 			pc += 4;
 			return true;
 		}
@@ -523,7 +518,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
 
-			pc = registers[arg0];
+			pc = registers[arg0].UValue;
 			return true;
 		}
 
@@ -531,7 +526,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
-			if (registers[arg1] == 0) pc = registers[arg0];
+			if (registers[arg1].UValue == 0) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
@@ -540,7 +535,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || arg2 != 0) return false;
 
-			if (registers[arg1] != 0) pc = registers[arg0];
+			if (registers[arg1].UValue != 0) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
@@ -549,7 +544,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			if (registers[arg1] == registers[arg2]) pc = registers[arg0];
+			if (registers[arg1].UValue == registers[arg2].UValue) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
@@ -558,7 +553,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			if (registers[arg1] != registers[arg2]) pc = registers[arg0];
+			if (registers[arg1].UValue != registers[arg2].UValue) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
@@ -567,7 +562,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			if ((int)registers[arg1] > (int)registers[arg2]) pc = registers[arg0];
+			if (registers[arg1].IValue > registers[arg2].IValue) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
@@ -576,7 +571,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			if ((int)registers[arg1] < (int)registers[arg2]) pc = registers[arg0];
+			if (registers[arg1].IValue < registers[arg2].IValue) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
@@ -585,7 +580,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			if ((int)registers[arg1] >= (int)registers[arg2]) pc = registers[arg0];
+			if (registers[arg1].IValue >= registers[arg2].IValue) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
@@ -594,7 +589,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			if ((int)registers[arg1] <= (int)registers[arg2]) pc = registers[arg0];
+			if (registers[arg1].IValue <= registers[arg2].IValue) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
@@ -603,7 +598,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			if (registers[arg1] > registers[arg2]) pc = registers[arg0];
+			if (registers[arg1].UValue > registers[arg2].UValue) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
@@ -612,7 +607,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			if (registers[arg1] < registers[arg2]) pc = registers[arg0];
+			if (registers[arg1].UValue < registers[arg2].UValue) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
@@ -621,7 +616,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			if (registers[arg1] >= registers[arg2]) pc = registers[arg0];
+			if (registers[arg1].UValue >= registers[arg2].UValue) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
@@ -630,7 +625,7 @@ namespace FTG.Studios.BISC.VM
 		{
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			if (registers[arg1] <= registers[arg2]) pc = registers[arg0];
+			if (registers[arg1].UValue <= registers[arg2].UValue) pc = registers[arg0].UValue;
 			else pc += 4;
 			return true;
 		}
