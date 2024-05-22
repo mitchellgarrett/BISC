@@ -133,12 +133,13 @@ namespace FTG.Studios.BISC.Asm
 			BEEF.ObjectFile obj = new BEEF.ObjectFile();
 			obj.FileHeader = new BEEF.FileHeader()
 			{
-				MagicNumber = BEEF.FileHeader.MAGIC_NUMBER,
+				HeaderBegin = BEEF.FileHeader.MAGIC_NUMBER,
 				Architecture = 0xb,
 				Endianness = BEEF.Endianness.Little,
 				EntryPoint = 0,
 				SectionTableOffset = BEEF.FileHeader.SizeInBytes,
-				SectionCount = (UInt16)section_count
+				SectionCount = (UInt16)section_count,
+				HeaderEnd = BEEF.FileHeader.MAGIC_NUMBER
 			};
 
 			obj.SectionHeaders = new BEEF.SectionHeader[section_count];
