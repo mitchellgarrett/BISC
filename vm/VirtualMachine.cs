@@ -201,7 +201,7 @@ namespace FTG.Studios.BISC.VM
 			if (opcode >= instructions.Length || !instructions[opcode](arg0, arg1, arg2))
 			{
 				// TODO: Set debug register to illegal execution
-				throw new IllegalExecutionException($"Illegal execution: 0x{opcode:x2}{arg0:x2}{arg1:x2}{arg2:x2}");
+				throw new IllegalExecutionException($"Illegal execution: 0x{opcode:x2}{arg0:x2}{arg1:x2}{arg2:x2} at 0x{pc:x8}");
 			}
 
 			return true;
