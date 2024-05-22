@@ -390,7 +390,7 @@ namespace FTG.Studios.BISC.VM
 		bool MULH(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0].IValue = (registers[arg1].IValue * registers[arg2].IValue) >> 32;
+			registers[arg0].IValue = (int)(((long)registers[arg1].IValue * (long)registers[arg2].IValue) >> 32);
 			pc += 4;
 			return true;
 		}
@@ -398,7 +398,7 @@ namespace FTG.Studios.BISC.VM
 		bool MULHU(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
 
-			registers[arg0].UValue = (registers[arg1].UValue * registers[arg2].UValue) >> 32;
+			registers[arg0].UValue = (registers[arg1].UValue >> 16) * (registers[arg2].UValue >> 16);
 			pc += 4;
 			return true;
 		}
