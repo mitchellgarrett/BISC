@@ -210,19 +210,19 @@ namespace FTG.Studios.BISC.VM
 		#region Instructions
 
 		#region System Instructions
-		bool NOP(byte arg0, byte arg1, byte arg2)
-		{
-			if (arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
-
-			pc += 4;
-			return true;
-		}
-
 		bool HLT(byte arg0, byte arg1, byte arg2)
 		{
 			if (arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
 
 			Halt();
+			return true;
+		}
+		
+		bool NOP(byte arg0, byte arg1, byte arg2)
+		{
+			if (arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
+
+			pc += 4;
 			return true;
 		}
 
@@ -389,16 +389,18 @@ namespace FTG.Studios.BISC.VM
 
 		bool MULH(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-
-			registers[arg0].IValue = (int)(((long)registers[arg1].IValue * (long)registers[arg2].IValue) >> 32);
+			
+			long value = (long)registers[arg1].IValue * (long)registers[arg2].IValue;
+			registers[arg0].IValue = (int)((value >> 32) & 0xFFFFFFFF);
 			pc += 4;
 			return true;
 		}
 
 		bool MULHU(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || !IsValidRegister(arg1) || !IsValidRegister(arg2)) return false;
-
-			registers[arg0].UValue = (registers[arg1].UValue >> 16) * (registers[arg2].UValue >> 16);
+			
+			UInt64 value = (UInt64)registers[arg1].UValue * (UInt64)registers[arg2].UValue;
+			registers[arg0].UValue = (UInt32)((value >> 32) & 0xFFFFFFFF);
 			pc += 4;
 			return true;
 		}
