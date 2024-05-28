@@ -142,6 +142,7 @@ namespace FTG.Studios.BISC.Asm
 
 			if (!string.IsNullOrEmpty(current_word))
 			{
+				charno++;
 				tokens.Add(BuildToken(current_word));
 			}
 
