@@ -5,11 +5,11 @@
 		\hline
 		\textbf{Opcode} & \textbf{Mnemonic} & \textbf{Instruction} & \textbf{Action}\\
 		\hline
-		0x00 & \hyperref[sec:HLT]{HLT} & Halt & Halts CPU execution\\
+		0x00 & \hyperref[sec:HLT]{HLT} & Halt & Halt CPU execution\\
 		\hline
 		0x01 & \hyperref[sec:NOP]{NOP} & No Operation & pc := pc + 4\\
 		\hline
-		0x02 & \hyperref[sec:SYS]{SYS} & System Call & Calls operating system\\
+		0x02 & \hyperref[sec:SYS]{SYS} & System Call & Execute system call\\
 		\hline
 		0x03 & \hyperref[sec:CALL]{CALL} & Function Call & ra := pc, pc = rs\\
 		\hline

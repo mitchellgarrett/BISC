@@ -2,10 +2,215 @@
 
 \subsubsection{HLT \normalfont{- Halt}}\label{sec:HLT}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:n-type]{\textbf{N-Type}}}
+		\bitbox{8}{0x00} & 
+		\bitbox{24}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The HLT, instruction signals to the CPU that the program is done and it should stop execution.
+If the CPU does not encounter a HLT it will continue executing forever, so it is important to always end your program with one of these.
+Note that HLT does not advance the program counter, so the value of \texttt{pc} will be the address of the HLT instruction.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	Halt CPU execution
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	; halt program
+	HLT
+\end{lstlisting}
+
 \subsubsection{NOP \normalfont{- No Operation}}\label{sec:NOP}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:n-type]{\textbf{N-Type}}}
+		\bitbox{8}{0x01} & 
+		\bitbox{24}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+The NOP instruction conducts `No Operation', meaning it literally does nothing and advances the program counter by 4.
+Why does this exist, you may ask? Well, NOPs can be very useful for padding out space in a program for timing purposes or as a debugging instruction to ensure the CPU is working correctly.
+Apart from that it is unlikely that you will be using these often.
  
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	pc := pc + 4
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	; no operation
+	NOP
+\end{lstlisting}
+
 \subsubsection{SYS \normalfont{- System Call}}\label{sec:SYS}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:n-type]{\textbf{N-Type}}}
+		\bitbox{8}{0x02} & 
+		\bitbox{24}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The SYS instruction signals to the OS that it should handle a System Call.
+The type of System Call to be executed is OS-dependent and depends on the value of the \texttt{r0} register.
+Registers \texttt{r1-r7} can be used as further arguments or be modified to store return values of the call, therefore you should read up on the specifics of your OS and what the implications are of each System Call.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	Execute system call
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	; load system call index into r0
+	LDI r0, {imm32}
+	; execute system call designated by r0
+	SYS
+\end{lstlisting}
 
 \subsubsection{CALL \normalfont{- Function Call}}\label{sec:CALL}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{R-Type}}}
+		\bitbox{8}{0x03} & 
+		\bitbox{8}{rd} &
+		\bitbox{16}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The CALL instruction executes a Function Call, storing the current value of the program counter in the return address register and changing the value of the program counter to the value of the \texttt{rd} register.
+The specifics of how arguments are passed to a function are specified in the \textit{Calling Convention}.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	ra := pc
+	pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	; load address of function to call
+	LDI {rd}, {imm32}
+	; pass execution to function
+	CALL {rd}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; load address of function
+	LDI r0, THIS_IS_A_FUNCTION
+	; call function
+	CALL r0
+	; this instruction will be run
+	; after function returns
+	HLT
+	
+	; label of function
+	THIS_IS_A_FUNCTION:
+	RET
+\end{lstlisting}
+
 \subsubsection{RET \normalfont{- Return}}\label{sec:RET}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:n-type]{\textbf{N-Type}}}
+		\bitbox{8}{0x04} & 
+		\bitbox{24}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The RET instruction returns from a function call, restoring the program counter to the stored value in the return address register.
+This means you must be careful not to manipulate the value of \texttt{ra}.
+Remember that each time the CALL instruction is executed the value of \texttt{ra} is changed, so calling a function inside of another function will corrupt it's value.
+To get around this, follow the \textit{Calling Convention} to see how to push modified registers to the stack to save their values.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	ra := pc
+	pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	; return from function
+	RET
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; load address of function
+	LDI r0, THIS_IS_A_FUNCTION
+	; call function
+	CALL r0
+	; this instruction will be run
+	; after function returns
+	HLT
+	
+	; label of function
+	THIS_IS_A_FUNCTION:
+	; return from function
+	RET
+\end{lstlisting}

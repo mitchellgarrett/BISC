@@ -2,8 +2,102 @@
 
 \subsubsection{ADD \normalfont{- Add}}\label{sec:ADD}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+		\bitbox{8}{0x0F} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}}
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The ADD instruction adds the values of the two source registers and stores the result in the destination register.
+Note that the addition is the same whether the inputs are interpreted as signed or unsigned values.
+The destination register can be the same as one of the source registers to overwrite that register with the resulting sum,
+or all three registers can be the same to add a register to itself.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0 + rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	ADD {rd}, {rs0} {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = r1 + r2
+	ADD r0, r1, r2
+	
+	; r0 = r1 + r0
+	ADD r0, r1, r0
+	
+	; r0 = r0 + r0
+	ADD r0, r0, r0
+\end{lstlisting}
+
 \subsubsection{SUB \normalfont{- Subtract}}\label{sec:SUB}
- 
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+		\bitbox{8}{0x0E} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}}
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The SUB instruction subtracts the value of \texttt{rs\textsubscript{1}} from \texttt{rs\textsubscript{0}} and stores the result in the destination register.
+Note that the subtraction is the same whether the inputs are interpreted as signed or unsigned values.
+The destination register can be the same as one of the source registers to overwrite that register with the resulting difference,
+or all three registers can be the same to subtract a register from itself, but that would result in 0.
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0 - rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	SUB {rd}, {rs0} {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = r1 - r2
+	SUB r0, r1, r2
+	
+	; r0 = r1 - r0
+	SUB r0, r1, r0
+\end{lstlisting} 
+
 \subsubsection{MUL \normalfont{- Multiply}}\label{sec:MUL}
 
 \subsubsection{MULH \normalfont{- Multiply High}}\label{sec:MULH}

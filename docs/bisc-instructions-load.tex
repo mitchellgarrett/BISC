@@ -2,6 +2,165 @@
 
 \subsubsection{LLI \normalfont{- Load Lower Immediate}}\label{sec:LLI}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:i-type]{\textbf{I-Type}}}
+		\bitbox{8}{0x05} & 
+		\bitbox{8}{rd} &
+		\bitbox{16}{immediate}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The LLI instruction loads the given 16-bit immediate into the lower 16 bits of the destination register \texttt{rd}, zeroing out the top 16 bits.
+Combined with the LUI instruction, you can load an entire 32-bit immediate into a register.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd[0..15] := imm16
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	LLI {rd}, {imm16}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; load a decimal immediate
+	LLI r0, 512
+	
+	; load a hexadecimal immediate
+	LLI r1, 0x42
+	
+	; load a binary immediate
+	LLI r2, 0b11001100
+	
+	; load a character
+	LLI r3, 'X'
+	
+	; load a 16-bit immediate
+	LLI r4, 0xffff
+	
+	; load lower 16 bits of 32-bit immediate
+	; using a preprocessor directive
+	LLI r5, %lo(0xffffffff)
+	
+	; load a label
+	LLI r6, %lo(THIS_IS_A_LABEL)
+\end{lstlisting}
+
 \subsubsection{LUI \normalfont{- Load Upper Immediate}}\label{sec:LUI}
 
+\textbf{Description}
+
+The LUI instruction loads the given 16-bit immediate into the upper 16 bits of the destination register \texttt{rd}, leaving the bottom 16 bits the same.
+Combined with the LLI instruction, you can load an entire 32-bit immediate into a register.
+Note that since this instruction does not touch the bottom 16 bits the register may have the value you think it does if you do not know what is in the bottom bits.
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:i-type]{\textbf{I-Type}}}
+		\bitbox{8}{0x06} & 
+		\bitbox{8}{rd} &
+		\bitbox{16}{immediate}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd[16..31] := imm16
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	LUI {rd}, {imm16}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; load a decimal immediate
+	LUI r0, 512
+	
+	; load a hexadecimal immediate
+	LUI r1, 0x42
+	
+	; load a binary immediate
+	LUI r2, 0b11001100
+	
+	; load a character
+	LUI r3, 'X'
+	
+	; load a 16-bit immediate
+	LUI r4, 0xffff
+	
+	; load upper 16 bits of 32-bit immediate
+	; using a preprocessor directive
+	LLU r5, %hi(0xffffffff)
+	
+	; load a label
+	LLI r6, %hi(THIS_IS_A_LABEL)
+\end{lstlisting}
+
 \subsubsection{MOV \normalfont{- Move}}\label{sec:MOV}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:d-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x07} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs} &
+		\bitbox{8}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The MOV instruction simply copies the value of the source register into the destination register, keeping the value of the source register the same.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	MOV {rd}, {rs}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; move the value of r7 into rv
+	MOV rv, r7
+\end{lstlisting}
