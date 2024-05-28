@@ -81,6 +81,8 @@ namespace FTG.Studios.BISC.Test {
 		[Test]
 		public void Tokenize_CanLex_InstructionAtEndOfFile() { }
 
+		// FIXME: These tests will break if the opcode is also used as a pseudo op
+
 		[Test]
 		public void Tokenize_CanLex_NInstruction() {
 			const Opcode expected_opcode = Opcode.NOP;
