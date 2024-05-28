@@ -14,7 +14,7 @@ namespace FTG.Studios.BISC.Test {
 			
 			register.UValue = expected;
 			
-			AssemblerTest.AreEqual(expected, register.UValue);
+			Assert.AreEqual(expected, register.UValue);
 		}
 		
 		[Test]
@@ -23,8 +23,8 @@ namespace FTG.Studios.BISC.Test {
 			RegisterValue register;
 			
 			register.IValue = expected;
-			
-			AssemblerTest.AreEqual(expected, register.IValue);
+
+			Assert.AreEqual(expected, register.IValue);
 		}
 		
 		[Test]
@@ -33,19 +33,17 @@ namespace FTG.Studios.BISC.Test {
 			RegisterValue register;
 			
 			register.FValue = expected;
-			
-			AssemblerTest.AreEqual(expected, register.FValue);
+
+			Assert.AreEqual(expected, register.FValue);
 		}
 		
 		[Test]
 		public void CanConvertFromUToI() {
 			const UInt32 uvalue = 0xffffffff;
 			const int ivalue = -1;
-			RegisterValue register;
-			
-			register.UValue = uvalue;
-			
-			AssemblerTest.AreEqual(ivalue, register.IValue);
+			RegisterValue register = new RegisterValue(uvalue);
+
+			Assert.AreEqual(ivalue, register.IValue);
 		}
 	}
 }
