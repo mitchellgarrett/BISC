@@ -38,7 +38,7 @@ namespace FTG.Studios.BISC.Asm
 					if (!string.IsNullOrEmpty(current_word)) tokens.Add(BuildToken(current_word));
 
 					current_word = c.ToString();
-					while ((c = source[++source_index]) != Syntax.line_seperator)
+					while (source_index < source.Length - 1 && (c = source[++source_index]) != Syntax.line_seperator)
 					{
 						current_word += c;
 						charno++;
