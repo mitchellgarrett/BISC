@@ -29,14 +29,15 @@ namespace FTG.Studios.BISC.Asm
 		public const char macro_expansion_operator = '$';
 		public const char data_prefix = '.';
 
-		public const string directive_section = "SECTION";
-		public const string directive_define = "DEFINE";
+		public const string directive_section = "section";
+		public const string directive_define = "define";
 
-		public const string data_byte = ".BYTE";
-		public const string data_half = ".HALF";
-		public const string data_word = ".WORD";
-		public const string data_string = ".STRING";
-		public const string data_zero = ".ZERO";
+		public const string data_byte = ".byte";
+		public const string data_half = ".half";
+		public const string data_word = ".word";
+		public const string data_string = ".string";
+		// TODO: consider renaming this to .null
+		public const string data_zero = ".zero";
 
 		public static Opcode? GetOpcode(string mnemonic)
 		{

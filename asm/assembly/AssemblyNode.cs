@@ -15,7 +15,7 @@ namespace FTG.Studios.BISC.Asm {
 			}
 			
 			public override string ToString() {
-				string output = $"Program():\n";
+				string output = $"Program()\n";
 				foreach (BlockItem item in Body) output += item.ToString() + '\n';
 				return output;
 			}
@@ -31,7 +31,7 @@ namespace FTG.Studios.BISC.Asm {
 			}
 			
 			public override string ToString() {
-				return $"Label({Identifier})";
+				return $"Label(\"{Identifier}\")";
 			}
 		}
 		
@@ -57,7 +57,7 @@ namespace FTG.Studios.BISC.Asm {
 			}
 			
 			public override string ToString() {
-				return $"Symbol({Identifier})";
+				return $"Symbol(\"{Identifier}\")";
 			}
 		}
 	}

@@ -173,15 +173,15 @@ namespace FTG.Studios.BISC.Asm
 				return new Token(TokenType.Directive, lexeme_upper, null, lineno, charno);
 			}*/
 
-			if (lexeme_upper[0] == Syntax.data_prefix)
+			if (lexeme[0] == Syntax.data_prefix)
 			{
-				return new Token(TokenType.DataInitializer, lexeme_upper, null, lineno, charno - lexeme.Length);
+				return new Token(TokenType.DataInitializer, lexeme, null, lineno, charno - lexeme.Length);
 			}
 
 			for (int index = 0; index < Specification.pseudo_instruction_names.Length; index++)
 			{
 				if (lexeme_upper == Specification.pseudo_instruction_names[index])
-					return new Token(TokenType.PseudoOp, lexeme_upper, (UInt32)index, lineno, charno - lexeme.Length);
+					return new Token(TokenType.PseudoOp, lexeme, (UInt32)index, lineno, charno - lexeme.Length);
 			}
 
 			Opcode? opcode;
