@@ -17,7 +17,7 @@ namespace FTG.Studios.BISC.Asm
 
 			string file_name = args[0];
 
-			AssemblerResult program = null;
+			AssemblyTree program = null;
 			try {
 				program = Assembler.Assemble(file_name + ".asm", File.ReadAllText(file_name + ".asm"));
 			} catch (SyntaxErrorException exception) {
@@ -25,10 +25,10 @@ namespace FTG.Studios.BISC.Asm
 				Environment.Exit(1);
 			}
 
-			BEEF.ObjectFile beef = program.ToObjectFile();
+			/*BEEF.ObjectFile beef = program.ToObjectFile();
 			BEEF.ObjectFile.Serialize(beef, file_name + ".exe");
 
-			Console.WriteLine(beef);
+			Console.WriteLine(beef);*/
 		}
 
 		static void PrintHelp()

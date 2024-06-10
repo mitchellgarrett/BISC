@@ -15,19 +15,19 @@ namespace FTG.Studios.BISC.Asm
 		/// </summary>
 		/// <param name="source">Source code.</param>
 		/// <returns>An executable program.</returns>
-		public static AssemblerResult Assemble(string file_name, string source)
+		public static AssemblyTree Assemble(string file_name, string source)
 		{
 			List<Token> tokens = Lexer.Tokenize(source);
 
 			foreach (var token in tokens) Console.WriteLine(token);
 
-			AssemblerResult program = Parser.Parse(tokens, file_name);
+			AssemblyTree program = Parser.Parse(tokens, file_name);
 
 			// First-pass optimizations
 			//Optimizer.Optimize(program);
 
-			program.AssignAddresses();
-			program.ResolveUndefinedSymboles();
+			//program.AssignAddresses();
+			//program.ResolveUndefinedSymboles();
 
 			Console.WriteLine(program);
 
