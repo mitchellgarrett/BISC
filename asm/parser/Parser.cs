@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace FTG.Studios.BISC.Asm {
@@ -20,11 +19,11 @@ namespace FTG.Studios.BISC.Asm {
 			Parser.file_name = file_name;
 			LinkedList<Token> stream = new LinkedList<Token>(tokens);
 			
-			AssemblyNode.Program program = ParseProgram(stream);
-			return new AssemblyTree(program);
+			List<AssemblyNode.BlockItem> body = ParseProgram(stream);
+			return new AssemblyTree(body);
 		}
 		
-		static AssemblyNode.Program ParseProgram(LinkedList<Token> tokens) {
+		static List<AssemblyNode.BlockItem> ParseProgram(LinkedList<Token> tokens) {
 			List<AssemblyNode.BlockItem> body = new List<AssemblyNode.BlockItem>();
 			
 			// Add newline to end of program
@@ -34,7 +33,7 @@ namespace FTG.Studios.BISC.Asm {
 				AssemblyNode.BlockItem item = ParseBlockItem(tokens);
 				if (item != null) body.Add(item);
 			}
-			return new AssemblyNode.Program(body);
+			return body;
 		}
 
 		static AssemblyNode.BlockItem ParseBlockItem(LinkedList<Token> tokens) {

@@ -12,7 +12,7 @@ namespace FTG.Studios.BISC.Asm {
 			byte[][] section_data = new byte[1][];
 			
 			List<byte> current_section_data = new List<byte>();
-			foreach (var item in program.Program.Body) {
+			foreach (var item in program.Body) {
 				current_section_data.AddRange(AssembleBlockItem(item));
 			}
 			
@@ -46,6 +46,7 @@ namespace FTG.Studios.BISC.Asm {
 		
 		static byte[] AssembleBlockItem(AssemblyNode.BlockItem item) {
 			if (item is AssemblyNode.Instruction instruction) return AssembleInstruction(instruction);
+			if (item is AssemblyNode.DataInitializer initializer) return AssembleDataInitializer(initializer);
 			return new byte[] { };
 		}
 		
@@ -56,7 +57,7 @@ namespace FTG.Studios.BISC.Asm {
 			if (instruction is AssemblyNode.MInstruction m) return AssembleMInstruction(m);
 			if (instruction is AssemblyNode.DInstruction d) return AssembleDInstruction(d);
 			if (instruction is AssemblyNode.TInstruction t) return AssembleTInstruction(t);
-			return new byte[] { };
+			throw new InvalidOperationException($"TODO: AssembleInstruction did not work {instruction.GetType()}");
 		}
 		
 		static byte[] AssembleNInstruction(AssemblyNode.NInstruction instruction) {
@@ -92,7 +93,7 @@ namespace FTG.Studios.BISC.Asm {
 		static byte[] AssembleConstant(AssemblyNode.Constant constant) {
 			if (constant is AssemblyNode.Immediate immediate) return immediate.Value.DisassembleUInt32();
 			if (constant is AssemblyNode.LinkerRelocation relocation) return AssembleLinkerRelocation(relocation);
-			throw new InvalidOperationException("TODO: AssmebleConstant did not work");
+			throw new InvalidOperationException($"TODO: AssmebleConstant did not work {constant.GetType()}");
 		}
 		
 		static byte[] AssembleLinkerRelocation(AssemblyNode.LinkerRelocation relocation) {
@@ -106,6 +107,10 @@ namespace FTG.Studios.BISC.Asm {
 				
 				_ => throw new InvalidOperationException("TODO: AssembleLinkerRelocation did not work"),
 			};
+		}
+		
+		static byte[] AssembleDataInitializer(AssemblyNode.DataInitializer initializer) {
+			return initializer.Data;
 		}
 	}
 }
