@@ -25,10 +25,10 @@ namespace FTG.Studios.BISC.Asm
 				Environment.Exit(1);
 			}
 
-			/*BEEF.ObjectFile beef = program.ToObjectFile();
+			BEEF.ObjectFile beef = CodeGenerator.AssembleBEEF(program);
 			BEEF.ObjectFile.Serialize(beef, file_name + ".exe");
 
-			Console.WriteLine(beef);*/
+			Console.WriteLine(beef);
 		}
 
 		static void PrintHelp()

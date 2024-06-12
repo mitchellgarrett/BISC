@@ -11,6 +11,7 @@ namespace FTG.Studios.BISC.Asm {
 			
 			switch (tokens.Peek().Mnemonic.ToLower()) {
 				case Syntax.directive_section: return ParseSectionDefinition(tokens);
+				
 				default:
 					Fail(tokens.Peek(), TokenType.Identifier, $"Invalid directive '{tokens.Peek().Mnemonic}' after directive prefix '{Syntax.directive_prefix}'");
 					return null;
@@ -20,6 +21,34 @@ namespace FTG.Studios.BISC.Asm {
 		static AssemblyNode.SectionDefinition ParseSectionDefinition(LinkedList<Token> tokens) {
 			Token token = tokens.Dequeue();
 			return new AssemblyNode.SectionDefinition(token.Mnemonic);
+		}
+		
+		// Should only be called when parsing a constant value
+		static AssemblyNode.LinkerRelocation ParseLinkerRelocation(LinkedList<Token> tokens) {
+			Token token = tokens.Dequeue();
+			
+			AssemblyNode.LinkerRelocation.RelocationType type;
+			switch (token.Mnemonic.ToLower()) {
+				case Syntax.directive_relocation_lo:
+					type = AssemblyNode.LinkerRelocation.RelocationType.Lo;
+					break;
+					
+				case Syntax.directive_relocation_hi:
+					type = AssemblyNode.LinkerRelocation.RelocationType.Hi;
+					break;
+					
+				default:
+					Fail(token, TokenType.Identifier, $"Invalid directive '{Syntax.directive_prefix}{token.Mnemonic}'");
+					return null;
+			}
+			
+			Expect(tokens.Dequeue(), TokenType.OpenParenthesis, "TODO: expected (");
+			
+			AssemblyNode.Constant constant = ParseConstant(tokens);
+			
+			Expect(tokens.Dequeue(), TokenType.CloseParenthesis, "TODO: expected )");
+			
+			return new AssemblyNode.LinkerRelocation(constant, type);
 		}
 		
 		static AssemblyNode.DataInitializer ParseDataInitializer(LinkedList<Token> tokens) {

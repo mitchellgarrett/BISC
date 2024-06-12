@@ -90,6 +90,15 @@ namespace FTG.Studios.BISC.Asm {
 				return new AssemblyNode.Symbol(token.Mnemonic);
 			}
 			
+			// Check for relocation directives
+			if (
+				Match(token, TokenType.DirectivePrefix) && 
+				tokens.Peek().Mnemonic == Syntax.directive_relocation_lo || 
+				tokens.Peek().Mnemonic == Syntax.directive_relocation_hi
+			) {
+				return ParseLinkerRelocation(tokens);
+			}
+			
 			Fail(token, TokenType.Immediate, $"Invalid immediate '{token.Mnemonic}'");
 			return null;
 		}

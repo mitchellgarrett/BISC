@@ -91,24 +91,5 @@ namespace FTG.Studios.BISC.Asm {
 				return $"{Opcode}({Destination}, {LeftOperand}, {RightOperand})";
 			}
 		}
-		
-		// TODO: Make the operands better
-		public class PseudoInstruction : BlockItem {
-			public readonly int Opcode;
-			public readonly string Mnemonic;
-			public readonly Token[] Operands;
-			
-			public PseudoInstruction(int opcode, string mnemonic, Token[] operands) {
-				Opcode = opcode;
-				Mnemonic = mnemonic;
-				Operands = operands;
-			}
-			
-			public override string ToString() {
-				string output = $"{Mnemonic}(";
-				foreach (Token operand in Operands) output += $"{operand}, ";
-				return output[..^2] + ')';
-			}
-		}
 	}
 }

@@ -117,9 +117,16 @@ namespace FTG.Studios.BISC.Asm {
 			if (tokens.Count < 1) return false;
 			
 			immediate = tokens.Dequeue();
-			if (!Match(immediate, TokenType.Immediate) && !Match(immediate, TokenType.Identifier)) return false;
+			if (Match(immediate, TokenType.Immediate) || Match(immediate, TokenType.Identifier)) return true;
 			
-			return true;
+			// Handle relocation directives
+			// FIXME
+			if (Match(immediate, TokenType.DirectivePrefix)) {
+				immediate = tokens.Dequeue();
+				if (Match(immediate, TokenType.Identifier) && immediate.Mnemonic == Syntax.directive_relocation_lo || immediate.Mnemonic == Syntax.directive_relocation_hi) return true;
+			}
+			
+			return false;
 		}
 		
 		static bool TryParseMemory(LinkedList<Token> tokens, out Token register, out Token offset) {

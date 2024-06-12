@@ -152,17 +152,18 @@ namespace FTG.Studios.BISC.Asm
 
 		static Token BuildToken(char lexeme)
 		{
-			switch (lexeme)
+			return lexeme switch
 			{
-				case Syntax.seperator: return new Token(TokenType.Seperator, lineno, charno);
-				case Syntax.open_bracket: return new Token(TokenType.OpenBracket, lineno, charno);
-				case Syntax.close_bracket: return new Token(TokenType.CloseBracket, lineno, charno);
-				case Syntax.label_delimeter: return new Token(TokenType.LabelDelimeter, lineno, charno);
-				case Syntax.directive_prefix: return new Token(TokenType.DirectivePrefix, lineno, charno);
-				case Syntax.macro_expansion_operator: return new Token(TokenType.MacroExpansionOperator, lineno, charno);
-			}
-
-			return new Token(TokenType.Invalid, lexeme.ToString(), null, lineno, charno);
+				Syntax.seperator => new Token(TokenType.Seperator, lineno, charno),
+				Syntax.open_bracket => new Token(TokenType.OpenBracket, lineno, charno),
+				Syntax.close_bracket => new Token(TokenType.CloseBracket, lineno, charno),
+				Syntax.open_parenthesis => new Token(TokenType.OpenParenthesis, lineno, charno),
+				Syntax.close_parenthesis => new Token(TokenType.CloseParenthesis, lineno, charno),
+				Syntax.label_delimeter => new Token(TokenType.LabelDelimeter, lineno, charno),
+				Syntax.directive_prefix => new Token(TokenType.DirectivePrefix, lineno, charno),
+				Syntax.macro_expansion_operator => new Token(TokenType.MacroExpansionOperator, lineno, charno),
+				_ => new Token(TokenType.Invalid, lexeme.ToString(), null, lineno, charno),
+			};
 		}
 
 		static Token BuildToken(string lexeme)

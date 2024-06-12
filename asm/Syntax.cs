@@ -1,16 +1,16 @@
 ﻿using System;
 
-namespace FTG.Studios.BISC.Asm
-{
+namespace FTG.Studios.BISC.Asm {
 
-	static class Syntax
-	{
+	static class Syntax {
 
 		public const char carriage_return = '\r';
 		public const char line_seperator = '\n';
 		public const char seperator = ',';
 		public const char open_bracket = '[';
 		public const char close_bracket = ']';
+		public const char open_parenthesis = '(';
+		public const char close_parenthesis = ')';
 		public const char single_quote = '\'';
 		public const char double_quote = '"';
 		public const char label_delimeter = ':';
@@ -23,14 +23,14 @@ namespace FTG.Studios.BISC.Asm
 		public const string decimal_literal = @"^((\d+(\.\d*)?)|(\.\d+))$";
 		public const string char_literal = @"^'([ -~]|\\0|\\b|\\t|\\n|\\r)'$";
 
-		public const string macro_literal = @"(%hi|%lo)\({0}\)";
-
 		public const char directive_prefix = '%';
 		public const char macro_expansion_operator = '$';
 		public const char data_prefix = '.';
 
 		public const string directive_section = "section";
 		public const string directive_define = "define";
+		public const string directive_relocation_lo = "lo";
+		public const string directive_relocation_hi = "hii";
 
 		public const string data_byte = ".byte";
 		public const string data_half = ".half";

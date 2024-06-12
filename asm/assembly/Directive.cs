@@ -25,13 +25,28 @@ namespace FTG.Studios.BISC.Asm {
 				Data = data;
 			}
 			
-			public override string ToString()
-		{
-			string output = "Data(";
-			foreach (var b in Data) output += $"{b:x2} ";
-			output = output[..^1] + ')';
-			return output;
+			public override string ToString() {
+				string output = "Data(";
+				foreach (var b in Data) output += $"{b:x2} ";
+				output = output[..^1] + ')';
+				return output;
+			}
 		}
+		
+		public class LinkerRelocation : Constant {
+			public enum RelocationType { Lo, Hi };
+			
+			public readonly Constant Constant;
+			public readonly RelocationType Type;
+			
+			public LinkerRelocation(Constant constant, RelocationType type) {
+				Constant = constant;
+				Type = type;
+			}
+
+			public override string ToString() {
+				return $"{Type}({Constant})";
+			}
 		}
 	}
 }
