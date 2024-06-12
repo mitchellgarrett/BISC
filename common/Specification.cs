@@ -1,13 +1,6 @@
-using System;
+namespace FTG.Studios.BISC {
 
-namespace FTG.Studios.BISC
-{
-
-	public static class Specification
-	{
-
-		public const char COMMENT = ';';
-		public const char LABEL_DELIMETER = ':';
+	public static class Specification {
 
 		public static readonly string[] REGISTER_NAMES = {
 			"pc", "sp", "gp", "fp", "ra", "rv", "ti", "ta",

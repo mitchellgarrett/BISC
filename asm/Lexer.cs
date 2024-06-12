@@ -22,6 +22,7 @@ namespace FTG.Studios.BISC.Asm
 			for (int source_index = 0; source_index < source.Length; source_index++)
 			{
 				char c = source[source_index];
+				// TODO: Handle tab size
 				charno++;
 
 

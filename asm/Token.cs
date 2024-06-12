@@ -1,12 +1,10 @@
 ﻿using System;
 
-namespace FTG.Studios.BISC.Asm
-{
+namespace FTG.Studios.BISC.Asm {
 
 	public enum TokenType { Invalid, Opcode, PseudoOp, Identifier, Register, Immediate, Seperator, LineSeperator, LabelDelimeter, OpenBracket, CloseBracket, Comment, DirectivePrefix, Directive, DataInitializer, SingleQuote, DoubleQuote, String, MacroExpansionOperator }
 
-	public struct Token
-	{
+	public struct Token {
 
 		public TokenType Type;
 		public string Mnemonic;
@@ -16,8 +14,7 @@ namespace FTG.Studios.BISC.Asm
 
 		public bool IsValid { get { return Type != TokenType.Invalid; } }
 
-		public Token(TokenType type, int ln, int ch)
-		{
+		public Token(TokenType type, int ln, int ch) {
 			Type = type;
 			Mnemonic = null;
 			Value = null;
@@ -25,8 +22,7 @@ namespace FTG.Studios.BISC.Asm
 			CharNo = ch;
 		}
 
-		public Token(TokenType type, string mnemonic, UInt32? value, int ln, int ch)
-		{
+		public Token(TokenType type, string mnemonic, UInt32? value, int ln, int ch) {
 			Type = type;
 			Mnemonic = mnemonic;
 			Value = value;
@@ -34,8 +30,7 @@ namespace FTG.Studios.BISC.Asm
 			CharNo = ch;
 		}
 
-		public override string ToString()
-		{
+		public override string ToString() {
 			string value = $"(Ln: {LineNo}, Ch: {CharNo}) <{Type}";
 			if (Mnemonic != null) value += $", {Mnemonic}";
 			if (Value != null) value += $" ({Value})";

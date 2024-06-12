@@ -26,6 +26,10 @@ namespace FTG.Studios.BISC.Asm {
 		
 		static AssemblyNode.Program ParseProgram(LinkedList<Token> tokens) {
 			List<AssemblyNode.BlockItem> body = new List<AssemblyNode.BlockItem>();
+			
+			// Add newline to end of program
+			tokens.AddLast(new Token(TokenType.LineSeperator, 0, 0));
+			
 			while (tokens.Count > 0) {
 				AssemblyNode.BlockItem item = ParseBlockItem(tokens);
 				if (item != null) body.Add(item);
@@ -34,34 +38,33 @@ namespace FTG.Studios.BISC.Asm {
 		}
 
 		static AssemblyNode.BlockItem ParseBlockItem(LinkedList<Token> tokens) {
-			switch (tokens.Peek().Type)
-				{
-					case TokenType.Opcode:
-						return ParseInstruction(tokens);
-					
-					case TokenType.PseudoOp:
-						ParsePseudoInstruction(tokens);
-						return null;
-					
-					case TokenType.Identifier:
-						return ParseLabel(tokens);
-					
-					// TODO" Make this part of ParseDirective
-					case TokenType.DataInitializer:
-						return ParseDataInitializer(tokens);
-					
-					case TokenType.DirectivePrefix:
-						return ParseDirective(tokens);
-					
-					case TokenType.Comment:
-					case TokenType.LineSeperator:
-						tokens.Dequeue();
-						return null;
-					
-					default:
-						Fail(tokens.Peek(), TokenType.Opcode, $"Invalid opcode '{tokens.Peek().Mnemonic}'");
-						return null;
-				}
+			switch (tokens.Peek().Type) {
+				case TokenType.Opcode:
+					return ParseInstruction(tokens);
+				
+				case TokenType.PseudoOp:
+					ParsePseudoInstruction(tokens);
+					return null;
+				
+				case TokenType.Identifier:
+					return ParseLabel(tokens);
+				
+				// TODO" Make this part of ParseDirective
+				case TokenType.DataInitializer:
+					return ParseDataInitializer(tokens);
+				
+				case TokenType.DirectivePrefix:
+					return ParseDirective(tokens);
+				
+				case TokenType.Comment:
+				case TokenType.LineSeperator:
+					tokens.Dequeue();
+					return null;
+				
+				default:
+					Fail(tokens.Peek(), TokenType.Opcode, $"Invalid opcode '{tokens.Peek().Mnemonic}'");
+					return null;
+			}
 		}
 		
 		static Opcode ParseOpcode(LinkedList<Token> tokens) {
@@ -96,112 +99,6 @@ namespace FTG.Studios.BISC.Asm {
 			Expect(token, TokenType.Identifier, $"Invalid identifier '{token.Mnemonic}'");
 			Expect(tokens.Dequeue(), TokenType.LabelDelimeter, $"Expected '{Syntax.label_delimeter}' after label '{token.Mnemonic}'");
 			return new AssemblyNode.Label(token.Mnemonic);
-		}
-		
-		// TODO: This is garbage
-		// Maybe have PseudoInstruction node that gets pushed onto assembler tree and resolved later?
-		static void ParsePseudoInstruction(LinkedList<Token> tokens)
-		{
-			Token pseudo_op = tokens.Dequeue();
-			Expect(pseudo_op, TokenType.PseudoOp, $"Invalid opcode '{pseudo_op.Mnemonic}'");
-
-			List<Token> args = new List<Token>();
-			while (tokens.Count > 0)
-			{
-				Token token = tokens.Dequeue();
-				if (Match(token, TokenType.LineSeperator)) break;
-				if (Match(token, TokenType.Comment)) continue;
-				args.Add(token);
-			}
-
-			int index = (int)pseudo_op.Value;
-			for (; index < Specification.pseudo_instruction_names.Length; index++)
-			{
-				if (pseudo_op.Mnemonic.ToUpper() == Specification.pseudo_instruction_names[index])
-				{
-					bool valid = true;
-					Queue<Token> temp_stream = new Queue<Token>(args);
-					List<Token> temp_args = new List<Token>(3);
-					ArgumentType[] arg_types = Specification.pseudo_instruction_arguments[index];
-					for (int a = 0; valid && a < arg_types.Length; a++)
-					{
-						switch (arg_types[a])
-						{
-							case ArgumentType.None:
-								if (temp_stream.Count > 0) valid = false;
-								break;
-							case ArgumentType.Register:
-								if (temp_stream.Count == 0 || !Match(temp_stream.Peek(), TokenType.Register)) valid = false;
-								else temp_args.Add(temp_stream.Dequeue());
-								break;
-							case ArgumentType.Memory:
-								if (temp_stream.Count == 0 || !Match(temp_stream.Peek(), TokenType.Register)) valid = false;
-								else temp_args.Add(temp_stream.Dequeue());
-								if (temp_stream.Count == 0 || !Match(temp_stream.Dequeue(), TokenType.OpenBracket)) valid = false;
-								if (temp_stream.Count == 0 || (!Match(temp_stream.Peek(), TokenType.Immediate) && !Match(temp_stream.Peek(), TokenType.Identifier))) valid = false;
-								else temp_args.Add(temp_stream.Dequeue());
-								if (temp_stream.Count == 0 || !Match(temp_stream.Dequeue(), TokenType.CloseBracket)) valid = false;
-								break;
-							case ArgumentType.Immediate32:
-								if (temp_stream.Count == 0 || (!Match(temp_stream.Peek(), TokenType.Immediate) && !Match(temp_stream.Peek(), TokenType.Identifier))) valid = false;
-								else temp_args.Add(temp_stream.Dequeue());
-								break;
-						}
-						if (a < arg_types.Length - 1 && (temp_stream.Count == 0 || !Match(temp_stream.Dequeue(), TokenType.Seperator))) valid = false;
-					}
-					if (temp_stream.Count > 0) valid = false;
-					if (valid)
-					{
-						args = temp_args;
-						break;
-					}
-				}
-			}
-
-			if (index >= Specification.pseudo_instruction_names.Length)
-			{
-				Opcode? opcode = Syntax.GetOpcode(pseudo_op.Mnemonic.ToUpper());
-				if (opcode.HasValue)
-				{
-					pseudo_op.Type = TokenType.Opcode;
-					pseudo_op.Value = (UInt32)opcode.Value;
-				}
-				else
-				{
-					Fail(pseudo_op, TokenType.Opcode, $"Invalid opcode '{pseudo_op.Mnemonic}'");
-				}
-				tokens.AddFirst(new Token(TokenType.LineSeperator, pseudo_op.LineNo, 0));
-				for (int v = args.Count - 1; v >= 0; v--)
-				{
-					tokens.AddFirst(args[v]);
-				}
-				tokens.AddFirst(pseudo_op);
-				return;
-			}
-
-			for (int i = args.Count; i < 3; i++)
-			{
-				args.Add(new Token(TokenType.Invalid, 0, 0));
-			}
-
-			string[] definition = Specification.pseudo_instruction_definitions[index];
-			string[] replacements = new string[definition.Length];
-			Array.Copy(definition, replacements, replacements.Length);
-
-			for (int i = replacements.Length - 1; i >= 0; i--)
-			{
-				replacements[i] = string.Format(replacements[i], args[0].Mnemonic, args[1].Mnemonic, args[2].Mnemonic);
-				replacements[i] += '\n';
-				List<Token> vals = Lexer.Tokenize(replacements[i]);
-				for (int v = vals.Count - 1; v >= 0; v--)
-				{
-					Token t = vals[v];
-					t.LineNo = pseudo_op.LineNo;
-					tokens.AddFirst(t);
-				}
-			}
-
-			return;
 		}
 	}
 }
