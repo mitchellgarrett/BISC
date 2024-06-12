@@ -19,6 +19,7 @@ namespace FTG.Studios.BISC.Asm {
 			Parser.file_name = file_name;
 			LinkedList<Token> stream = new LinkedList<Token>(tokens);
 			
+			// TODO: Parse sections too
 			List<AssemblyNode.BlockItem> body = ParseProgram(stream);
 			return new AssemblyTree(body);
 		}

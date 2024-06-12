@@ -13,13 +13,18 @@ namespace FTG.Studios.BISC.Asm {
 				case Syntax.directive_section: return ParseSectionDefinition(tokens);
 				
 				default:
-					Fail(tokens.Peek(), TokenType.Identifier, $"Invalid directive '{tokens.Peek().Mnemonic}' after directive prefix '{Syntax.directive_prefix}'");
+					Fail(tokens.Peek(), TokenType.Identifier, $"Invalid directive '{Syntax.directive_prefix}{tokens.Peek().Mnemonic}'");
 					return null;
 			}
 		}
 		
 		static AssemblyNode.SectionDefinition ParseSectionDefinition(LinkedList<Token> tokens) {
 			Token token = tokens.Dequeue();
+			if (token.Mnemonic != Syntax.directive_section) Fail(token, TokenType.Identifier, $"Invalid directive '{Syntax.directive_prefix}{token.Mnemonic}'");
+			
+			token = tokens.Dequeue();
+			Expect(token, TokenType.DataInitializer, $"Invalid section name '{token.Mnemonic}'");
+			
 			return new AssemblyNode.SectionDefinition(token.Mnemonic);
 		}
 		

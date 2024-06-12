@@ -30,6 +30,9 @@ namespace FTG.Studios.BISC.Asm
 			//program.ResolveUndefinedSymboles();
 
 			Console.WriteLine(program);
+			
+			Preprocessor.PartitionSections(program);
+			Console.WriteLine(program);
 
 			return program;
 		}

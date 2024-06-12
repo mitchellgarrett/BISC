@@ -6,34 +6,17 @@ namespace FTG.Studios.BISC.Asm {
 	
 	public static class CodeGenerator {
 		
+		// TODO: Make this better
 		public static ObjectFile AssembleBEEF(AssemblyTree program) {
-			SectionHeader[] section_headers = new SectionHeader[1];
-			
-			byte[][] section_data = new byte[1][];
-			
-			List<byte> current_section_data = new List<byte>();
-			foreach (var item in program.Body) {
-				current_section_data.AddRange(AssembleBlockItem(item));
-			}
-			
-			section_data[0] = current_section_data.ToArray();
-			
-			section_headers[0] = new SectionHeader() {
-				Type = SectionType.Program,
-				Flags = SectionFlag.Readable | SectionFlag.Writable | SectionFlag.Executable | SectionFlag.Code,
-				Offset = FileHeader.SizeInBytes + SectionHeader.SizeInBytes,
-				Address = 0,
-				Size = (UInt32)section_data[0].Length,
-				Name = ".text"
-			};
+			AssembleProgram(program, out SectionHeader[] section_headers, out byte[][] section_data);
 			
 			FileHeader file_header = new FileHeader() {
 				HeaderBegin = FileHeader.MAGIC_NUMBER,
 				Architecture = 0xb,
 				Endianness = Endianness.Little,
-				EntryPoint = 0,
+				EntryPoint = section_headers[0].Address,
 				SectionTableOffset = FileHeader.SizeInBytes,
-				SectionCount = 1,
+				SectionCount = (UInt16)section_headers.Length,
 				HeaderEnd = FileHeader.MAGIC_NUMBER
 			};
 
@@ -42,6 +25,42 @@ namespace FTG.Studios.BISC.Asm {
 				SectionHeaders = section_headers,
 				SectionData = section_data
 			};
+		}
+		
+		static void AssembleProgram(AssemblyTree program, out SectionHeader[] section_headers, out byte[][] section_data) {
+			// TODO: This assumets everything in the program is in a section
+			section_headers = new SectionHeader[program.Body.Count];
+			section_data = new byte[program.Body.Count][];
+			
+			UInt32 offset = (UInt32)(FileHeader.SizeInBytes + SectionHeader.SizeInBytes * section_headers.Length);
+			UInt32 address = 0;
+			
+			for (int i = 0; i < program.Body.Count; i++) {
+				AssemblyNode.Section section = program.Body[i] as AssemblyNode.Section;
+				
+				section_data[i] = AssembleSection(section);
+				UInt32 section_size = (UInt32)section_data[i].Length;
+				
+				section_headers[i] = new SectionHeader() {
+					Type = SectionType.Program,
+					Flags = SectionFlag.Readable | SectionFlag.Writable | SectionFlag.Executable | SectionFlag.Code,
+					Offset = offset,
+					Address = address,
+					Size = section_size,
+					Name = section.Identifier
+				};
+				
+				offset += section_size;
+				address += section_size;
+			}
+		}
+		
+		static byte[] AssembleSection(AssemblyNode.Section section) {
+			List<byte> section_data = new List<byte>();
+			foreach (var item in section.Body) {
+				section_data.AddRange(AssembleBlockItem(item));
+			}
+			return section_data.ToArray();
 		}
 		
 		static byte[] AssembleBlockItem(AssemblyNode.BlockItem item) {
