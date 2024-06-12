@@ -1,10 +1,10 @@
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
+BUILD_DIR = build
 DEPS_DIR = deps
 
 CMN_DIR = common
 CMN_SRC = $(call rwildcard,$(CMN_DIR),*.cs) $(call rwildcard,$(DEPS_DIR),*.cs)
-BUILD_DIR = build
 
 ASM_DIR = asm
 ASM_EXE = bisc-asm.exe
