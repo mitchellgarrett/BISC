@@ -30,7 +30,7 @@ namespace FTG.Studios.BISC.Asm {
 		public const string directive_section = "section";
 		public const string directive_define = "define";
 		public const string directive_relocation_lo = "lo";
-		public const string directive_relocation_hi = "hii";
+		public const string directive_relocation_hi = "hi";
 
 		public const string data_byte = ".byte";
 		public const string data_half = ".half";

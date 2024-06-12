@@ -69,11 +69,15 @@ namespace FTG.Studios.BISC.Asm {
 		
 		static byte[] AssembleIInstruction(AssemblyNode.IInstruction instruction) {
 			byte[] immediate = AssembleConstant(instruction.Immediate);
+			if (immediate[2] != 0 || immediate[3] != 0) throw new ArgumentException("TODO: Immediate should be 16 bits");
+			
 			return new byte[] { (byte)instruction.Opcode, (byte)instruction.Destination, immediate[0], immediate[1] };
 		}
 		
 		static byte[] AssembleMInstruction(AssemblyNode.MInstruction instruction) {
 			byte[] offset = AssembleConstant(instruction.Offset);
+			if (offset[1] != 0 || offset[2] != 0 || offset[3] != 0) throw new ArgumentException("TODO: Offset should be 8 bits");
+			
 			return new byte[] { (byte)instruction.Opcode, (byte)instruction.Destination, (byte)instruction.Source, offset[0] };
 		}
 		
@@ -88,21 +92,20 @@ namespace FTG.Studios.BISC.Asm {
 		static byte[] AssembleConstant(AssemblyNode.Constant constant) {
 			if (constant is AssemblyNode.Immediate immediate) return immediate.Value.DisassembleUInt32();
 			if (constant is AssemblyNode.LinkerRelocation relocation) return AssembleLinkerRelocation(relocation);
-			throw new InvalidOperationException("AssmebleConstant did not work");
+			throw new InvalidOperationException("TODO: AssmebleConstant did not work");
 		}
 		
 		static byte[] AssembleLinkerRelocation(AssemblyNode.LinkerRelocation relocation) {
 			byte[] value = AssembleConstant(relocation.Constant);
-			
-			switch (relocation.Type) {
+
+			return relocation.Type switch {
 				// Return lower 16 bits of immediate
-				case AssemblyNode.LinkerRelocation.RelocationType.Lo: return new byte[] { value[0], value[1] };
-				
+				AssemblyNode.LinkerRelocation.RelocationType.Lo => new byte[] { value[0], value[1], 0, 0 },
 				// Return upper 16 bits of immediate
-				case AssemblyNode.LinkerRelocation.RelocationType.Hi: return new byte[] { value[2], value[3] };
-			}
-			
-			throw new InvalidOperationException("AssembleLinkerRelocation did not work");
+				AssemblyNode.LinkerRelocation.RelocationType.Hi => new byte[] { value[2], value[3], 0, 0 },
+				
+				_ => throw new InvalidOperationException("TODO: AssembleLinkerRelocation did not work"),
+			};
 		}
 	}
 }
