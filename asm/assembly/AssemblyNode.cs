@@ -9,7 +9,7 @@ namespace FTG.Studios.BISC.Asm {
 		
 		public abstract class BlockItem : Node { }
 		
-		public class Section : BlockItem {
+		public class Section : Node {
 			public readonly string Identifier;
 			public readonly List<BlockItem> Body;
 			

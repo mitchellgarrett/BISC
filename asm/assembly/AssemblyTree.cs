@@ -1,17 +1,17 @@
 using System.Collections.Generic;
 
 namespace FTG.Studios.BISC.Asm {
-	// TODO: Maybe change name back to AssemblyResult; not much of a tree
+	
 	public class AssemblyTree {
-		public List<AssemblyNode.BlockItem> Body;
+		public readonly List<AssemblyNode.Section> Sections;
 			
-			public AssemblyTree(List<AssemblyNode.BlockItem> body) {
-				Body = body;
+			public AssemblyTree(List<AssemblyNode.Section> sections) {
+				Sections = sections;
 			}
 			
 			public override string ToString() {
 				string output = $"Program()\n";
-				foreach (var item in Body) output += item.ToString() + '\n';
+				foreach (var section in Sections) output += section.ToString() + '\n';
 				return output;
 			}
 	}

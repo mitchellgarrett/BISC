@@ -29,14 +29,14 @@ namespace FTG.Studios.BISC.Asm {
 		
 		static void AssembleProgram(AssemblyTree program, out SectionHeader[] section_headers, out byte[][] section_data) {
 			// TODO: This assumets everything in the program is in a section
-			section_headers = new SectionHeader[program.Body.Count];
-			section_data = new byte[program.Body.Count][];
+			section_headers = new SectionHeader[program.Sections.Count];
+			section_data = new byte[program.Sections.Count][];
 			
 			UInt32 offset = (UInt32)(FileHeader.SizeInBytes + SectionHeader.SizeInBytes * section_headers.Length);
 			UInt32 address = 0;
 			
-			for (int i = 0; i < program.Body.Count; i++) {
-				AssemblyNode.Section section = program.Body[i] as AssemblyNode.Section;
+			for (int i = 0; i < program.Sections.Count; i++) {
+				AssemblyNode.Section section = program.Sections[i] as AssemblyNode.Section;
 				
 				section_data[i] = AssembleSection(section);
 				UInt32 section_size = (UInt32)section_data[i].Length;

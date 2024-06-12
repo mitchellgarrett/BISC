@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace FTG.Studios.BISC.Asm {
@@ -19,24 +20,42 @@ namespace FTG.Studios.BISC.Asm {
 			Parser.file_name = file_name;
 			LinkedList<Token> stream = new LinkedList<Token>(tokens);
 			
-			// TODO: Parse sections too
-			List<AssemblyNode.BlockItem> body = ParseProgram(stream);
-			return new AssemblyTree(body);
+			List<AssemblyNode.Section> sections = ParseProgram(stream);
+			return new AssemblyTree(sections);
 		}
 		
-		static List<AssemblyNode.BlockItem> ParseProgram(LinkedList<Token> tokens) {
-			List<AssemblyNode.BlockItem> body = new List<AssemblyNode.BlockItem>();
-			
+		static List<AssemblyNode.Section> ParseProgram(LinkedList<Token> tokens) {
 			// Add newline to end of program
 			tokens.AddLast(new Token(TokenType.LineSeperator, 0, 0));
 			
+			List<AssemblyNode.Section> sections = new List<AssemblyNode.Section>();
+			
+			// Default to .text section
+			AssemblyNode.SectionDefinition previous_section_definition = new AssemblyNode.SectionDefinition(".text");
+			List<AssemblyNode.BlockItem> current_section_data = new List<AssemblyNode.BlockItem>();
+			
 			while (tokens.Count > 0) {
 				AssemblyNode.BlockItem item = ParseBlockItem(tokens);
-				if (item != null) body.Add(item);
+				
+				// If we encounter another section definition, then dump the current_section_data contents into a new Section object and start over
+				if (item is AssemblyNode.SectionDefinition current_section_definition) {
+					if (current_section_data.Count > 0)
+						sections.Add(new AssemblyNode.Section(previous_section_definition.Identifier, current_section_data));
+					
+					previous_section_definition = current_section_definition;
+					current_section_data = new List<AssemblyNode.BlockItem>();
+				} else if (item != null) {
+					current_section_data.Add(item);
+				}
 			}
-			return body;
+			
+			// Add trailing section
+			if (current_section_data.Count > 0)
+				sections.Add(new AssemblyNode.Section(previous_section_definition.Identifier, current_section_data));
+		
+			return sections;
 		}
-
+		
 		static AssemblyNode.BlockItem ParseBlockItem(LinkedList<Token> tokens) {
 			switch (tokens.Peek().Type) {
 				case TokenType.Opcode:
