@@ -1,16 +1,18 @@
-rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+
+DEPS_DIR = deps
 
 CMN_DIR = common
-CMN_SRC = $(wildcard $(CMN_DIR)/*.cs) $(wildcard deps/beef/src/*.cs)
+CMN_SRC = $(call rwildcard,$(CMN_DIR),*.cs) $(call rwildcard,$(DEPS_DIR),*.cs)
 BUILD_DIR = build
 
 ASM_DIR = asm
 ASM_EXE = bisc-asm.exe
-ASM_SRC = $(wildcard $(ASM_DIR)/*.cs) $(wildcard $(ASM_DIR)/assembly/*.cs) $(wildcard $(ASM_DIR)/codegen/*.cs) $(wildcard $(ASM_DIR)/parser/*.cs) $(CMN_SRC) 
+ASM_SRC = $(call rwildcard,$(ASM_DIR),*.cs) $(CMN_SRC)
 
 VM_DIR = vm
 VM_EXE = bisc-vm.exe
-VM_SRC = $(wildcard $(VM_DIR)/*.cs) $(CMN_SRC)
+VM_SRC = $(call rwildcard,$(VM_DIR),*.cs) $(CMN_SRC)
 
 TEST_DIR = test
 
