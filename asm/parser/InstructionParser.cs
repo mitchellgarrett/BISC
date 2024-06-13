@@ -4,24 +4,21 @@ namespace FTG.Studios.BISC.Asm {
 	
 	public static partial class Parser {
 		
-		static AssemblyNode.Instruction ParseInstruction(LinkedList<Token> tokens)
-		{
+		static AssemblyNode.Instruction ParseInstruction(LinkedList<Token> tokens) {
 			Token opcode = tokens.Peek();
 			InstructionFormat format = Specification.instruction_formats[opcode.Value.Value];
-			switch (format)
-			{
-				case InstructionFormat.N: return ParseNInstruction(tokens);
-				case InstructionFormat.R: return ParseRInstruction(tokens);
-				case InstructionFormat.I: return ParseIInstruction(tokens);
-				case InstructionFormat.M: return ParseMInstruction(tokens);
-				case InstructionFormat.D: return ParseDInstruction(tokens);
-				case InstructionFormat.T: return ParseTInstruction(tokens);
-				default: return null;
-			}
+			return format switch {
+				InstructionFormat.N => ParseNInstruction(tokens),
+				InstructionFormat.R => ParseRInstruction(tokens),
+				InstructionFormat.I => ParseIInstruction(tokens),
+				InstructionFormat.M => ParseMInstruction(tokens),
+				InstructionFormat.D => ParseDInstruction(tokens),
+				InstructionFormat.T => ParseTInstruction(tokens),
+				_ => null,
+			};
 		}
 		
-		static AssemblyNode.NInstruction ParseNInstruction(LinkedList<Token> tokens)
-		{
+		static AssemblyNode.NInstruction ParseNInstruction(LinkedList<Token> tokens) {
 			Opcode opcode = ParseOpcode(tokens);
 			
 			if (Match(tokens.Peek(), TokenType.Comment)) tokens.Dequeue();
@@ -30,10 +27,9 @@ namespace FTG.Studios.BISC.Asm {
 			return new AssemblyNode.NInstruction(opcode);
 		}
 		
-		static AssemblyNode.RInstruction ParseRInstruction(LinkedList<Token> tokens)
-		{
+		static AssemblyNode.RInstruction ParseRInstruction(LinkedList<Token> tokens) {
 			Opcode opcode = ParseOpcode(tokens);
-			Register register = ParseRegister(tokens);
+			AssemblyNode.Register register = ParseRegister(tokens);
 			
 			if (Match(tokens.Peek(), TokenType.Comment)) tokens.Dequeue();
 			Expect(tokens.Dequeue(), TokenType.LineSeperator, $"Line feed expected after instruction '{opcode}'");
@@ -41,10 +37,9 @@ namespace FTG.Studios.BISC.Asm {
 			return new AssemblyNode.RInstruction(opcode, register);
 		}
 		
-		static AssemblyNode.IInstruction ParseIInstruction(LinkedList<Token> tokens)
-		{
+		static AssemblyNode.IInstruction ParseIInstruction(LinkedList<Token> tokens) {
 			Opcode opcode = ParseOpcode(tokens);
-			Register register = ParseRegister(tokens);
+			AssemblyNode.Register register = ParseRegister(tokens);
 
 			Expect(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after '{register}'");
 
@@ -56,14 +51,13 @@ namespace FTG.Studios.BISC.Asm {
 			return new AssemblyNode.IInstruction(opcode, register, immediate);
 		}
 		
-		static AssemblyNode.MInstruction ParseMInstruction(LinkedList<Token> tokens)
-		{
+		static AssemblyNode.MInstruction ParseMInstruction(LinkedList<Token> tokens) {
 			Opcode opcode = ParseOpcode(tokens);
-			Register destination_register = ParseRegister(tokens);
+			AssemblyNode.Register destination_register = ParseRegister(tokens);
 
 			Expect(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after '{destination_register}'");
 
-			Register source_register = ParseRegister(tokens);
+			AssemblyNode.Register source_register = ParseRegister(tokens);
 
 			Expect(tokens.Dequeue(), TokenType.OpenBracket, $"Expected '{Syntax.open_bracket}' after register {source_register}");
 
@@ -77,14 +71,13 @@ namespace FTG.Studios.BISC.Asm {
 			return new AssemblyNode.MInstruction(opcode, destination_register, source_register, offset);
 		}
 		
-		static AssemblyNode.DInstruction ParseDInstruction(LinkedList<Token> tokens)
-		{
+		static AssemblyNode.DInstruction ParseDInstruction(LinkedList<Token> tokens) {
 			Opcode opcode = ParseOpcode(tokens);
-			Register destination_register = ParseRegister(tokens);
+			AssemblyNode.Register destination_register = ParseRegister(tokens);
 
 			Expect(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after '{destination_register}'");
 
-			Register source_register = ParseRegister(tokens);
+			AssemblyNode.Register source_register = ParseRegister(tokens);
 
 			if (Match(tokens.Peek(), TokenType.Comment)) tokens.Dequeue();
 			Expect(tokens.Dequeue(), TokenType.LineSeperator, $"Line feed expected after instruction '{opcode}'");
@@ -92,18 +85,17 @@ namespace FTG.Studios.BISC.Asm {
 			return new AssemblyNode.DInstruction(opcode, destination_register, source_register);
 		}
 		
-		static AssemblyNode.TInstruction ParseTInstruction(LinkedList<Token> tokens)
-		{
+		static AssemblyNode.TInstruction ParseTInstruction(LinkedList<Token> tokens) {
 			Opcode opcode = ParseOpcode(tokens);
-			Register destination_register = ParseRegister(tokens);
+			AssemblyNode.Register destination_register = ParseRegister(tokens);
 
 			Expect(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after '{destination_register}'");
 
-			Register source_register_a = ParseRegister(tokens);
+			AssemblyNode.Register source_register_a = ParseRegister(tokens);
 
 			Expect(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after '{source_register_a}'");
 
-			Register source_register_b = ParseRegister(tokens);
+			AssemblyNode.Register source_register_b = ParseRegister(tokens);
 
 			if (Match(tokens.Peek(), TokenType.Comment)) tokens.Dequeue();
 			Expect(tokens.Dequeue(), TokenType.LineSeperator, $"Line feed expected after instruction '{opcode}'");

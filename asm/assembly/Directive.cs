@@ -36,16 +36,24 @@ namespace FTG.Studios.BISC.Asm {
 		public class LinkerRelocation : Constant {
 			public enum RelocationType { Lo, Hi };
 			
-			public readonly Constant Constant;
+			public readonly Constant Value;
 			public readonly RelocationType Type;
 			
-			public LinkerRelocation(Constant constant, RelocationType type) {
-				Constant = constant;
+			public LinkerRelocation(Constant value, RelocationType type) {
+				Value = value;
 				Type = type;
 			}
 
 			public override string ToString() {
-				return $"{Type}({Constant})";
+				return $"{Type}({Value})";
+			}
+			
+			public override string GetMnemonic() {
+				return Type switch {
+					RelocationType.Lo => $"%lo({Value.GetMnemonic()})",
+					RelocationType.Hi => $"%hi({Value.GetMnemonic()})",
+					_ => null,
+				};
 			}
 		}
 	}

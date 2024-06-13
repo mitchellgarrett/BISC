@@ -22,7 +22,7 @@ namespace FTG.Studios.BISC.Asm {
 			tokens.Dequeue();
 			
 			int pseudo_index;
-			List<Token> pseudo_operands = null;
+			List<AssemblyNode.Operand> pseudo_operands = null;
 			for (pseudo_index = (int)pseudo_opcode.Value; pseudo_index < Specification.pseudo_instruction_names.Length; pseudo_index++) {
 				if (pseudo_opcode.Mnemonic.ToUpper() != Specification.pseudo_instruction_names[pseudo_index]) continue;
 				ArgumentType[] argument_types = Specification.pseudo_instruction_arguments[pseudo_index];
@@ -52,7 +52,7 @@ namespace FTG.Studios.BISC.Asm {
 			// Replace each instruction in the pseudo instruction expansion which its proper arguments
 			for (int i = 0; i < pseudo_instruction_definition.Length; i++) {
 				// Format operands into the instruction definition
-				string current_instruction = string.Format(pseudo_instruction_definition[i], pseudo_operands.Select(o => o.Mnemonic).ToArray());
+				string current_instruction = string.Format(pseudo_instruction_definition[i], pseudo_operands.Select(operand => operand.GetMnemonic()).ToArray());
 				current_instruction += '\n';
 				
 				// Parse formatted instruction and push its tokens onto the queue
@@ -65,30 +65,31 @@ namespace FTG.Studios.BISC.Asm {
 			}
 		}
 		
-		static bool TryParsePseudoInstruction(ArgumentType[] argument_types, LinkedList<Token> tokens, out List<Token> operands) {
-			operands = new List<Token>(argument_types.Length);
+		static bool TryParsePseudoInstruction(ArgumentType[] argument_types, LinkedList<Token> tokens, out List<AssemblyNode.Operand> operands) {
+			operands = new List<AssemblyNode.Operand>(argument_types.Length);
+			
 			for (int index = 0; index < argument_types.Length; index++) {
-				Token register_token, immediate_token;
+				AssemblyNode.Register register;
+				AssemblyNode.Constant immediate;
 				switch (argument_types[index]) {
 					case ArgumentType.None: 
 						if (tokens.Count > 0) return false;
 						break;
 						
 					case ArgumentType.Register:
-						if (!TryParseRegister(tokens, out register_token)) return false;
-						operands.Add(register_token);
+						if (!TryParseRegister(tokens, out register)) return false;
+						operands.Add(register);
 						break;
 						
 					case ArgumentType.Immediate32:
-						if (!TryParseImmediate32(tokens, out immediate_token)) return false;
-						operands.Add(immediate_token);
+						if (!TryParseImmediate32(tokens, out immediate)) return false;
+						operands.Add(immediate);
 						break;
 					
-					// TODO: Implement memory accesses in pseudo instructions
 					case ArgumentType.Memory:
-						if (!TryParseMemory(tokens, out register_token, out immediate_token)) return false;
-						operands.Add(register_token);
-						operands.Add(immediate_token);
+						if (!TryParseMemory(tokens, out register, out immediate)) return false;
+						operands.Add(register);
+						operands.Add(immediate);
 						break;
 				}
 				
@@ -102,48 +103,44 @@ namespace FTG.Studios.BISC.Asm {
 			return true;
 		}
 		
-		static bool TryParseRegister(LinkedList<Token> tokens, out Token register) {
-			register = new Token(TokenType.Invalid, 0, 0);
+		static bool TryParseRegister(LinkedList<Token> tokens, out AssemblyNode.Register register) {
+			register = null;
 			if (tokens.Count < 1) return false;
 			
-			register = tokens.Dequeue();
-			if (!Match(register, TokenType.Register)) return false;
-			
-			return true;
-		}
-		
-		static bool TryParseImmediate32(LinkedList<Token> tokens, out Token immediate) {
-			immediate = new Token(TokenType.Invalid, 0, 0);
-			if (tokens.Count < 1) return false;
-			
-			immediate = tokens.Dequeue();
-			if (Match(immediate, TokenType.Immediate) || Match(immediate, TokenType.Identifier)) return true;
-			
-			// Handle relocation directives
-			// FIXME
-			if (Match(immediate, TokenType.DirectivePrefix)) {
-				immediate = tokens.Dequeue();
-				if (Match(immediate, TokenType.Identifier) && immediate.Mnemonic == Syntax.directive_relocation_lo || immediate.Mnemonic == Syntax.directive_relocation_hi) return true;
+			try {
+				register = ParseRegister(tokens);
+				return true;
+			} catch (SyntaxErrorException) {
+				return false;
 			}
-			
-			return false;
 		}
 		
-		static bool TryParseMemory(LinkedList<Token> tokens, out Token register, out Token offset) {
-			register = offset = new Token(TokenType.Invalid, 0, 0);
+		static bool TryParseImmediate32(LinkedList<Token> tokens, out AssemblyNode.Constant immediate) {
+			immediate = null;
+			if (tokens.Count < 1) return false;
+			
+			try {
+				immediate = ParseConstant(tokens);
+				return true;
+			} catch (SyntaxErrorException) {
+				return false;
+			}
+		}
+		
+		static bool TryParseMemory(LinkedList<Token> tokens, out AssemblyNode.Register register, out AssemblyNode.Constant offset) {
+			register = null;
+			offset = null;
 			if (tokens.Count < 4) return false;
 			
-			register = tokens.Dequeue();
-			if (!Match(register, TokenType.Register)) return false;
-			
-			if (!Match(tokens.Dequeue(), TokenType.OpenBracket)) return false;
-			
-			offset = tokens.Dequeue();
-			if (!Match(offset, TokenType.Immediate) && !Match(offset, TokenType.Identifier)) return false;
-			
-			if (!Match(tokens.Dequeue(), TokenType.CloseBracket)) return false;
-			
-			return true;
+			try {
+				register = ParseRegister(tokens);
+				Expect(tokens.Dequeue(), TokenType.OpenBracket, null);
+				offset = ParseConstant(tokens);
+				Expect(tokens.Dequeue(), TokenType.CloseBracket, null);
+				return true;
+			} catch (SyntaxErrorException) {
+				return false;
+			}
 		}
 	}
 }

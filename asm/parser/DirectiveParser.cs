@@ -50,8 +50,8 @@ namespace FTG.Studios.BISC.Asm {
 			Expect(tokens.Dequeue(), TokenType.OpenParenthesis, "TODO: expected (");
 			
 			AssemblyNode.Constant constant = ParseConstant(tokens);
-			
-			Expect(tokens.Dequeue(), TokenType.CloseParenthesis, "TODO: expected )");
+
+			Expect(tokens.Dequeue(), TokenType.CloseParenthesis, "TODO: expected ) but got");
 			
 			return new AssemblyNode.LinkerRelocation(constant, type);
 		}

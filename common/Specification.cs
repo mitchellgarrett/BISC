@@ -185,9 +185,8 @@ namespace FTG.Studios.BISC {
 		};
 
 		public static readonly string[][] pseudo_instruction_definitions = new string[][] {
-			//new string[] { "LLI {0}, %lo({1})", "LUI {0}, %hi({1})" }, // LDI {imm}
-			new string[] { "LLI {0}, {1}", "LUI {0}, {1}" },
-			new string[] { "LDI {0}, {1}" },                            // LRA {imm}
+			new string[] { "LLI {0}, %lo({1})", "LUI {0}, %hi({1})" },  // LDI {reg}, {imm}
+			new string[] { "LDI {0}, {1}" },                            // LRA {reg}, {imm}
 			
 			new string[] { "LDI ta, {0}", "CALL ta" },                  // CALL {imm}
 			

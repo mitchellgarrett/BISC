@@ -92,10 +92,10 @@ namespace FTG.Studios.BISC.Asm {
 			return (Opcode)token.Value.Value;
 		}
 		
-		static Register ParseRegister(LinkedList<Token> tokens) {
+		static AssemblyNode.Register ParseRegister(LinkedList<Token> tokens) {
 			Token token = tokens.Dequeue();
 			Expect(token, TokenType.Register, $"Invalid register '{token.Mnemonic}'");
-			return (Register)token.Value.Value;
+			return new AssemblyNode.Register((Register)token.Value.Value);
 		}
 		
 		static AssemblyNode.Constant ParseConstant(LinkedList<Token> tokens) {
