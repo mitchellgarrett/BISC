@@ -75,6 +75,10 @@ namespace FTG.Studios.BISC.Asm {
 				case TokenType.DirectivePrefix:
 					return ParseDirective(tokens);
 				
+				// Parse macro expansion
+				case TokenType.MacroExpansionOperator:
+					return ParseMacroAccess(tokens);
+				
 				case TokenType.Comment:
 				case TokenType.LineSeperator:
 					tokens.Dequeue();

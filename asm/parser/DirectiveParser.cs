@@ -8,10 +8,12 @@ namespace FTG.Studios.BISC.Asm {
 		static AssemblyNode.Directive ParseDirective(LinkedList<Token> tokens) {
 			Expect(tokens.Dequeue(), TokenType.DirectivePrefix, "FIXME: directive prefix");
 			Expect(tokens.Peek(), TokenType.Identifier, "FIXME: directive prefix");
-			
+
 			switch (tokens.Peek().Mnemonic.ToLower()) {
 				case Syntax.directive_section: return ParseSectionDefinition(tokens);
 				case Syntax.directive_define: return ParseConstantDefinition(tokens);
+				case Syntax.directive_macro: return ParseMacroDefinition(tokens);
+				case Syntax.directive_end: return ParseMacroEnd(tokens);
 				
 				default:
 					Fail(tokens.Peek(), TokenType.Identifier, $"Invalid directive '{Syntax.directive_prefix}{tokens.Peek().Mnemonic}'");
@@ -37,11 +39,46 @@ namespace FTG.Studios.BISC.Asm {
 			Expect(token, TokenType.Identifier, $"Invalid identifier '{token.Mnemonic}'");
 			string identifier = token.Mnemonic;
 			
-			Expect(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after identifier '{identifier}'");
-			
 			AssemblyNode.Constant value = ParseConstant(tokens);
 			
 			return new AssemblyNode.ConstantDefinition(identifier, value);
+		}
+		
+		static AssemblyNode.MacroDefinition ParseMacroDefinition(LinkedList<Token> tokens) {
+			Token token = tokens.Dequeue();
+			if (token.Mnemonic != Syntax.directive_macro) Fail(token, TokenType.Identifier, $"Invalid directive '{Syntax.directive_prefix}{token.Mnemonic}'");
+			
+			token = tokens.Dequeue();
+			Expect(token, TokenType.Identifier, $"Invalid identifier '{token.Mnemonic}'");
+			string identifier = token.Mnemonic;
+			
+			Expect(tokens.Dequeue(), TokenType.LineSeperator, $"Expected line feed after directive '{Syntax.directive_prefix}{Syntax.directive_macro} {identifier}'");
+			
+			// TODO: Parse parameters
+			// Add items to list until we reach '%end'
+			List< AssemblyNode.BlockItem> body = new List<AssemblyNode.BlockItem>();
+			AssemblyNode.BlockItem item;
+			while (!((item = ParseBlockItem(tokens)) is AssemblyNode.MacroEnd)) {
+				if (item != null) body.Add(item);
+			}
+			
+			return new AssemblyNode.MacroDefinition(identifier, new List<string>(), body);
+		}
+		
+		static AssemblyNode.MacroAccess ParseMacroAccess(LinkedList<Token> tokens) {
+			Expect(tokens.Dequeue(), TokenType.MacroExpansionOperator, "TODO: expected $");
+			
+			Token token = tokens.Dequeue();
+			Expect(token, TokenType.Identifier, "TODO: invalid macro access");
+			
+			return new AssemblyNode.MacroAccess(token.Mnemonic, new List<string>());
+		}
+		
+		static AssemblyNode.MacroEnd ParseMacroEnd(LinkedList<Token> tokens) {
+			Token token = tokens.Dequeue();
+			if (token.Mnemonic != Syntax.directive_end) Fail(token, TokenType.Identifier, $"Invalid directive '{Syntax.directive_prefix}{token.Mnemonic}'");
+			
+			return new AssemblyNode.MacroEnd();
 		}
 		
 		// Should only be called when parsing a constant value

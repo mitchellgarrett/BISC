@@ -31,7 +31,7 @@ namespace FTG.Studios.BISC.Asm {
 			if (Match(token, TokenType.MacroExpansionOperator)) {
 				token = tokens.Dequeue();
 				Expect(token, TokenType.Identifier, "TODO: Invalid macro");
-				return new AssemblyNode.MacroAccess(token.Mnemonic);
+				return new AssemblyNode.DefineAccess(token.Mnemonic);
 			}
 			
 			// Check for relocation directives

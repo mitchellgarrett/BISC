@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace FTG.Studios.BISC.Asm {
 	
@@ -31,6 +32,53 @@ namespace FTG.Studios.BISC.Asm {
 
 			public override string ToString() {
 				return $"ConstantDefinition(\"{Identifier}\", {Value})";
+			}
+		}
+		
+		public class MacroDefinition : Directive {
+			public readonly string Identifier;
+			public readonly List<string> Parameters;
+			public readonly List<BlockItem> Body;
+			
+			public MacroDefinition(string identifier, List<string> parameters, List<BlockItem> body) {
+				Identifier = identifier;
+				Parameters = parameters;
+				Body = body;
+			}
+
+			public override string ToString() {
+				string output = $"MacroDefinition(\"{Identifier}\"";
+				foreach (string parameter in Parameters) output += parameter + ", ";
+				if (Parameters.Count > 0) output = output[..^2];
+				output += ")\n";
+				foreach (BlockItem item in Body) output += item.ToString() + '\n';
+				output += "MacroEnd()";
+				return output;
+			}
+		}
+		
+		public class MacroAccess : Directive {
+			public readonly string Identifier;
+			public readonly List<string> Arguments;
+			
+			public MacroAccess(string identifier, List<string> arguments) {
+				Identifier = identifier;
+				Arguments = arguments;
+			}
+			
+			public override string ToString() {
+				string output = $"MacroAccess(\"{Identifier}\"";
+				foreach (string parameter in Arguments) output += parameter + ", ";
+				if (Arguments.Count > 0) output = output[..^2];
+				output += ')';
+				return output;
+			}
+		}
+		
+		public class MacroEnd : Directive {
+
+			public override string ToString() {
+				return "MacroEnd()";
 			}
 		}
 		

@@ -20,7 +20,7 @@ namespace FTG.Studios.BISC.Asm {
 
 			AssemblyTree program = Parser.Parse(tokens, file_name);
 			
-			Preprocessor.EvaluateConstants(program);
+			Preprocessor.EvaluateMacros(program);
 			
 			SemanticAnalyzer.AssignAddresses(program);
 			SemanticAnalyzer.ResolveLabels(program);

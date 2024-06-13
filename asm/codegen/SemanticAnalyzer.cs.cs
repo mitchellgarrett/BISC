@@ -16,9 +16,8 @@ namespace FTG.Studios.BISC.Asm {
 		}
 		
 		// TODO: Resolve macros/constant definitions
-		static readonly Dictionary<string, AssemblyNode.Label> labels = new Dictionary<string, AssemblyNode.Label>();
 		public static void ResolveLabels(AssemblyTree program) {
-			labels.Clear();
+			Dictionary<string, AssemblyNode.Label> labels = new Dictionary<string, AssemblyNode.Label>();
 			
 			// First pass to define symbols
 			foreach (var section in program.Sections) {
@@ -35,15 +34,15 @@ namespace FTG.Studios.BISC.Asm {
 				for (int i = 0; i < section.Body.Count; i++) {
 					if (section.Body[i] is AssemblyNode.IInstruction iinstruction) {
 						// Replace immediate value of instruction with the address of the label
-						section.Body[i] = new AssemblyNode.IInstruction(iinstruction.Opcode, iinstruction.Destination, ResolveConstant(iinstruction.Immediate));
+						section.Body[i] = new AssemblyNode.IInstruction(iinstruction.Opcode, iinstruction.Destination, ResolveConstant(labels, iinstruction.Immediate));
 					}
 					
 					// TODO: Fix memory oinstructions too
 				}
 			}
 			
-			static AssemblyNode.Constant ResolveConstant(AssemblyNode.Constant constant) {
-				if (constant is AssemblyNode.LinkerRelocation relocation) return new AssemblyNode.LinkerRelocation(ResolveConstant(relocation.Value), relocation.Type);
+			static AssemblyNode.Constant ResolveConstant(Dictionary<string, AssemblyNode.Label> labels, AssemblyNode.Constant constant) {
+				if (constant is AssemblyNode.LinkerRelocation relocation) return new AssemblyNode.LinkerRelocation(ResolveConstant(labels, relocation.Value), relocation.Type);
 				
 				if (constant is AssemblyNode.LabelAccess symbol_access) {
 					if (!labels.TryGetValue(symbol_access.Identifier, out AssemblyNode.Label symbol)) 

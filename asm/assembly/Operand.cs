@@ -58,15 +58,15 @@ namespace FTG.Studios.BISC.Asm {
 			}
 		}
 		
-		public class MacroAccess : Constant {
+		public class DefineAccess : Constant {
 			public readonly string Identifier;
 			
-			public MacroAccess(string identifier) {
+			public DefineAccess(string identifier) {
 				Identifier = identifier;
 			}
 			
 			public override string ToString() {
-				return $"MacroAccess(\"{Identifier}\")";
+				return $"DefineAccess(\"{Identifier}\")";
 			}
 			
 			public override string GetMnemonic() {

@@ -26,9 +26,12 @@ namespace FTG.Studios.BISC.Asm {
 		public const char directive_prefix = '%';
 		public const char macro_expansion_operator = '$';
 		public const char data_prefix = '.';
-
+		
+		// Make these into a keyword token
 		public const string directive_section = "section";
 		public const string directive_define = "define";
+		public const string directive_macro = "macro";
+		public const string directive_end = "end";
 		public const string directive_relocation_lo = "lo";
 		public const string directive_relocation_hi = "hi";
 
