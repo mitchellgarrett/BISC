@@ -16,8 +16,10 @@ namespace FTG.Studios.BISC.Asm {
 			}
 		}
 		
-		static Dictionary<string, AssemblyNode.Label> labels = new Dictionary<string, AssemblyNode.Label>();
-		public static void ResolveSymbols(AssemblyTree program) {
+		
+		// TODO: Resolve macros/constant definitions
+		static readonly Dictionary<string, AssemblyNode.Label> labels = new Dictionary<string, AssemblyNode.Label>();
+		public static void ResolveLabels(AssemblyTree program) {
 			labels.Clear();
 			
 			// First pass to define symbols
@@ -45,7 +47,7 @@ namespace FTG.Studios.BISC.Asm {
 				
 				if (constant is AssemblyNode.Symbol symbol) {
 					if (!labels.TryGetValue(symbol.Identifier, out AssemblyNode.Label label)) 
-						throw new SyntaxErrorException($"Unknown symbol '{label.Identifier}'");
+						throw new SyntaxErrorException($"Unknown symbol '{symbol.Identifier}'");
 					
 					return new AssemblyNode.Immediate(label.Address);
 				}

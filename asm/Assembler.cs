@@ -24,7 +24,7 @@ namespace FTG.Studios.BISC.Asm {
 			//Optimizer.Optimize(program);
 
 			SemanticAnalyzer.AssignAddresses(program);
-			SemanticAnalyzer.ResolveSymbols(program);
+			SemanticAnalyzer.ResolveLabels(program);
 
 			Console.WriteLine(program);
 
