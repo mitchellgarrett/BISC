@@ -36,7 +36,7 @@ namespace FTG.Studios.BISC.Asm {
 			UInt32 address = 0;
 			
 			for (int i = 0; i < program.Sections.Count; i++) {
-				AssemblyNode.Section section = program.Sections[i] as AssemblyNode.Section;
+				AssemblyNode.Section section = program.Sections[i];
 				
 				section_data[i] = AssembleSection(section);
 				UInt32 section_size = (UInt32)section_data[i].Length;
@@ -112,7 +112,7 @@ namespace FTG.Studios.BISC.Asm {
 		static byte[] AssembleConstant(AssemblyNode.Constant constant) {
 			if (constant is AssemblyNode.Immediate immediate) return immediate.Value.DisassembleUInt32();
 			if (constant is AssemblyNode.LinkerRelocation relocation) return AssembleLinkerRelocation(relocation);
-			throw new InvalidOperationException($"TODO: AssmebleConstant did not work {constant.GetType()}");
+			throw new SyntaxErrorException($"Invalid constant '{constant}'");
 		}
 		
 		static byte[] AssembleLinkerRelocation(AssemblyNode.LinkerRelocation relocation) {
@@ -124,7 +124,7 @@ namespace FTG.Studios.BISC.Asm {
 				// Return upper 16 bits of immediate
 				AssemblyNode.LinkerRelocation.RelocationType.Hi => new byte[] { value[2], value[3], 0, 0 },
 				
-				_ => throw new InvalidOperationException("TODO: AssembleLinkerRelocation did not work"),
+				_ => throw new SyntaxErrorException($"Invalid linker directive '{relocation}'")
 			};
 		}
 		
