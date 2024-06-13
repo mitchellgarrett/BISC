@@ -85,48 +85,5 @@ namespace FTG.Studios.BISC.Asm {
 					return null;
 			}
 		}
-		
-		static Opcode ParseOpcode(LinkedList<Token> tokens) {
-			Token token = tokens.Dequeue();
-			Expect(token, TokenType.Opcode, $"Invalid opcode '{token.Mnemonic}'");
-			return (Opcode)token.Value.Value;
-		}
-		
-		static AssemblyNode.Register ParseRegister(LinkedList<Token> tokens) {
-			Token token = tokens.Dequeue();
-			Expect(token, TokenType.Register, $"Invalid register '{token.Mnemonic}'");
-			return new AssemblyNode.Register((Register)token.Value.Value);
-		}
-		
-		static AssemblyNode.Constant ParseConstant(LinkedList<Token> tokens) {
-			Token token = tokens.Dequeue();
-			
-			if (Match(token, TokenType.Immediate)) {
-				return new AssemblyNode.Immediate(token.Value.Value);
-			}
-			
-			if (Match(token, TokenType.Identifier)) {
-				return new AssemblyNode.Symbol(token.Mnemonic);
-			}
-			
-			// Check for relocation directives
-			if (
-				Match(token, TokenType.DirectivePrefix) && 
-				tokens.Peek().Mnemonic == Syntax.directive_relocation_lo || 
-				tokens.Peek().Mnemonic == Syntax.directive_relocation_hi
-			) {
-				return ParseLinkerRelocation(tokens);
-			}
-			
-			Fail(token, TokenType.Immediate, $"Invalid immediate '{token.Mnemonic}'");
-			return null;
-		}
-		
-		static AssemblyNode.Label ParseLabel(LinkedList<Token> tokens) {
-			Token token = tokens.Dequeue();
-			Expect(token, TokenType.Identifier, $"Invalid identifier '{token.Mnemonic}'");
-			Expect(tokens.Dequeue(), TokenType.LabelDelimeter, $"Expected '{Syntax.label_delimeter}' after label '{token.Mnemonic}'");
-			return new AssemblyNode.Label(token.Mnemonic);
-		}
 	}
 }

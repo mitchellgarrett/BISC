@@ -7,7 +7,14 @@ namespace FTG.Studios.BISC.Asm {
 		
 		public abstract class Node { }
 		
-		public abstract class BlockItem : Node { }
+		public abstract class BlockItem : Node { 
+			public readonly int Size;
+			public UInt32 Address;
+			
+			public BlockItem(int size) {
+				Size = size;
+			}
+		}
 		
 		public class Section : Node {
 			public readonly string Identifier;
@@ -28,7 +35,7 @@ namespace FTG.Studios.BISC.Asm {
 		public class Label : BlockItem {
 			public readonly string Identifier;
 			
-			public Label(string identifier) {
+			public Label(string identifier) : base(0) {
 				Identifier = identifier;
 			}
 			

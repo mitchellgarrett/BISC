@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FTG.Studios.BISC.Asm
-{
+namespace FTG.Studios.BISC.Asm {
 
 	/// <summary>
 	/// BISC Assembler.
 	/// </summary>
-	public static class Assembler
-	{
+	public static class Assembler {
 
 		/// <summary>
 		/// Assembles BISC source code into an intermediate program representation.
 		/// </summary>
 		/// <param name="source">Source code.</param>
 		/// <returns>An executable program.</returns>
-		public static AssemblyTree Assemble(string file_name, string source)
-		{
+		public static AssemblyTree Assemble(string file_name, string source) {
 			List<Token> tokens = Lexer.Tokenize(source);
 
 			foreach (var token in tokens) Console.WriteLine(token);
@@ -26,8 +23,8 @@ namespace FTG.Studios.BISC.Asm
 			// First-pass optimizations
 			//Optimizer.Optimize(program);
 
-			//program.AssignAddresses();
-			//program.ResolveUndefinedSymboles();
+			SemanticAnalyzer.AssignAddresses(program);
+			SemanticAnalyzer.ResolveSymbols(program);
 
 			Console.WriteLine(program);
 
@@ -39,8 +36,7 @@ namespace FTG.Studios.BISC.Asm
 		/// </summary>
 		/// <param name="lexeme">String to parse. Can be a signed or unsigned integer, hexadecimal value prefixed with 0x, binary value prefixed with 0b, or single ASCII character wrapped in single quotes.</param>
 		/// <returns>Unsigned 32-bit integer.</returns>
-		public static UInt32? ParseImmediate(string lexeme)
-		{
+		public static UInt32? ParseImmediate(string lexeme) {
 			// Check for ASCII character
 			if (lexeme[0] == '\'')
 			{

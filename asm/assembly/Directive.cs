@@ -3,9 +3,11 @@ using System;
 namespace FTG.Studios.BISC.Asm {
 	
 	public static partial class AssemblyNode {
-		
-		public abstract class Directive : BlockItem { }
-		
+
+		public abstract class Directive : BlockItem {
+			protected Directive() : base(0) { }
+		}
+
 		public class SectionDefinition : Directive {
 			public readonly string Identifier;
 			
@@ -15,6 +17,20 @@ namespace FTG.Studios.BISC.Asm {
 
 			public override string ToString() {
 				return $"SectionDefinition(\"{Identifier}\")";
+			}
+		}
+		
+		public class ConstantDefinition : Directive {
+			public readonly string Identifier;
+			public readonly Constant Value;
+			
+			public ConstantDefinition(string identifier, Constant value) {
+				Identifier = identifier;
+				Value = value;
+			}
+
+			public override string ToString() {
+				return $"ConstantDefinition(\"{Identifier}\", {Value})";
 			}
 		}
 		

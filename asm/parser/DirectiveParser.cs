@@ -11,6 +11,7 @@ namespace FTG.Studios.BISC.Asm {
 			
 			switch (tokens.Peek().Mnemonic.ToLower()) {
 				case Syntax.directive_section: return ParseSectionDefinition(tokens);
+				case Syntax.directive_define: return ParseConstantDefinition(tokens);
 				
 				default:
 					Fail(tokens.Peek(), TokenType.Identifier, $"Invalid directive '{Syntax.directive_prefix}{tokens.Peek().Mnemonic}'");
@@ -26,6 +27,21 @@ namespace FTG.Studios.BISC.Asm {
 			Expect(token, TokenType.DataInitializer, $"Invalid section name '{token.Mnemonic}'");
 			
 			return new AssemblyNode.SectionDefinition(token.Mnemonic);
+		}
+		
+		static AssemblyNode.ConstantDefinition ParseConstantDefinition(LinkedList<Token> tokens) {
+			Token token = tokens.Dequeue();
+			if (token.Mnemonic != Syntax.directive_define) Fail(token, TokenType.Identifier, $"Invalid directive '{Syntax.directive_prefix}{token.Mnemonic}'");
+			
+			token = tokens.Dequeue();
+			Expect(token, TokenType.Identifier, $"Invalid identifier '{token.Mnemonic}'");
+			string identifier = token.Mnemonic;
+			
+			Expect(tokens.Dequeue(), TokenType.Seperator, $"Expected '{Syntax.seperator}' after identifier '{identifier}'");
+			
+			AssemblyNode.Constant value = ParseConstant(tokens);
+			
+			return new AssemblyNode.ConstantDefinition(identifier, value);
 		}
 		
 		// Should only be called when parsing a constant value

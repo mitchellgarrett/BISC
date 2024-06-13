@@ -7,7 +7,7 @@ namespace FTG.Studios.BISC.Asm {
 		public abstract class Instruction : BlockItem {
 			public readonly Opcode Opcode;
 			
-			public Instruction(Opcode opcode) {
+			public Instruction(Opcode opcode) : base(4) {
 				Opcode = opcode;
 			}
 		}
