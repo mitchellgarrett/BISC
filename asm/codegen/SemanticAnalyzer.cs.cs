@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection.Emit;
 
 namespace FTG.Studios.BISC.Asm {
 	
@@ -16,7 +15,6 @@ namespace FTG.Studios.BISC.Asm {
 			}
 		}
 		
-		
 		// TODO: Resolve macros/constant definitions
 		static readonly Dictionary<string, AssemblyNode.Label> labels = new Dictionary<string, AssemblyNode.Label>();
 		public static void ResolveLabels(AssemblyTree program) {
@@ -26,7 +24,7 @@ namespace FTG.Studios.BISC.Asm {
 			foreach (var section in program.Sections) {
 				foreach (var item in section.Body) {
 					if (item is AssemblyNode.Label label) {
-						if (labels.ContainsKey(label.Identifier)) throw new SyntaxErrorException($"Duplicate symbol '{label.Identifier}'");
+						if (labels.ContainsKey(label.Identifier)) throw new SyntaxErrorException($"Duplicate label '{label.Identifier}'");
 						labels.Add(label.Identifier, label);
 					}
 				}
@@ -39,17 +37,19 @@ namespace FTG.Studios.BISC.Asm {
 						// Replace immediate value of instruction with the address of the label
 						section.Body[i] = new AssemblyNode.IInstruction(iinstruction.Opcode, iinstruction.Destination, ResolveConstant(iinstruction.Immediate));
 					}
+					
+					// TODO: Fix memory oinstructions too
 				}
 			}
 			
 			static AssemblyNode.Constant ResolveConstant(AssemblyNode.Constant constant) {
 				if (constant is AssemblyNode.LinkerRelocation relocation) return new AssemblyNode.LinkerRelocation(ResolveConstant(relocation.Value), relocation.Type);
 				
-				if (constant is AssemblyNode.Symbol symbol) {
-					if (!labels.TryGetValue(symbol.Identifier, out AssemblyNode.Label label)) 
-						throw new SyntaxErrorException($"Unknown symbol '{symbol.Identifier}'");
+				if (constant is AssemblyNode.LabelAccess symbol_access) {
+					if (!labels.TryGetValue(symbol_access.Identifier, out AssemblyNode.Label symbol)) 
+						throw new SyntaxErrorException($"Unknown label '{symbol_access.Identifier}'");
 					
-					return new AssemblyNode.Immediate(label.Address);
+					return new AssemblyNode.Immediate(symbol.Address);
 				}
 				
 				return constant;

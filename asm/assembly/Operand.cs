@@ -42,19 +42,35 @@ namespace FTG.Studios.BISC.Asm {
 			}
 		}
 		
-		public class Symbol : Constant {
+		public class LabelAccess : Constant {
 			public readonly string Identifier;
 			
-			public Symbol(string identifier) {
+			public LabelAccess(string identifier) {
 				Identifier = identifier;
 			}
 			
 			public override string ToString() {
-				return $"Symbol(\"{Identifier}\")";
+				return $"LabelAccess(\"{Identifier}\")";
 			}
 			
 			public override string GetMnemonic() {
 				return Identifier;
+			}
+		}
+		
+		public class MacroAccess : Constant {
+			public readonly string Identifier;
+			
+			public MacroAccess(string identifier) {
+				Identifier = identifier;
+			}
+			
+			public override string ToString() {
+				return $"MacroAccess(\"{Identifier}\")";
+			}
+			
+			public override string GetMnemonic() {
+				return $"{Syntax.macro_expansion_operator}{Identifier}";
 			}
 		}
 	}

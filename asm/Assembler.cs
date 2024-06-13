@@ -19,12 +19,14 @@ namespace FTG.Studios.BISC.Asm {
 			foreach (var token in tokens) Console.WriteLine(token);
 
 			AssemblyTree program = Parser.Parse(tokens, file_name);
+			
+			Preprocessor.EvaluateConstants(program);
+			
+			SemanticAnalyzer.AssignAddresses(program);
+			SemanticAnalyzer.ResolveLabels(program);
 
 			// First-pass optimizations
 			//Optimizer.Optimize(program);
-
-			SemanticAnalyzer.AssignAddresses(program);
-			SemanticAnalyzer.ResolveLabels(program);
 
 			Console.WriteLine(program);
 

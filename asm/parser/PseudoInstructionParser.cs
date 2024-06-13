@@ -82,7 +82,7 @@ namespace FTG.Studios.BISC.Asm {
 						break;
 						
 					case ArgumentType.Immediate32:
-						if (!TryParseImmediate32(tokens, out immediate)) return false;
+						if (!TryParseImmediate(tokens, out immediate)) return false;
 						operands.Add(immediate);
 						break;
 					
@@ -115,7 +115,7 @@ namespace FTG.Studios.BISC.Asm {
 			}
 		}
 		
-		static bool TryParseImmediate32(LinkedList<Token> tokens, out AssemblyNode.Constant immediate) {
+		static bool TryParseImmediate(LinkedList<Token> tokens, out AssemblyNode.Constant immediate) {
 			immediate = null;
 			if (tokens.Count < 1) return false;
 			

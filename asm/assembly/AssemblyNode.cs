@@ -7,6 +7,8 @@ namespace FTG.Studios.BISC.Asm {
 		
 		public abstract class Node { }
 		
+		// TODO: Add line/column numbers
+		// TODO: Add undefined symbol bool
 		public abstract class BlockItem : Node { 
 			public readonly int Size;
 			public UInt32 Address;

@@ -24,15 +24,14 @@ namespace FTG.Studios.BISC.Asm {
 			}
 			
 			if (Match(token, TokenType.Identifier)) {
-				return new AssemblyNode.Symbol(token.Mnemonic);
+				return new AssemblyNode.LabelAccess(token.Mnemonic);
 			}
 			
 			// Check for macros
 			if (Match(token, TokenType.MacroExpansionOperator)) {
-				tokens.Dequeue();
 				token = tokens.Dequeue();
 				Expect(token, TokenType.Identifier, "TODO: Invalid macro");
-				return new AssemblyNode.Symbol(token.Mnemonic);
+				return new AssemblyNode.MacroAccess(token.Mnemonic);
 			}
 			
 			// Check for relocation directives
