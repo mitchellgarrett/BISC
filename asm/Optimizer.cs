@@ -1,30 +1,24 @@
-namespace FTG.Studios.BISC.Asm
-{
+namespace FTG.Studios.BISC.Asm {
 
-	public static class Optimizer
-	{
-
-		/*public static void Optimize(AssemblerResult program)
-		{
-			for (int i = 0; i < program.SectionData.Count; i++)
-			{
-				if (!(program.SectionData[i] is IInstruction current_iinstruction)) continue;
-
-				if (i < program.SectionData.Count - 1)
-				{
-					if (!(program.SectionData[i + 1] is IInstruction next_iinstruction)) continue;
-
-
-					// If current inst is LLI, next inst is LUI, both have same dest reg, and next inst loads 0
-					// then the LUI {reg}, 0 operation is redundant as LLI already zeros out the upper 16 bits
-					if (current_iinstruction.Opcode == Opcode.LLI && next_iinstruction.Opcode == Opcode.LUI && current_iinstruction.Immediate.Value == next_iinstruction.Immediate.Value)
-					{
-						// Check if upper 16 bits are 0 cause that's how LUI is currently implemented, which is dumb
-						if (next_iinstruction.Immediate.Value.HasValue && (next_iinstruction.Immediate.Value.Value >> 16) == 0)
-							program.RemoveAt(i + 1);
-					}
+	public static class Optimizer {
+		
+		/// <summary>
+		/// Removes LUI instructions that reduandly load 0.
+		/// </summary>
+		/// <param name="program">The program to optimize.</param>
+		public static void RemoveRedundantLoads(AssemblyTree program) {
+			foreach (var section in program.Sections) {
+				for (int i = 0; i < section.Body.Count - 1; i++) {
+					if (!(section.Body[i] is AssemblyNode.IInstruction current)) continue;
+					if (!(section.Body[i + 1] is AssemblyNode.IInstruction next)) continue;
+					
+					// If the current/next instruction form a LLI/LUI pair that load to the same register
+					// and the LUI loads 0, then it is redundant and can be removed
+					if (current.Opcode != Opcode.LLI || next.Opcode != Opcode.LUI) continue;
+					if (current.Destination.Type != next.Destination.Type) continue;
+					// TODO: Evaluate value
 				}
 			}
-		}*/
+		}
 	}
 }
