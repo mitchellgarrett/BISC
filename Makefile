@@ -15,6 +15,7 @@ VM_EXE = bisc-vm.exe
 VM_SRC = $(call rwildcard,$(VM_DIR),*.cs) $(CMN_SRC)
 
 TEST_DIR = test
+TEST_PROJECT = $(TEST_DIR)/"BISC Tester.csproj"
 
 DOCS_DIR = docs
 #DOCS_SRC = $(wildcard $(DOCS_DIR)/*.tex)
@@ -48,11 +49,13 @@ vm: $(VM_EXE) $(ASM_EXE)
 	@mono $(BUILD_DIR)/$(ASM_EXE) $(FILE)
 	@mono $(BUILD_DIR)/$(VM_EXE) $(FILE)
 
-docs:
+docs: $(DOCS_SRC)
 	@mkdir -p $(DOCS_BUILD_DIR)
 	@latexmk -pdf -outdir=$(DOCS_BUILD_DIR) $(DOCS_SRC)
 
-docs: $(DOCS_SRC)
+.PHONY: test
+test:
+	dotnet test $(TEST_PROJECT)
 
 clean:
 	@rm -rf $(BUILD_DIR)
