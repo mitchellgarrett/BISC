@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace FTG.Studios.BISC.Asm {
@@ -43,9 +44,10 @@ namespace FTG.Studios.BISC.Asm {
 			
 			// Check for relocation directives
 			if (
+				tokens.Count > 0 &&
 				Match(token, TokenType.DirectivePrefix) && 
-				tokens.Peek().Mnemonic == Syntax.directive_relocation_lo || 
-				tokens.Peek().Mnemonic == Syntax.directive_relocation_hi
+				(tokens.Peek().Mnemonic == Syntax.directive_relocation_lo || 
+				tokens.Peek().Mnemonic == Syntax.directive_relocation_hi)
 			) {
 				return ParseLinkerRelocation(tokens);
 			}
