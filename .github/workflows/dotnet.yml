@@ -13,7 +13,8 @@ jobs:
 
     - name: Initialize submodules
       run: git submodule update --init --recursive
-
+    - name: ls
+      run: ls deps -R
     - name: Build project
       run: make
 
