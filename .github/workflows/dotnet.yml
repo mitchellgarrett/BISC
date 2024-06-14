@@ -12,12 +12,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Initialize submodules
-      run: git submodule update --init --recursive
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-         dotnet-version: 8.0.x
+      run: ls -a && git submodule update --init --recursive
 
     - name: Build Assembler
       run: make asm
