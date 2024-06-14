@@ -47,10 +47,9 @@ namespace FTG.Studios.BISC.Asm {
 			}
 
 			public override string ToString() {
-				string output = $"MacroDefinition(\"{Identifier}\"";
+				string output = $"MacroDefinition(\"{Identifier}\", ";
 				foreach (string parameter in Parameters) output += parameter + ", ";
-				if (Parameters.Count > 0) output = output[..^2];
-				output += ")\n";
+				output = output[..^2] + ")\n";
 				foreach (BlockItem item in Body) output += item.ToString() + '\n';
 				output += "MacroEnd()";
 				return output;
@@ -59,18 +58,17 @@ namespace FTG.Studios.BISC.Asm {
 		
 		public class MacroAccess : Directive {
 			public readonly string Identifier;
-			public readonly List<string> Arguments;
+			public readonly List<Operand> Arguments;
 			
-			public MacroAccess(string identifier, List<string> arguments) {
+			public MacroAccess(string identifier, List<Operand> arguments) {
 				Identifier = identifier;
 				Arguments = arguments;
 			}
 			
 			public override string ToString() {
-				string output = $"MacroAccess(\"{Identifier}\"";
-				foreach (string parameter in Arguments) output += parameter + ", ";
-				if (Arguments.Count > 0) output = output[..^2];
-				output += ')';
+				string output = $"MacroAccess(\"{Identifier}\", ";
+				foreach (Operand parameter in Arguments) output += parameter.ToString() + ", ";
+				output = output[..^2] + ')';
 				return output;
 			}
 		}

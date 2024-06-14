@@ -10,6 +10,13 @@ namespace FTG.Studios.BISC.Asm {
 			return (Opcode)token.Value.Value;
 		}
 		
+		static AssemblyNode.Operand ParseOperand(LinkedList<Token> tokens) {
+			return tokens.Peek().Type switch {
+				TokenType.Register => ParseRegister(tokens),
+				_ => ParseConstant(tokens),
+			};
+		}
+		
 		static AssemblyNode.Register ParseRegister(LinkedList<Token> tokens) {
 			Token token = tokens.Dequeue();
 			Expect(token, TokenType.Register, $"Invalid register '{token.Mnemonic}'");

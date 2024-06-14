@@ -52,9 +52,18 @@ namespace FTG.Studios.BISC.Asm {
 			Expect(token, TokenType.Identifier, $"Invalid identifier '{token.Mnemonic}'");
 			string identifier = token.Mnemonic;
 			
-			Expect(tokens.Dequeue(), TokenType.LineSeperator, $"Expected line feed after directive '{Syntax.directive_prefix}{Syntax.directive_macro} {identifier}'");
+			// Add parameters until we reach new line
+			List<string> parameters = new List<string>();
+			while (!Match(token = tokens.Dequeue(), TokenType.LineSeperator) && !Match(token, TokenType.Comment)) {
+				Expect(token, TokenType.Identifier, "TODO: invalid macro argument");
+				parameters.Add(token.Mnemonic);
+				
+				// Parameters should be comma-separated
+				if (!Match(tokens.Peek(), TokenType.LineSeperator) && !Match(tokens.Peek(), TokenType.Comment)) {
+					Expect(tokens.Dequeue(), TokenType.Seperator, "TODO: comma between macreo parameters");
+				}
+			}
 			
-			// TODO: Parse parameters
 			// Add items to list until we reach '%end'
 			List< AssemblyNode.BlockItem> body = new List<AssemblyNode.BlockItem>();
 			AssemblyNode.BlockItem item;
@@ -62,16 +71,28 @@ namespace FTG.Studios.BISC.Asm {
 				if (item != null) body.Add(item);
 			}
 			
-			return new AssemblyNode.MacroDefinition(identifier, new List<string>(), body);
+			return new AssemblyNode.MacroDefinition(identifier, parameters, body);
 		}
 		
 		static AssemblyNode.MacroAccess ParseMacroAccess(LinkedList<Token> tokens) {
 			Expect(tokens.Dequeue(), TokenType.MacroExpansionOperator, "TODO: expected $");
 			
-			Token token = tokens.Dequeue();
-			Expect(token, TokenType.Identifier, "TODO: invalid macro access");
+			Expect(tokens.Peek(), TokenType.Identifier, "TODO: invalid macro access");
+			string identifier = tokens.Dequeue().Mnemonic;
 			
-			return new AssemblyNode.MacroAccess(token.Mnemonic, new List<string>());
+			// Add arguments until we reach new line
+			List<AssemblyNode.Operand> arguments = new List<AssemblyNode.Operand>();
+			while (!Match(tokens.Peek(), TokenType.LineSeperator) && !Match(tokens.Peek(), TokenType.Comment)) {
+				AssemblyNode.Operand operand = ParseOperand(tokens);
+				arguments.Add(operand);
+				
+				// Arguments should be comma-separated
+				if (!Match(tokens.Peek(), TokenType.LineSeperator) && !Match(tokens.Peek(), TokenType.Comment)) {
+					Expect(tokens.Dequeue(), TokenType.Seperator, "TODO: comma between macreo parameters");
+				}
+			}
+			
+			return new AssemblyNode.MacroAccess(identifier, arguments);
 		}
 		
 		static AssemblyNode.MacroEnd ParseMacroEnd(LinkedList<Token> tokens) {

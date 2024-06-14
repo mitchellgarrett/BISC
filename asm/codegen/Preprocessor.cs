@@ -62,11 +62,44 @@ namespace FTG.Studios.BISC.Asm {
 				return constant;
 			}
 			
+			// TODO: This is garbage
+			static AssemblyNode.Operand EvaluateOperand(Dictionary<string, AssemblyNode.Operand> operand_definitions, AssemblyNode.Operand operand) {
+				if (operand is AssemblyNode.LinkerRelocation relocation) return new AssemblyNode.LinkerRelocation((AssemblyNode.Constant)EvaluateOperand(operand_definitions, relocation.Value), relocation.Type);
+				
+				if (operand is AssemblyNode.DefineAccess symbol_access) {
+					if (!operand_definitions.TryGetValue(symbol_access.Identifier, out AssemblyNode.Operand value)) 
+						throw new SyntaxErrorException($"Unknown symbol '{symbol_access.Identifier}'");
+					
+					return EvaluateOperand(operand_definitions, value);
+				}
+				
+				return operand;
+			}
+			
 			static List<AssemblyNode.BlockItem> EvaluateMacro(Dictionary<string, AssemblyNode.MacroDefinition> macro_definitions, AssemblyNode.MacroAccess macro_access) {
 				// TODO: Make this work with parameters
 				if (!macro_definitions.TryGetValue(macro_access.Identifier, out AssemblyNode.MacroDefinition macro_definition)) 
 						throw new SyntaxErrorException($"Unknown symbol '{macro_access.Identifier}'");
-						
+				
+				// Generate argument dictionary
+				if (macro_access.Arguments.Count != macro_definition.Parameters.Count)
+					throw new SyntaxErrorException($"Macro '{macro_definition.Identifier}' expects {macro_definition.Parameters.Count} arguments but got {macro_access.Arguments.Count}");
+				
+				Dictionary<string, AssemblyNode.Operand> argument_values = new Dictionary<string, AssemblyNode.Operand>();
+				for (int i = 0; i < macro_access.Arguments.Count; i++) {
+					string identifier = macro_definition.Parameters[i];
+					AssemblyNode.Operand value = macro_access.Arguments[i];
+					
+					if (argument_values.ContainsKey(identifier)) throw new SyntaxErrorException($"Duplicate argument '{identifier}' in macro '{macro_definition.Identifier}'");
+					argument_values.Add(identifier, value);
+				}
+				
+				// Create copy of body to fill with arguments
+				List<AssemblyNode.BlockItem> body = new List<AssemblyNode.BlockItem>(macro_definition.Body);
+				foreach (var item in body) {
+					// TODO: fill with arguments
+				}
+					
 				return macro_definition.Body;
 			}
 		}
