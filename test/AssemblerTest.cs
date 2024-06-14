@@ -67,7 +67,10 @@ namespace FTG.Studios.BISC.Test {
 		const string file_name = "test";
 
 		[SetUp]
-		public void SetUp() { }
+		public void SetUp() {
+			// Ignore stdout
+			Console.SetOut(System.IO.TextWriter.Null);
+		}
 
 		[Test]
 		public void AssembleInstruction() {
