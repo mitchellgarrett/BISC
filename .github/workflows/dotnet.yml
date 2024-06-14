@@ -21,5 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: ls
+      run: ls -a
     - name: Test
       run: make test
