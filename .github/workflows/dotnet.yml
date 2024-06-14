@@ -15,7 +15,7 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Build Project
-      run: make asm
+      run: make
 
   test:
     runs-on: ubuntu-latest
