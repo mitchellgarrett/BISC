@@ -50,7 +50,8 @@ namespace FTG.Studios.BISC.Asm {
 			string[] pseudo_instruction_definition = Specification.pseudo_instruction_definitions[pseudo_index];
 			
 			// Replace each instruction in the pseudo instruction expansion which its proper arguments
-			for (int i = 0; i < pseudo_instruction_definition.Length; i++) {
+			// Traverse backwards to put tokens on the front of the queue so that they are dequeued in the correct order
+			for (int i = pseudo_instruction_definition.Length - 1; i >= 0; i--) {
 				// Format operands into the instruction definition
 				string current_instruction = string.Format(pseudo_instruction_definition[i], pseudo_operands.Select(operand => operand.GetMnemonic()).ToArray());
 				current_instruction += '\n';
