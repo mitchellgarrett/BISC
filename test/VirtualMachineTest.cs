@@ -500,7 +500,7 @@ namespace FTG.Studios.BISC.Test {
 
 			UInt32 value_a = 0xbabecafe;
 			UInt32 value_b = 0xcafebabe;
-			UInt32 expected = 0x0D1B3800;
+			UInt32 expected = (value_a & 0xFFFF) * (value_b & 0xFFFF);
 
 			vm.SetRegister(source_register_a, value_a);
 			vm.SetRegister(source_register_b, value_b);
