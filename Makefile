@@ -15,7 +15,6 @@ VM_EXE = bisc-vm.exe
 VM_SRC = $(call rwildcard,$(VM_DIR),*.cs) $(CMN_SRC)
 
 TEST_DIR = test
-TEST_PROJECT = $(TEST_DIR)/"BISC Tester.csproj"
 
 DOCS_DIR = docs
 #DOCS_SRC = $(wildcard $(DOCS_DIR)/*.tex)
@@ -55,7 +54,7 @@ docs: $(DOCS_SRC)
 
 .PHONY: test
 test:
-	dotnet test $(TEST_PROJECT)
+	dotnet test
 
 clean:
 	@rm -rf $(BUILD_DIR)
