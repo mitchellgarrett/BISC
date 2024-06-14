@@ -54,7 +54,7 @@ docs: $(DOCS_SRC)
 
 .PHONY: test
 test:
-	dotnet test
+	@dotnet test
 
 clean:
 	@rm -rf $(BUILD_DIR)
