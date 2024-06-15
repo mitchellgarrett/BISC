@@ -2,6 +2,128 @@
 
 \subsubsection{NOT \normalfont{- Logical Not}}\label{sec:NOT}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{}
+		\bitbox{8}{0x17} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs} &
+		\bitbox{8}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The NOT instruction performs a logical not operation on the source register and stores the result in the destination register.
+Practically, this means that \texttt{rd} will be 1 if \texttt{rs} is 0 and 0 if \texttt{rs} is non-zero.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs = 0, rd := 1, else rd := 0
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	NOT {rd}, {rs}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = not r1
+	MODU r0, r1
+\end{lstlisting}
+
 \subsubsection{NEG \normalfont{- Integer Negate}}\label{sec:NEG}
  
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{}
+		\bitbox{8}{0x18} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs} &
+		\bitbox{8}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The NEG instruction negates the source register and stores the result in the destination register,
+essentially multiplying \texttt{rs} by -1.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := -1 * rs
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	NEG {rd}, {rs}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = -1 * r1
+	NEG r0, r1
+\end{lstlisting}
+
 \subsubsection{INV \normalfont{- Bitwise Invert}}\label{sec:INV}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{}
+		\bitbox{8}{0x19} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs} &
+		\bitbox{8}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The INV instruction inverts all the bits in the source register and stores the result in the destination register.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs $\oplus$ 0xffffffff
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	INV {rd}, {rs}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = invert all bits of r1
+	INV r0, r1
+\end{lstlisting}
