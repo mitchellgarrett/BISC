@@ -70,10 +70,14 @@ namespace FTG.Studios.BISC.Asm {
 					List<Token> argument = new List<Token>();
 					// TODO: This will fail if it encounters another comma that's not supposed to be the separator
 					while (tokens[index].Type != TokenType.Seperator && tokens[index].Type != TokenType.LineSeperator) {
+
 						argument.Add(tokens[index]);
 						tokens.RemoveAt(index);
 					}
 					arguments.Add(macro_parameters[i], argument);
+					
+					// Remove seperator/line feed
+					tokens.RemoveAt(index);
 				}
 				
 				// Replace parameters with given values in macro definition
@@ -156,7 +160,6 @@ namespace FTG.Studios.BISC.Asm {
 			parameters = new List<string>();
 			while (tokens[index].Type != TokenType.LineSeperator) {
 				if (tokens[index].Type != TokenType.Identifier) throw new SyntaxErrorException($"TODO: invalid macro {tokens[index]}");
-				
 				parameters.Add(tokens[index].Mnemonic);
 				tokens.RemoveAt(index);
 			
@@ -166,7 +169,7 @@ namespace FTG.Studios.BISC.Asm {
 					tokens.RemoveAt(index);
 				}
 			}
-			
+
 			// Remove line feed
 			tokens.RemoveAt(index);
 
