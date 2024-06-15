@@ -8,29 +8,27 @@ namespace FTG.Studios.BISC.Test {
     public class NonVolatileMemoryTest {
 
         NonVolatileMemory memory;
-        UInt32 address_start, address_end, address_length;
+        UInt32 address_length;
 
         [SetUp]
         public void SetUp() {
-            address_start = 0x1000;
             address_length = 0x1000;
-            address_end = address_start + address_length;
-            memory = new NonVolatileMemory(address_start, address_length);
+            memory = new NonVolatileMemory(address_length);
         }
 
         [Test]
         public void Reset() {
-            MemoryTest.NonZeroReset(memory, address_start, address_end);
+            MemoryTest.NonZeroReset(memory, 0, address_length);
         }
 
         [Test]
         public void Read() {
-            MemoryTest.TrivialRead(memory, address_start, address_end);
+            MemoryTest.TrivialRead(memory, 0, address_length);
         }
 
         [Test]
         public void Write() {
-            MemoryTest.TrivialWrite(memory, address_start, address_end);
+            MemoryTest.TrivialWrite(memory, 0, address_length);
         }
     }
 }

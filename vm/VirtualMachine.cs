@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Linq;
 
-namespace FTG.Studios.BISC.VM
-{
+namespace FTG.Studios.BISC.VM {
 
 	/// <summary>
 	/// BISC virtual machine.
 	/// </summary>
-	public class VirtualMachine
-	{
+	public class VirtualMachine {
 
 		delegate bool InstructionHandler(byte arg0, byte arg1, byte arg2);
 		InstructionHandler[] instructions;
@@ -26,10 +24,10 @@ namespace FTG.Studios.BISC.VM
         public VirtualMachine(MemoryModule memory) {
             this.memory = memory;
             Initialize();
+			Reset();
         }
 
-		void Initialize()
-		{
+		void Initialize() {
 			registers = new RegisterValue[Specification.NUM_REGISTERS];
 			instructions = new InstructionHandler[] {
 				HLT, NOP, SYS, CALL, RET,
@@ -43,87 +41,73 @@ namespace FTG.Studios.BISC.VM
 			};
 		}
 
-		public UInt32 GetRegister(int reg)
-		{
+		public UInt32 GetRegister(int reg) {
 			if (reg >= 0 && reg < Specification.NUM_REGISTERS) return registers[reg].UValue;
 			return 0xFFFFFFFF;
 		}
 
-		public UInt32 GetRegister(Register reg)
-		{
+		public UInt32 GetRegister(Register reg) {
 			return registers[(int)reg].UValue;
 		}
 
-		public void SetRegister(int reg, UInt32 val)
-		{
+		public void SetRegister(int reg, UInt32 val) {
 			if (reg >= 0 && reg < Specification.NUM_REGISTERS) registers[reg].UValue = val;
 		}
 
-		public void SetRegister(Register reg, UInt32 val)
-		{
+		public void SetRegister(Register reg, UInt32 val) {
 			registers[(int)reg].UValue = val;
 		}
 
-		bool IsValidRegister(byte reg)
-		{
+		bool IsValidRegister(byte reg) {
 			return reg <= Specification.NUM_REGISTERS;
 		}
 
-		public byte GetMemory8(UInt32 address)
-		{
+		public byte GetMemory8(UInt32 address) {
 			byte[] data = { 0 };
 			memory.Read(address, ref data);
 
 			return data[0];
 		}
 
-		public UInt16 GetMemory16(UInt32 address)
-		{
+		public UInt16 GetMemory16(UInt32 address) {
 			byte[] data = { 0, 0 };
 			memory.Read(address, ref data);
 
 			return data.AssembleUInt16();
 		}
 
-		public UInt32 GetMemory32(UInt32 address)
-		{
+		public UInt32 GetMemory32(UInt32 address) {
 			byte[] data = { 0, 0, 0, 0 };
 			memory.Read(address, ref data);
 
 			return data.AssembleUInt32();
 		}
 
-		public void SetMemory8(UInt32 address, UInt32 value)
-		{
+		public void SetMemory8(UInt32 address, UInt32 value) {
 			byte[] data = { (byte)(value & 0xFF) };
 			memory.Write(address, data);
 		}
 
-		public void SetMemory16(UInt32 address, UInt32 value)
-		{
+		public void SetMemory16(UInt32 address, UInt32 value) {
 			byte[] data = value.DisassembleUInt16();
 			memory.Write(address, data);
 		}
 
-		public void SetMemory32(UInt32 address, UInt32 value)
-		{
+		public void SetMemory32(UInt32 address, UInt32 value) {
 			byte[] data = value.DisassembleUInt32();
 			memory.Write(address, data);
 		}
 
-		public void SetMemoryRange(UInt32 address, byte[] data)
-		{
+		public void SetMemoryRange(UInt32 address, byte[] data) {
 			memory.Write(address, data);
 		}
 
-		public void SetMemoryRange(UInt32 address, UInt32[] data)
-		{
+		public void SetMemoryRange(UInt32 address, UInt32[] data) {
 			byte[] bytes = data.SelectMany(BitConverter.GetBytes).ToArray();
 			memory.Write(address, bytes);
 		}
 
-		public void Reset()
-		{
+		public void Reset() {
 			// Zero out the registers.
 			for (int i = 0; i < registers.Length; i++)
 			{
@@ -136,8 +120,7 @@ namespace FTG.Studios.BISC.VM
 			IsRunning = true;
 		}
 
-		public void Halt()
-		{
+		public void Halt() {
 			IsRunning = false;
 		}
 
@@ -145,8 +128,7 @@ namespace FTG.Studios.BISC.VM
 		/// Executes a single 32-bit BISC instruction at the address stored in PC.
 		/// </summary>
 		/// <returns>True if the executed instruction is valid, false otherwise.</returns>
-		public bool ExecuteNext()
-		{
+		public bool ExecuteNext() {
 			return ExecuteAt(pc);
 		}
 
@@ -155,8 +137,7 @@ namespace FTG.Studios.BISC.VM
 		/// </summary>
 		/// <param name="address">The memory address the instruction to execute is located.</param>
 		/// <returns>True if the instruction at the given address is valid, false otherwise.</returns>
-		public bool ExecuteAt(UInt32 address)
-		{
+		public bool ExecuteAt(UInt32 address) {
 			byte[] bytes = new byte[4];
 			memory.Read(address, ref bytes);
 			return ExecuteInstruction(bytes[0], bytes[1], bytes[2], bytes[3]);
@@ -167,8 +148,7 @@ namespace FTG.Studios.BISC.VM
 		/// </summary>
 		/// <param name="address">The memory addrerss to start execution from.</param>
 		/// <returns>The value of the RV register at the end of execution.</returns>
-		public UInt32 ExecuteFrom(UInt32 address)
-		{
+		public UInt32 ExecuteFrom(UInt32 address) {
 			pc = address;
 			while (IsRunning && ExecuteNext()) ;
 			return rv;
@@ -179,8 +159,7 @@ namespace FTG.Studios.BISC.VM
 		/// </summary>
 		/// <param name="instruction">32-bit instruction.</param>
 		/// <returns>True if the given instruction is valid, false otherwise.</returns>
-		public bool ExecuteInstruction(UInt32 instruction)
-		{
+		public bool ExecuteInstruction(UInt32 instruction) {
 			// Decompose instruction into its byte parameters
 			byte[] bytes = instruction.DisassembleUInt32();
 			return ExecuteInstruction(bytes[0], bytes[1], bytes[2], bytes[3]);
@@ -194,8 +173,7 @@ namespace FTG.Studios.BISC.VM
 		/// <param name="arg1">Second instruction argument.</param>
 		/// <param name="arg2">Third instruction argument.</param>
 		/// <returns>True if the given instruction is valid, false otherwise.</returns>
-		public bool ExecuteInstruction(byte opcode, byte arg0, byte arg1, byte arg2)
-		{
+		public bool ExecuteInstruction(byte opcode, byte arg0, byte arg1, byte arg2) {
 			if (opcode >= instructions.Length || !instructions[opcode](arg0, arg1, arg2))
 			{
 				// TODO: Set debug register to illegal execution
@@ -208,24 +186,21 @@ namespace FTG.Studios.BISC.VM
 		#region Instructions
 
 		#region System Instructions
-		bool HLT(byte arg0, byte arg1, byte arg2)
-		{
+		bool HLT(byte arg0, byte arg1, byte arg2) {
 			if (arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
 
 			Halt();
 			return true;
 		}
 		
-		bool NOP(byte arg0, byte arg1, byte arg2)
-		{
+		bool NOP(byte arg0, byte arg1, byte arg2) {
 			if (arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
 
 			pc += 4;
 			return true;
 		}
 
-		bool SYS(byte arg0, byte arg1, byte arg2)
-		{
+		bool SYS(byte arg0, byte arg1, byte arg2) {
 			if (arg0 != 0 || arg1 != 0 || arg2 != 0) return false;
 
 			// TODO: Handle syscall
@@ -234,8 +209,7 @@ namespace FTG.Studios.BISC.VM
 			return true;
 		}
 
-		bool CALL(byte arg0, byte arg1, byte arg2)
-		{
+		bool CALL(byte arg0, byte arg1, byte arg2) {
 			if (!IsValidRegister(arg0) || arg1 != 0 || arg2 != 0) return false;
 
 			// Set return address to next instruction

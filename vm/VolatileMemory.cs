@@ -10,12 +10,12 @@ namespace FTG.Studios.BISC.VM {
 
         protected readonly Dictionary<UInt32, byte[]> memory;
 
-        public VolatileMemory(UInt32 len) {
+        public VolatileMemory(UInt32 length) {
             Random rng = new Random();
 
-            MetaName = Specification.AssembleInteger32FromString("VMEM");
+            MetaName = "VMEM".AssembleUInt32();
             MetaID   = (UInt32)rng.Next();
-            AddressLength = len;
+            AddressLength = length;
             memory = new Dictionary<UInt32, byte[]>();
         }
 

@@ -7,7 +7,9 @@ namespace FTG.Studios.BISC.VM {
     /// </summary>
     public class NonVolatileMemory : VolatileMemory {
 
-        public NonVolatileMemory(UInt32 len) : base(len) { MetaName = Specification.AssembleInteger32FromString("NMEM"); }
+        public NonVolatileMemory(UInt32 len) : base(len) { 
+			MetaName = "NMEM".AssembleUInt32();
+		}
 
         #region IMemoryModule
         // Read-only memory will not lose its contents on reset.

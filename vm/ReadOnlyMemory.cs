@@ -7,7 +7,9 @@ namespace FTG.Studios.BISC.VM {
     /// </summary>
     public class ReadOnlyMemory : NonVolatileMemory {
 
-        public ReadOnlyMemory(UInt32 len) : base(len) { MetaName = Specification.AssembleInteger32FromString("ROM "); }
+        public ReadOnlyMemory(UInt32 len) : base(len) { 
+			MetaName = "ROM ".AssembleUInt32();
+		}
 
         /// <summary>
         /// Write an array of bytes to the read-only memory.

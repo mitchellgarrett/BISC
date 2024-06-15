@@ -25,7 +25,7 @@ namespace FTG.Studios.BISC
 		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
 		public static UInt16 AssembleUInt16(this byte[] bytes)
 		{
-			if (bytes.Length != 2) throw new ArgumentException("Length of byte array passed to byte[].Assemble16 must be 2.");
+			if (bytes.Length != 2) throw new ArgumentException("Length of byte array passed to byte[].AssembleUInt16 must be 2.");
 			if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt16(bytes.Reverse().ToArray(), 0);
 			return BitConverter.ToUInt16(bytes, 0);
 		}
@@ -37,7 +37,7 @@ namespace FTG.Studios.BISC
 		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
 		public static UInt32 AssembleUInt32(this byte[] bytes)
 		{
-			if (bytes.Length != 4) throw new ArgumentException("Length of byte array passed to byte[].Assemble32 must be 4.");
+			if (bytes.Length != 4) throw new ArgumentException("Length of byte array passed to byte[].AssembleUInt32 must be 4.");
 			if (!BitConverter.IsLittleEndian) return BitConverter.ToUInt32(bytes.Reverse().ToArray(), 0);
 			return BitConverter.ToUInt32(bytes, 0);
 		}
@@ -60,6 +60,17 @@ namespace FTG.Studios.BISC
 		public static UInt32 AssembleUInt32(this (byte, byte, byte, byte) bytes)
 		{
 			return new byte[] { bytes.Item1, bytes.Item2, bytes.Item3, bytes.Item4 }.AssembleUInt32();
+		}
+		
+		/// <summary>
+		/// Assembles a 32-bit integer from a four-character string supplied in little-endian order.
+		/// </summary>
+		/// <param name="bytes">A string of four characters in little-endian order.</param>
+		/// <returns>A 16-bit integer in the endianness of the host machine.</returns>
+		public static UInt32 AssembleUInt32(this string bytes)
+		{
+			if (bytes.Length != 4) throw new ArgumentException("Length of string passed to string.AssembleUInt32 must be 4.");
+			return new byte[] { (byte)bytes[0], (byte)bytes[1], (byte)bytes[2], (byte)bytes[3] }.AssembleUInt32();
 		}
 
 		/// <summary>

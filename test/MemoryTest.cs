@@ -6,7 +6,7 @@ namespace FTG.Studios.BISC.Test {
 
     public class MemoryTest {
 
-        public static void TrivialReset(Memory memory, UInt32 address_start, UInt32 address_end) {
+        public static void TrivialReset(MemoryModule memory, UInt32 address_start, UInt32 address_end) {
             Assert.NotNull(memory);
 
             UInt32 expected = 0xffff;
@@ -41,7 +41,7 @@ namespace FTG.Studios.BISC.Test {
             Assert.AreEqual(0, actual);
         }
 
-        public static void NonZeroReset(Memory memory, UInt32 address_start, UInt32 address_end) {
+        public static void NonZeroReset(MemoryModule memory, UInt32 address_start, UInt32 address_end) {
             Assert.NotNull(memory);
 
             UInt32 expected = 0xffff;
@@ -76,7 +76,7 @@ namespace FTG.Studios.BISC.Test {
             Assert.AreEqual(expected, actual);
         }
 
-        public static void TrivialRead(Memory memory, UInt32 address_start, UInt32 address_end) {
+        public static void TrivialRead(MemoryModule memory, UInt32 address_start, UInt32 address_end) {
             Assert.NotNull(memory);
 
             UInt32 expected = 0x0000;
@@ -113,7 +113,7 @@ namespace FTG.Studios.BISC.Test {
             Assert.AreEqual(expected, actual);
         }
 
-        public static void TrivialWrite(Memory memory, UInt32 address_start, UInt32 address_end) {
+        public static void TrivialWrite(MemoryModule memory, UInt32 address_start, UInt32 address_end) {
             Assert.NotNull(memory);
 
             // Write values to address boundaries

@@ -9,10 +9,10 @@ namespace FTG.Studios.BISC.VM
 
 		public Computer()
 		{
-			mmu = new MemoryManager();
+			mmu = new MemoryManager(32, 0xFFFF_0000);
 
-			VolatileMemory ram = new VolatileMemory(0, 0x4000);
-			mmu.AddDevice(ram);
+			VolatileMemory ram = new VolatileMemory(0x4000);
+			mmu.AddModule(ram, 0);
 
 			vm = new VirtualMachine(mmu);
 		}

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace FTG.Studios.BISC.VM {
 
@@ -22,7 +21,7 @@ namespace FTG.Studios.BISC.VM {
 
 			this.maxModules = maxModules;
 
-			MetaName   = Specification.AssembleInteger32FromString("MMU ");
+			MetaName   = "MMU ".AssembleUInt32();
 			Random rng = new Random();
 			MetaID     = (UInt32)rng.Next();
 			meta       = new MemoryManagerMeta[maxModules * 4];
@@ -31,20 +30,21 @@ namespace FTG.Studios.BISC.VM {
 			memoryModules = new MemoryModule[4 * maxModules];
 			AddressLength = 0xFFFF_FFFF;
 
-			meta[0] = new MemoryManagerMeta();
-
-			meta[0].Name    = MetaName;
-			meta[0].ID      = MetaID;
-			meta[0].Address = metaAddress;
-			meta[0].Length  = (4 * 4 * maxModules) - 1; // In bytes.
+			meta[0] = new MemoryManagerMeta
+			{
+				Name = MetaName,
+				ID = MetaID,
+				Address = metaAddress,
+				Length = (4 * 4 * maxModules) - 1 // In bytes.
+			};
 			metaValid[0]    = true;
 
 		}
 
-		public bool AddModule(MemoryModule module, UInt32 addr) {
+		public bool AddModule(MemoryModule module, UInt32 address) {
 
-			UInt32 moduleStart = addr;
-			UInt32 moduleEnd   = addr + module.AddressLength;
+			UInt32 moduleStart = address;
+			UInt32 moduleEnd   = address + module.AddressLength;
 
 			// Check for overlaps with existing modules.
 			for(int i = 0; i < maxModules; i++) {
@@ -76,7 +76,7 @@ namespace FTG.Studios.BISC.VM {
 
 			// Error out if all metadata is valid, indicating that there are no remaining module slots.
 			if(index == 0) {
-				Console.Error.WriteLine($"Unable to add module {module} (start=0x{addr:x8}, end=0x{moduleEnd:x8}, length=0x{module.AddressLength:x8}) to MMU, the maximum number of modules has been reached");
+				Console.Error.WriteLine($"Unable to add module {module} (start=0x{address:x8}, end=0x{moduleEnd:x8}, length=0x{module.AddressLength:x8}) to MMU, the maximum number of modules has been reached");
 				return false;
 			}
 
@@ -84,14 +84,14 @@ namespace FTG.Studios.BISC.VM {
 			meta[index]         = new MemoryManagerMeta();
 			meta[index].Name    = module.MetaName;
 			meta[index].ID      = module.MetaID;
-			meta[index].Address = addr;
+			meta[index].Address = address;
 			meta[index].Length  = module.AddressLength;
 			metaValid[index]    = true;
 
 			memoryModules[index] = module;
 
-			System.Diagnostics.Debug.WriteLine($"Added module {module} (start=0x{addr:x8}, end=0x{moduleEnd:x8}, length=0x{module.AddressLength:x8}) to MMU at index={index}");
-			Console.WriteLine($"Added module {module} (start=0x{addr:x8}, end=0x{moduleEnd:x8}, length=0x{module.AddressLength:x8}) to MMU at index={index}");
+			System.Diagnostics.Debug.WriteLine($"Added module {module} (start=0x{address:x8}, end=0x{moduleEnd:x8}, length=0x{module.AddressLength:x8}) to MMU at index={index}");
+			Console.WriteLine($"Added module {module} (start=0x{address:x8}, end=0x{moduleEnd:x8}, length=0x{module.AddressLength:x8}) to MMU at index={index}");
 
 			return true;
 		}

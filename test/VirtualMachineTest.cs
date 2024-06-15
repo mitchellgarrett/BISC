@@ -22,10 +22,10 @@ namespace FTG.Studios.BISC.Test {
 
 		[SetUp]
 		public void SetUp() {
-			address_start = 0x1000;
+			address_start = 0x0000;
 			address_length = 0x1000;
 			address_end = address_start + address_length;
-			memory = new VolatileMemory(address_start, address_length);
+			memory = new VolatileMemory(address_length);
 			vm = new VirtualMachine(memory);
 			Assert.NotNull(vm);
 			
