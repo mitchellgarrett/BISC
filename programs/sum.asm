@@ -1,7 +1,7 @@
 ﻿; returns the sum of all integers
 ; from 1 to n
 
-li r0, 20000000
+lli r0, 20000000
 lli rv, 0
 lli t0, 1
 

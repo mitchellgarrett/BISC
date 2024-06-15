@@ -19,16 +19,14 @@ namespace FTG.Studios.BISC.VM
 		UInt32 ra { get => registers[(int)Register.RA].UValue; set { registers[(int)Register.RA].UValue = value; } }
 		UInt32 rv { get => registers[(int)Register.RV].UValue; set { registers[(int)Register.RV].UValue = value; } }
 
-		readonly Memory memory;
+        public readonly MemoryModule memory;
 
 		public bool IsRunning { get; private set; }
 
-		public VirtualMachine(Memory memory)
-		{
-			this.memory = memory;
-			Initialize();
-			Reset();
-		}
+        public VirtualMachine(MemoryModule memory) {
+            this.memory = memory;
+            Initialize();
+        }
 
 		void Initialize()
 		{

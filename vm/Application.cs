@@ -28,16 +28,16 @@ namespace FTG.Studios.BISC.VM
 			//options = Flags.SingleStep;
 			//options = Flags.SingleStep | Flags.Debug;
 
-			MemoryManager mmu = new MemoryManager();
-
-			VolatileMemory ram = new VolatileMemory(0, 0x4000);
-			mmu.AddDevice(ram);
-
-			Terminal terminal = new Terminal(0x4000, 80, 24);
-			mmu.AddDevice(terminal);
-
-			RandomNumberGenerator rng = new RandomNumberGenerator(0x5000);
-			mmu.AddDevice(rng);
+            MemoryManager mmu = new MemoryManager(32, 0xFFFF_0000);
+			
+			VolatileMemory ram = new VolatileMemory(0x4000);
+			mmu.AddModule(ram, 0);
+			
+			Terminal terminal = new Terminal(80, 24);
+            mmu.AddModule(terminal, 0x4000);
+			
+			RandomNumberGenerator rng = new RandomNumberGenerator();
+			mmu.AddModule(rng, 0x5000);
 
 			vm = new VirtualMachine(mmu);
 

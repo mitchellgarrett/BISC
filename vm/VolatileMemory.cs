@@ -4,19 +4,22 @@ using System.Collections.Generic;
 namespace FTG.Studios.BISC.VM {
 
     /// <summary>
-    /// BISC memory element.
+    /// BISC memory element that clears on reset.
     /// </summary>
-    public class VolatileMemory : Memory {
+    public class VolatileMemory : MemoryModule {
 
-        readonly Dictionary<UInt32, byte[]> memory;
+        protected readonly Dictionary<UInt32, byte[]> memory;
 
-        public VolatileMemory(UInt32 addr, UInt32 len) {
-            AddressStart = addr;
+        public VolatileMemory(UInt32 len) {
+            Random rng = new Random();
+
+            MetaName = Specification.AssembleInteger32FromString("VMEM");
+            MetaID   = (UInt32)rng.Next();
             AddressLength = len;
             memory = new Dictionary<UInt32, byte[]>();
         }
 
-        #region IMemory
+        #region IMemoryModule
         /// <summary>
         /// Clear the internal memory of the BasicVolatileMemory.
         /// </summary>
@@ -26,7 +29,7 @@ namespace FTG.Studios.BISC.VM {
         /// Read an array of bytes from the BasicVolatileMemory.
         /// </summary>
         public override bool Read(UInt32 address, ref byte[] data) {
-            if (address < AddressStart || address >= AddressEnd) return false;
+            if (address >= AddressLength) return false;
             for (int i = 0; i < data.Length; i++) {
                 if (memory.TryGetValue((UInt32)(address + i) >> 2, out byte[] value)) {
                     // Shift the dictionary address by 2 to prevent multiple, overlapping entries.
@@ -42,7 +45,7 @@ namespace FTG.Studios.BISC.VM {
         /// Write an array of bytes to the BasicVolatileMemory.
         /// </summary>
         public override bool Write(UInt32 address, byte[] data) {
-            if (address < AddressStart || address >= AddressEnd) return false;
+            if (address >= AddressLength) return false;
             for (int i = 0; i < data.Length; i++) {
                 // If this is the first write to this address, populate it with zeros first.
                 // This sets the other fields in case we are only writing part of an array, and protects the read function.

@@ -3,14 +3,16 @@
 namespace FTG.Studios.BISC.VM {
 
     /// <summary>
-    /// BISC memory element.
+    /// BISC memory element that does not clear on reset.
     /// </summary>
     public class NonVolatileMemory : VolatileMemory {
 
-        public NonVolatileMemory(UInt32 addr, UInt32 len) : base(addr, len) { }
+        public NonVolatileMemory(UInt32 len) : base(len) { MetaName = Specification.AssembleInteger32FromString("NMEM"); }
 
-        // Non-volatile memory will not lose its contents on reset.
+        #region IMemoryModule
+        // Read-only memory will not lose its contents on reset.
         public override void Reset() { }
+        #endregion
 
     }
 }
