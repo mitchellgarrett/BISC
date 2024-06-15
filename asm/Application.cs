@@ -1,30 +1,39 @@
 ﻿using System;
 using System.IO;
 
-namespace FTG.Studios.BISC.Asm {
+namespace FTG.Studios.BISC.Asm
+{
 
-    class Application {
+	class Application
+	{
 
-        static void Main(string[] args) {
-			if (args.Length <= 0) {
+		static void Main(string[] args)
+		{
+			if (args.Length != 1)
+			{
 				PrintHelp();
 				return;
 			}
-			
-            string file_name = args[0];
-            UInt32[] program = Assembler.Assemble(File.ReadAllText(file_name + ".asm"));
 
+			string file_name = args[0];
 
-            Console.WriteLine($"Assembled file {file_name}.asm into {program.Length} instructions");
-            for (UInt32 addr = 0; addr < program.Length; addr++) {
-                Console.WriteLine("{0:x}: {1:x08}", addr * 4, program[addr]);
-            }
+			AssemblyTree program = null;
+			try {
+				program = Assembler.Assemble(file_name + ".asm", File.ReadAllText(file_name + ".asm"));
+			} catch (SyntaxErrorException exception) {
+				Console.Error.WriteLine(exception.Message);
+				Environment.Exit(1);
+			}
 
-            BISC.Program.Write(file_name + ".bin", new BISC.Program(program));
-        }
-		
-		static void PrintHelp() {
+			BEEF.ObjectFile beef = program.AssembleBEEF();
+			BEEF.ObjectFile.Serialize(beef, file_name + ".exe");
+
+			Console.WriteLine(beef);
+		}
+
+		static void PrintHelp()
+		{
 			Console.WriteLine("Usage: bisc-asm file");
 		}
-    }
+	}
 }

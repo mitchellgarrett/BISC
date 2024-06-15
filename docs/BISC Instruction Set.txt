@@ -8,25 +8,44 @@ Registers
 ---------
 pc - program counter
 sp - stack pointer
+gp - global pointer
 fp - frame pointer
 ra - return address
 rv - return value
-ri - temporary immediate register
-r0-r7 - general-purpose registers
-t0-t7 - temporary registers
-f0-f7 - general-purpose floating-point registers
-ft0-ft7 - temporary floating-point registers
+ti - temporary immediate
+ta - temporary address
+r0-r7 - general purpose registers
+f0-f7 - general purpose floating point registers
 
 ------------------------
 Control Status Registers [WIP]
 ------------------------
-0x00, mid - model number of this CPU
-0x01, ccl - CPU cycle count
-0x02, cch - upper 32-bits of cycle
-0x03, etype - exception type
-0x04, epc - exception PC
-0x05, eval - exception value
-tid - thread id
+0x00, mid   - model number of this CPU
+0x01, ccl   - CPU cycle count
+0x02, cch   - upper 32-bits of cycle count
+0x03, instl - instruction count
+0x04, insth - upper 32-bits of instruction count
+0x05, tid   - thread id
+
+0x10, evec  - exception vector address
+0x11, etype - exception type
+0x12, epc   - exception PC
+0x13, eval  - exception value
+
+0x20, tvec  - trap vector address
+0x21, ttype - trap type
+0x22, tpc   - trap PC
+0x23, tval  - trap value
+
+0x30, ivec  - interrupt vector address
+0x31, itype - interrupt type
+0x32, ipc   - interrupt PC
+0x33, ival  - interrupt value
+
+0x40, svec  - system call vector address
+0x41, stype - system call type
+0x42, spc   - system call PC
+0x43, sval  - system call value
 
 ------------------
 General Formatting
@@ -44,8 +63,7 @@ System
 ------
 hlt
 nop
-sys  arg0 (reg)
-sys  arg0 (imm)*
+sys
 call arg0 (reg)
 call arg0 (imm)*
 ret
@@ -102,8 +120,7 @@ mul   dest (reg), arg0 (reg), arg1 (reg)
 mulh  dest (reg), arg0 (reg), arg1 (reg)
 mulhu dest (reg), arg0 (reg), arg1 (reg)
 div   dest (reg), arg0 (reg), arg1 (reg)
-divh  dest (reg), arg0 (reg), arg1 (reg)
-divhu dest (reg), arg0 (reg), arg1 (reg)
+divu dest (reg), arg0 (reg), arg1 (reg)
 mod   dest (reg), arg0 (reg), arg1 (reg)
 modu  dest (reg), arg0 (reg), arg1 (reg)
 

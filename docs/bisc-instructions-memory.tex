@@ -1,0 +1,311 @@
+\subsection{Memory Instructions}
+
+\subsubsection{LDW \normalfont{- Load Word}}\label{sec:LDW}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:m-type]{\textbf{M-Type}}}
+		\bitbox{8}{0x08} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs}
+		\bitbox{8}{offset}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The LDW instruction loads the 32-bit word from memory at the address given by the value of the source register plus the offeset into the destination register.
+This instruction is used to load values from memory into a register.
+Note that the offset is a signed 8-bit value, so you can only index address +127 or -127 of the value of the source register.
+Words are 4-byte values so LDW should only be used on addresses that are multiples of 4.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := mem[rs + offset]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	LDW {rd}, {rs}[imm8]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; load an address into r0
+	LDI r0, THIS_IS_AN_ADDRESS
+	
+	; load the word at that address into r1
+	LDW r1, r0[0]
+	
+	; load the next word into r2
+	; by adding an offset of 4
+	LDW r2, r0[4]
+\end{lstlisting}
+
+\subsubsection{LDH \normalfont{- Load Half Word}}\label{sec:LDH}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:m-type]{\textbf{M-Type}}}
+		\bitbox{8}{0x09} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs}
+		\bitbox{8}{offset}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The LDH instruction loads the 16-bit half word from memory at the address given by the value of the source register plus the offeset into the destination register.
+The half word is placed into the lower 16 bits of the destination register. The upper 16 bits are zeroed.
+Note that the offset is a signed 8-bit value, so you can only index address +127 or -127 of the value of the source register.
+Half words are 2-byte values so LDH should only be used on addresses that are multiples of 2.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd[0..15] := mem[rs + offset]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	LDH {rd}, {rs}[imm8]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; load an address into r0
+	LDI r0, THIS_IS_AN_ADDRESS
+	
+	; load the half word at that address into r1
+	LDH r1, r0[0]
+	
+	; load the next half word into r2
+	; by adding an offset of 2
+	LDH r2, r0[2]
+\end{lstlisting}
+
+\subsubsection{LDB \normalfont{- Load Byte}}\label{sec:LDB}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:m-type]{\textbf{M-Type}}}
+		\bitbox{8}{0x0A} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs}
+		\bitbox{8}{offset}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The LDB instruction loads the byte from memory at the address given by the value of the source register plus the offeset into the destination register.
+The byte is placed into the lower 8 bits of the destination register. The upper 24 bits are zeroed.
+Note that the offset is a signed 8-bit value, so you can only index address +127 or -127 of the value of the source register.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd[0..7] := mem[rs + offset]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	LDB {rd}, {rs}[imm8]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; load an address into r0
+	LDI r0, THIS_IS_AN_ADDRESS
+	
+	; load the byte at that address into r1
+	LDB r1, r0[0]
+	
+	; load the next byte into r2
+	; by adding an offset of 1
+	LDB r2, r0[1]
+\end{lstlisting}
+
+\subsubsection{STW \normalfont{- Store Word}}\label{sec:STW}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:m-type]{\textbf{M-Type}}}
+		\bitbox{8}{0x0B} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs}
+		\bitbox{8}{offset}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The STW instruction stores the value of the source register into memory at the address given by the value of the destination register plus the offeset.
+This instruction places an entire 4-byte value into memory.
+Note that the offset is a signed 8-bit value, so you can only index address +127 or -127 of the value of the source register.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	mem[rd + offset] := rs
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	LDW {rs}, {rd}[imm8]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; load an address into r0
+	LDI r0, THIS_IS_AN_ADDRESS
+	
+	; store the word in r1 into memory
+	STW r1, r0[0]
+	
+	; store the word in r2 into the next word in
+	; memory by adding an offset of 4
+	STW r2, r0[4]
+\end{lstlisting}
+
+\subsubsection{STH \normalfont{- Store Half Word}}\label{sec:STH}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:m-type]{\textbf{M-Type}}}
+		\bitbox{8}{0x0C} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs}
+		\bitbox{8}{offset}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The STH instruction stores the lower 16 bits of the source register into memory at the address given by the value of the destination register plus the offeset.
+This instruction only modifies the half word indexed by the address, no other bytes are modified.
+Since STH stores a half word, the top 16 bits of the source register are ignored.
+Note that the offset is a signed 8-bit value, so you can only index address +127 or -127 of the value of the source register.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	mem[rd + offset] := rs[0..15]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	LDH {rs}, {rd}[imm8]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; load an address into r0
+	LDI r0, THIS_IS_AN_ADDRESS
+	
+	; store the half word in r1 into memory
+	STH r1, r0[0]
+	
+	; store the half word in r2 into the next
+	; half word in memory by adding an offset of 2
+	STH r2, r0[2]
+\end{lstlisting}
+
+\subsubsection{STB \normalfont{- Store Byte}}\label{sec:STB}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:m-type]{\textbf{M-Type}}}
+		\bitbox{8}{0x0D} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs}
+		\bitbox{8}{offset}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The STB instruction stores the lower 8 bits of the source register into memory at the address given by the value of the destination register plus the offeset.
+This instruction only modifies the byte indexed by the address, no other bytes are modified.
+Since STB only stores a single byte, the top 24 bits of the source register are ignored.
+Note that the offset is a signed 8-bit value, so you can only index address +127 or -127 of the value of the source register.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	mem[rd + offset] := rs[0..7]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	LDB {rs}, {rd}[imm8]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; load an address into r0
+	LDI r0, THIS_IS_AN_ADDRESS
+	
+	; store the byte in r1 into memory
+	STB r1, r0[0]
+	
+	; store the byte in r2 into the next byte in
+	; memory by adding an offset of 1
+	STB r2, r0[1]
+\end{lstlisting}

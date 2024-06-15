@@ -8,6 +8,16 @@
 Properties/
 .*.swp
 
+# Latex artifacts
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.pdf
+*.synctex.gz
+*.toc
+*.out
+
 # User-specific files
 *.rsuser
 *.suo

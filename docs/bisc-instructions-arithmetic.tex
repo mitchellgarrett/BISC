@@ -1,0 +1,427 @@
+\subsection{Arithmetic Instructions}
+
+\subsubsection{ADD \normalfont{- Add}}\label{sec:ADD}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+		\bitbox{8}{0x0F} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}}
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The ADD instruction adds the values of the two source registers and stores the result in the destination register.
+Note that the addition is the same whether the inputs are interpreted as signed or unsigned values.
+The destination register can be the same as one of the source registers to overwrite that register with the resulting sum,
+or all three registers can be the same to add a register to itself.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0 + rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	ADD {rd}, {rs0} {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = r1 + r2
+	ADD r0, r1, r2
+	
+	; r0 = r1 + r0
+	ADD r0, r1, r0
+	
+	; r0 = r0 + r0
+	ADD r0, r0, r0
+\end{lstlisting}
+
+\subsubsection{SUB \normalfont{- Subtract}}\label{sec:SUB}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+		\bitbox{8}{0x0E} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}}
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The SUB instruction subtracts the value of \texttt{rs\textsubscript{1}} from \texttt{rs\textsubscript{0}} and stores the result in the destination register.
+Note that the subtraction is the same whether the inputs are interpreted as signed or unsigned values.
+The destination register can be the same as one of the source registers to overwrite that register with the resulting difference,
+or all three registers can be the same to subtract a register from itself, but that would result in 0.
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0 - rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	SUB {rd}, {rs0} {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = r1 - r2
+	SUB r0, r1, r2
+	
+	; r0 = r1 - r0
+	SUB r0, r1, r0
+\end{lstlisting} 
+
+\subsubsection{MUL \normalfont{- Multiply}}\label{sec:MUL}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+		\bitbox{8}{0x10} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}}
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The MUL instruction multiplies the values of \texttt{rs\textsubscript{1}} and \texttt{rs\textsubscript{0}} and stores the product in the destination register.
+Note that MUL multiplies the lower 16 bits of the source register, so the result is the same whether the inputs are interpreted as signed or unsigned values.
+16-bit multiplication results in a 32-bit value so the entirety of the destination register will be used.
+The destination register can be the same as one of the source registers to overwrite that register with the resulting product,
+or all three registers can be the same to multiply a register by itself.
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0[0..15] $\cdot$ rs1[0..15]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	MUL {rd}, {rs0} {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = r1 * r2
+	MUL r0, r1, r2
+	
+	; r0 = r1 * r0
+	MUL r0, r1, r0
+\end{lstlisting} 
+
+\subsubsection{MULH \normalfont{- Multiply High}}\label{sec:MULH}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+		\bitbox{8}{0x11} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}}
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The MULH instruction multiplies the upper 16 bits of \texttt{rs\textsubscript{1}} and \texttt{rs\textsubscript{0}} and stores the product in the destination register.
+The upper 16 bits are interpreted as signed values, resulting in a different product than MULHU.
+16-bit multiplication results in a 32-bit value so the entirety of the destination register will be used.
+The destination register can be the same as one of the source registers to overwrite that register with the resulting product,
+or all three registers can be the same to multiply a register by itself.
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0[16..31] $\cdot$ rs1[16..31]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	MULH {rd}, {rs0} {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = r1 * r2
+	MULH r0, r1, r2
+	
+	; r0 = r1 * r0
+	MULH r0, r1, r0
+\end{lstlisting} 
+
+\subsubsection{MULHU \normalfont{- Multiply High Unsigned}}\label{sec:MULHU}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+		\bitbox{8}{0x12} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}}
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The MULHU instruction multiplies the upper 16 bits of \texttt{rs\textsubscript{1}} and \texttt{rs\textsubscript{0}} and stores the product in the destination register.
+The upper 16 bits are interpreted as unsigned values, resulting in a different product than MULH.
+16-bit multiplication results in a 32-bit value so the entirety of the destination register will be used.
+The destination register can be the same as one of the source registers to overwrite that register with the resulting product,
+or all three registers can be the same to multiply a register by itself.
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0[16..31] $\cdot$ rs1[16..31]
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	MULHU {rd}, {rs0} {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = r1 * r2
+	MULHU r0, r1, r2
+	
+	; r0 = r1 * r0
+	MULHU r0, r1, r0
+\end{lstlisting}
+
+\subsubsection{DIV \normalfont{- Divide}}\label{sec:DIV}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+		\bitbox{8}{0x13} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}}
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The DIV instruction divides \texttt{rs\textsubscript{1}} by \texttt{rs\textsubscript{0}} and stores the result in the destination register.
+The source registers are interpreted as signed values, resulting in a different product than DIVU.
+The destination register can be the same as one of the source registers to overwrite that register with the resulting quotient.
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0 $\div$ rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	DIV {rd}, {rs0} {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = r1 / r2
+	DIV r0, r1, r2
+	
+	; r0 = r1 / r0
+	DIV r0, r1, r0
+\end{lstlisting}
+
+\subsubsection{DIVU \normalfont{- Divide Unsigned}}\label{sec:DIVU}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+		\bitbox{8}{0x14} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}}
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The DIVU instruction divides \texttt{rs\textsubscript{1}} by \texttt{rs\textsubscript{0}} and stores the result in the destination register.
+The source registers are interpreted as unsigned values, resulting in a different product than DIV.
+The destination register can be the same as one of the source registers to overwrite that register with the resulting quotient.
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0 $\div$ rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	DIVU {rd}, {rs0} {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = r1 / r2
+	DIVU r0, r1, r2
+	
+	; r0 = r1 / r0
+	DIVU r0, r1, r0
+\end{lstlisting}
+
+\subsubsection{MOD \normalfont{- Modulo}}\label{sec:MOD}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+		\bitbox{8}{0x15} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}}
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The MOD instruction conducts a modulus operation and divides \texttt{rs\textsubscript{1}} by \texttt{rs\textsubscript{0}} and stores the remainder of that division in the destination register.
+The source registers are interpreted as signed values, resulting in a different product than MODU.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0 % rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	MOD {rd}, {rs0} {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = r1 % r2
+	MOD r0, r1, r2
+	
+	; r0 = r1 % r0
+	MOD r0, r1, r0
+\end{lstlisting}
+
+\subsubsection{MODU \normalfont{- Modulo Unsigned}}\label{sec:MODU}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+		\bitbox{8}{0x16} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}}
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The MODU instruction conducts a modulus operation and divides \texttt{rs\textsubscript{1}} by \texttt{rs\textsubscript{0}} and stores the remainder of that division in the destination register.
+The source registers are interpreted as unsigned values, resulting in a different product than MOD.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0 % rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	MODU {rd}, {rs0} {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; r0 = r1 % r2
+	MODU r0, r1, r2
+	
+	; r0 = r1 % r0
+	MODU r0, r1, r0
+\end{lstlisting}

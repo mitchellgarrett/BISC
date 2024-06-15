@@ -1,0 +1,51 @@
+Defining sections:
+
+Code section
+%section .text
+
+Initialized data section
+%section .data
+
+Read-only data section
+%section .rodata
+
+Unitialized data section
+%section .udata
+
+Defining data:
+*Can be preceded with a label to define a variable*
+
+Emit a byte
+.byte 0xff
+
+Emit a half word
+.half 0xffff
+
+Emit a word
+.word 0xffffffff
+
+Emit a string (not null-termianted by default)
+.string "text\0"
+
+Emit a sequence of zeros
+.zero 64
+
+Include a file's contents in the current file
+%include "file_name"
+
+Define a constant
+%define constant_name = value
+
+Define a macro
+%define macro_name arg0, ...
+	macro_contents
+%enddef
+
+Define a symbol as global
+%global
+
+Emit the high 16 bits of a symbol
+%hi(symbol)
+
+Emit the low 16 bits of a symbol
+%lo(symbol)

@@ -1,0 +1,58 @@
+\documentclass{article}
+
+\usepackage{import}
+\usepackage[hidelinks]{hyperref}
+\usepackage{listings}
+
+\usepackage{lmodern}
+\usepackage{bytefield}
+
+\hypersetup{
+    linktoc=all
+}
+
+%\lstset
+%{
+%    numbers=left,
+%    stepnumber=1
+%}
+
+\providecommand{\versionnumber}{0.3}
+
+\title{%
+	\textbf{BISC Instruction Set Manual}\\
+	\large for version \versionnumber}
+
+\date{May 21, 2024}
+
+\newcommand{\tformat}[1]{
+	\begin{center}
+		\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+			\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+			\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+			\bitbox{8}{#1} & 
+			\bitbox{8}{rd} &
+			\bitbox{8}{rs\textsubscript{0}}
+			\bitbox{8}{rs\textsubscript{1}}
+			\end{leftwordgroup}\\
+		\end{bytefield}
+	\end{center}
+}
+
+\begin{document}
+	
+% Select ldmodern 'light' font
+%\ttfamily
+%\fontseries{l}\selectfont
+
+\maketitle
+
+\tableofcontents
+
+\include{bisc-registers}
+\include{bisc-instruction-reference}
+\include{bisc-instruction-formats}
+\include{bisc-instructions}
+\include{bisc-pseudoinstructions}
+
+\end{document}
