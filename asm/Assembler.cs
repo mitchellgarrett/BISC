@@ -16,13 +16,12 @@ namespace FTG.Studios.BISC.Asm {
 		public static AssemblyTree Assemble(string file_name, string source) {
 			List<Token> tokens = Lexer.Tokenize(source);
 
+			Preprocessor.RemoveComments(tokens);
+			Preprocessor.ProcessMacros(tokens);
+			
 			foreach (var token in tokens) Console.WriteLine(token);
 
 			AssemblyTree program = Parser.Parse(tokens, file_name);
-			
-			Console.WriteLine(program);
-			
-			Preprocessor.EvaluateMacros(program);
 			
 			SemanticAnalyzer.AssignAddresses(program);
 			SemanticAnalyzer.ResolveLabels(program);

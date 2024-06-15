@@ -18,6 +18,7 @@ namespace FTG.Studios.BISC.Asm {
 			}
 		}
 		
+		// TODO: Add size field
 		public class Section : Node {
 			public readonly string Identifier;
 			public readonly List<BlockItem> Body;

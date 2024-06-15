@@ -8,6 +8,7 @@ namespace FTG.Studios.BISC.Asm {
 
 		public TokenType Type;
 		public string Mnemonic;
+		// TODO: Make this an object
 		public UInt32? Value;
 		public int LineNo;
 		public int CharNo;
