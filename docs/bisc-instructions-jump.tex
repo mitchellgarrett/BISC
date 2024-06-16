@@ -2,26 +2,588 @@
 
 \subsubsection{JMP \normalfont{- Jump}}\label{sec:JMP}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{R-Type}}}
+		\bitbox{8}{0x1F} & 
+		\bitbox{8}{rd} &
+		\bitbox{16}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JMP instructions simply "jumps" to the address denoted byt the value of the destination register and is used to modify control flow.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	pc := rs
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JMP {rd}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	JMP r0
+\end{lstlisting}
+
 \subsubsection{JEZ \normalfont{- Jump If Zero}}\label{sec:JEZ}
  
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x20} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs} &
+		\bitbox{8}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JEZ instruction jumps to the address stored in the destination register only if the value of the source register is zero.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs = 0, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JEZ {rd}, {rs}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 0
+	JEZ r0, r1
+\end{lstlisting}
+
 \subsubsection{JNZ \normalfont{- Jump If Not Zero}}\label{sec:JNZ}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x21} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs} &
+		\bitbox{8}{\textit{null}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JNZ instruction jumps to the address stored in the destination register only if the value of the source register is not zero.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs != 0, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JNZ {rd}, {rs}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 1
+	JNZ r0, r1
+\end{lstlisting}
 
 \subsubsection{JEQ \normalfont{- Jump If Equal}}\label{sec:JEQ}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x22} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}} &
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JEQ instruction jumps to the address stored in the destination register only if the two source registers are equal.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs0 = rs1, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JEQ {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 1
+	LDI r2, 1
+	JEZ r0, r1, r2
+\end{lstlisting}
+
 \subsubsection{JNE \normalfont{- Jump If Not Equal}}\label{sec:JNE}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x23} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}} &
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JNE instruction jumps to the address stored in the destination register only if the two source registers are not equal.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs0 != rs1, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JNE {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 1
+	LDI r2, 0
+	JNE r0, r1, r2
+\end{lstlisting}
 
 \subsubsection{JGT \normalfont{- Jump If Greater Than}}\label{sec:JGT}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x24} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}} &
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JGT instruction jumps to the address stored in the destination register only if \texttt{rs\textsubscript{0}} is greater than \texttt{rs\textsubscript{1}},
+interpreting the two values as signed.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs0 > rs1, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JGT {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 1
+	LDI r2, 0
+	JGT r0, r1, r2
+\end{lstlisting}
+
 \subsubsection{JLT \normalfont{- Jump If Less Than}}\label{sec:JLT}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x25} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}} &
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JLT instruction jumps to the address stored in the destination register only if \texttt{rs\textsubscript{0}} is less than \texttt{rs\textsubscript{1}},
+interpreting the two values as signed.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs0 < rs1, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JLT {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 0
+	LDI r2, 1
+	JLT r0, r1, r2
+\end{lstlisting}
 
 \subsubsection{JGE \normalfont{- Jump If Greater Or Equal}}\label{sec:JGE}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x26} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}} &
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JGE instruction jumps to the address stored in the destination register only if \texttt{rs\textsubscript{0}} is greater than or equal to \texttt{rs\textsubscript{1}},
+interpreting the two values as signed.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs0 <= rs1, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JGE {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 1
+	LDI r2, 0
+	JGE r0, r1, r2
+\end{lstlisting}
+
 \subsubsection{JLE \normalfont{- Jump If Greater Or Less}}\label{sec:JLE}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x27} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}} &
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JLE instruction jumps to the address stored in the destination register only if \texttt{rs\textsubscript{0}} is less than or equal to \texttt{rs\textsubscript{1}},
+interpreting the two values as signed.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs0 >= rs1, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JGE {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 0
+	LDI r2, 1
+	JLE r0, r1, r2
+\end{lstlisting}
 
 \subsubsection{JGTU \normalfont{- Jump If Greater Than Unsigned}}\label{sec:JGTU}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x28} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}} &
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JGTU instruction jumps to the address stored in the destination register only if \texttt{rs\textsubscript{0}} is greater than \texttt{rs\textsubscript{1}},
+interpreting the two values as unsigned.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs0 > rs1, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JGE {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 1
+	LDI r2, 0
+	JGTU r0, r1, r2
+\end{lstlisting}
+
 \subsubsection{JLTU \normalfont{- Jump If Less Than Unsigned}}\label{sec:JLTU}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x29} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}} &
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JLTU instruction jumps to the address stored in the destination register only if \texttt{rs\textsubscript{0}} is less than \texttt{rs\textsubscript{1}},
+interpreting the two values as unsigned.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs0 < rs1, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JGE {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 0
+	LDI r2, 1
+	JLTU r0, r1, r2
+\end{lstlisting}
 
 \subsubsection{JGEU \normalfont{- Jump If Greater Or Equal Unsigned}}\label{sec:JGEU}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x2A} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}} &
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JGEU instruction jumps to the address stored in the destination register only if \texttt{rs\textsubscript{0}} is greater than or equal to \texttt{rs\textsubscript{1}},
+interpreting the two values as unsigned.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs0 >= rs1, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JGEU {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 1
+	LDI r2, 0
+	JGTU r0, r1, r2
+\end{lstlisting}
+
 \subsubsection{JLEU \normalfont{- Jump If Less Or Equal Unsigned}}\label{sec:JLEU}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:r-type]{\textbf{D-Type}}}
+		\bitbox{8}{0x2B} & 
+		\bitbox{8}{rd} &
+		\bitbox{8}{rs\textsubscript{0}} &
+		\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Desciption}
+
+The JLEU instruction jumps to the address stored in the destination register only if \texttt{rs\textsubscript{0}} is less than or equal to \texttt{rs\textsubscript{1}},
+interpreting the two values as unsigned.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	if rs0 <= rs1, pc := rd
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	JLEU {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	; jump to arbitrary address
+	LDI r0, THIS_IS_AND_ADDRESS
+	LDI r1, 0
+	LDI r2, 1
+	JLEU r0, r1, r2
+\end{lstlisting}

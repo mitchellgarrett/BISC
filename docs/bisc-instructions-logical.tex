@@ -2,10 +2,205 @@
 
 \subsubsection{AND \normalfont{- Bitwise And}}\label{sec:AND}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+			\bitbox{8}{0x1A} & 
+			\bitbox{8}{rd} &
+			\bitbox{8}{rs\textsubscript{0}}
+			\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The AND performs a bitwise and operation on all of the bits in the two source registers and stores the result in the destination register.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs $\land$ rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	AND {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	AND r0, r1, r2
+\end{lstlisting}
+
 \subsubsection{OR \normalfont{- Bitwise Or}}\label{sec:OR}
  
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+			\bitbox{8}{0x1B} & 
+			\bitbox{8}{rd} &
+			\bitbox{8}{rs\textsubscript{0}}
+			\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The OR performs a bitwise or operation on all of the bits in the two source registers and stores the result in the destination register.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs $\lor$ rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	OR {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	OR r0, r1, r2
+\end{lstlisting}
+
 \subsubsection{XOR \normalfont{- Bitwise Exlcusive Or}}\label{sec:XOR}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+			\bitbox{8}{0x1C} & 
+			\bitbox{8}{rd} &
+			\bitbox{8}{rs\textsubscript{0}}
+			\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The XOR performs a bitwise exclusive or operation on all of the bits in the two source registers and stores the result in the destination register.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs $\oplus$ rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	XOR {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	XOR r0, r1, r2
+\end{lstlisting}
 
 \subsubsection{BSL \normalfont{- Bit Shift Left}}\label{sec:BSL}
 
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+			\bitbox{8}{0x1D} & 
+			\bitbox{8}{rd} &
+			\bitbox{8}{rs\textsubscript{0}}
+			\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The BSL instruction shifts the value of \texttt{rs\textsubscript{0}} left by \texttt{rs\textsubscript{1}} bits.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs << rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	BSL {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	BSL r0, r1, r2
+\end{lstlisting}
+
 \subsubsection{BSR \normalfont{- Bit Shift Right}}\label{sec:BSR}
+
+\vspace{3ex}
+
+\begin{center}
+	\begin{bytefield}[leftcurly=., leftcurlyspace=0pt]{32}
+		\bitheader[endianness=little]{0, 7, 8, 15, 16, 23, 24, 31} \\
+		\begin{leftwordgroup}{\hyperref[sec:t-type]{\textbf{T-Type}}}
+			\bitbox{8}{0x1E} & 
+			\bitbox{8}{rd} &
+			\bitbox{8}{rs\textsubscript{0}}
+			\bitbox{8}{rs\textsubscript{1}}
+		\end{leftwordgroup}\\
+	\end{bytefield}
+\end{center}
+
+\textbf{Description}
+
+The BSR instruction shifts the value of \texttt{rs\textsubscript{0}} right by \texttt{rs\textsubscript{1}} bits.
+
+\vspace{3ex}
+
+\textbf{Action}
+\begin{lstlisting}[frame=single]
+	rd := rs0 >> rs1
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Assembler Syntax}
+\begin{lstlisting}[frame=single]
+	BSR {rd}, {rs0}, {rs1}
+\end{lstlisting}
+
+\vspace{3ex}
+
+\textbf{Example}
+\begin{lstlisting}[frame=single]
+	BSR r0, r1, r2
+\end{lstlisting}
