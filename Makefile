@@ -1,28 +1,28 @@
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
-BUILD_DIR = build
-DEPS_DIR = deps
+BUILD_DIR = Build
+DEPS_DIR = Modules
 
-CMN_DIR = common
+CMN_DIR = Common
 CMN_SRC = $(call rwildcard,$(CMN_DIR),*.cs) $(call rwildcard,$(DEPS_DIR),*.cs)
 
-ASM_DIR = asm
+ASM_DIR = Assembler
 ASM_EXE = bisc-asm.exe
 ASM_SRC = $(call rwildcard,$(ASM_DIR),*.cs) $(CMN_SRC)
 
-VM_DIR = vm
+VM_DIR = VirtualMachine
 VM_EXE = bisc-vm.exe
 VM_SRC = $(call rwildcard,$(VM_DIR),*.cs) $(CMN_SRC)
 
-TEST_DIR = test
+TEST_DIR = Test
 
-DOCS_DIR = docs
+DOCS_DIR = Docs
 #DOCS_SRC = $(wildcard $(DOCS_DIR)/*.tex)
 DOCS_SRC = $(DOCS_DIR)/bisc-manual.tex
-DOCS_BUILD_DIR = $(BUILD_DIR)/docs
+DOCS_BUILD_DIR = $(BUILD_DIR)/$(DOCS_DIR)
 
 CSC_FLAGS = -errorendlocation
-FILE ?= programs/console
+FILE ?= Programs/console
 
 .PHONY: all
 all: $(ASM_EXE) $(VM_EXE) 
