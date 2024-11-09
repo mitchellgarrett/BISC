@@ -52,7 +52,14 @@ namespace FTG.Studios.BISC.Asm {
 		
 		static byte[] AssembleMInstruction(AssemblyNode.MInstruction instruction) {
 			byte[] offset = AssembleConstant(instruction.Offset);
-			if (offset[1] != 0 || offset[2] != 0 || offset[3] != 0) throw new ArgumentException("TODO: Offset should be 8 bits");
+
+			// Offsets must be positive or negative 8 bit values
+			if (
+				(offset[1] != 0 || offset[2] != 0 || offset[3] != 0) && 
+				(offset[1] != 0xff || offset[2] != 0xff || offset[3] != 0xff)
+			) {
+				throw new ArgumentException($"TODO: Offset ({instruction.Offset}) should be 8 bits");
+			}	
 			
 			return new byte[] { (byte)instruction.Opcode, (byte)instruction.Destination.Type, (byte)instruction.Source.Type, offset[0] };
 		}
