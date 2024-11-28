@@ -12,5 +12,17 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Assembler\**" />
+    <Compile Remove="Virtual Machine\**" />
+	<Compile Remove="Test\**" />
+    <EmbeddedResource Remove="Assembler\**" />
+    <EmbeddedResource Remove="Virtual Machine\**" />
+	<EmbeddedResource Remove="Test\**" />
+    <None Remove="Assembler\**" />
+    <None Remove="Virtual Machine\**" />
+	<None Remove="Test\**" />
+  </ItemGroup>
 
 </Project>
