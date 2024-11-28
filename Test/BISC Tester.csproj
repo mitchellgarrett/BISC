@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>FTG.Studios.BISC.Test</RootNamespace>
 
     <IsPackable>false</IsPackable>
@@ -19,9 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\asm\BISC Assembler.csproj" />
-    <ProjectReference Include="..\BISC.csproj" />
-    <ProjectReference Include="..\vm\BISC Virtual Machine.csproj" />
+  	<ProjectReference Include="..\BISC.csproj" />
+    <ProjectReference Include="..\Assembler\BISC Assembler.csproj" />
+    <ProjectReference Include="..\VirtualMachine\BISC Virtual Machine.csproj" />
   </ItemGroup>
 
 </Project>

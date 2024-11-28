@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>FTG.Studios.BISC</RootNamespace>
   </PropertyGroup>
 
@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BISC.csproj" />
+	<ProjectReference Include="..\Modules\BEEF\BEEF.csproj" />
   </ItemGroup>
 
 </Project>

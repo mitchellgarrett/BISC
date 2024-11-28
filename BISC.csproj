@@ -15,14 +15,17 @@
   
   <ItemGroup>
     <Compile Remove="Assembler\**" />
-    <Compile Remove="Virtual Machine\**" />
+    <Compile Remove="VirtualMachine\**" />
 	<Compile Remove="Test\**" />
+	<Compile Remove="Modules\**" />
     <EmbeddedResource Remove="Assembler\**" />
-    <EmbeddedResource Remove="Virtual Machine\**" />
+    <EmbeddedResource Remove="VirtualMachine\**" />
 	<EmbeddedResource Remove="Test\**" />
+	<EmbeddedResource Remove="Modules\**" />
     <None Remove="Assembler\**" />
-    <None Remove="Virtual Machine\**" />
+    <None Remove="VirtualMachine\**" />
 	<None Remove="Test\**" />
+	<None Remove="Modules\**" />
   </ItemGroup>
 
 </Project>
