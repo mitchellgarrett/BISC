@@ -39,7 +39,7 @@ Define a constant
 Define a macro
 %define macro_name arg0, ...
 	macro_contents
-%enddef
+%end
 
 Define a symbol as global
 %global
