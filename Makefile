@@ -14,13 +14,6 @@ VM_DIR = VirtualMachine
 VM_EXE = bisc-vm.exe
 VM_SRC = $(call rwildcard,$(VM_DIR),*.cs) $(CMN_SRC)
 
-TEST_DIR = Test
-
-DOCS_DIR = Docs
-#DOCS_SRC = $(wildcard $(DOCS_DIR)/*.tex)
-DOCS_SRC = $(DOCS_DIR)/bisc-manual.tex
-DOCS_BUILD_DIR = $(BUILD_DIR)/$(DOCS_DIR)
-
 CSC_FLAGS = -errorendlocation
 FILE ?= Programs/console
 
@@ -29,9 +22,12 @@ all: $(ASM_EXE) $(VM_EXE)
 
 .PHONY: help
 help:
-	@echo "make     : build all make targets"
-	@echo "make asm : run assembler"
-	@echo "make vm  : run virtual machine"
+	@echo "make       : build all make targets"
+	@echo "make asm   : run assembler"
+	@echo "make vm    : run virtual machine"
+	@echo "make test  : run test sute"
+	@echo "make docs  : buid documentation"
+	@echo "make clean : remove build files"
 
 $(ASM_EXE): $(ASM_SRC)
 	@mkdir -p $(BUILD_DIR)
@@ -48,14 +44,15 @@ vm: $(VM_EXE) $(ASM_EXE)
 	@mono $(BUILD_DIR)/$(ASM_EXE) $(FILE)
 	@mono $(BUILD_DIR)/$(VM_EXE) $(FILE)
 
-docs: $(DOCS_SRC)
-	@mkdir -p $(DOCS_BUILD_DIR)
-	@latexmk -pdf -outdir=$(DOCS_BUILD_DIR) $(DOCS_SRC)
-
 .PHONY: test
 test:
 	@dotnet test
 
+.PHONY: docs
+docs:
+	@make pdf -C Modules/BISC-Docs
+
+.PHONY: clean
 clean:
 	@rm -rf $(BUILD_DIR)
 	@rm -rf obj bin

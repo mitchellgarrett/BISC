@@ -1,3 +1,6 @@
 [submodule "Modules/BEEF"]
 	path = Modules/BEEF
-	url = https://github.com/mitchellgarrett/BEEF.git
+	url = https://github.com/FTG-Studios/BEEF.git
+[submodule "Modules/BISC-Docs"]
+	path = Modules/BISC-Docs
+	url = https://github.com/FTG-Studios/BISC-Docs

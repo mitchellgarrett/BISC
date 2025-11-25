@@ -9,11 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- [BISC-Docs](https://github.com/FTG-Studios/BISC-Docs) as submodule.
 - This changelog.
-- [BISC-Docs](https://github.com/mitchellgarrett/BISC-Docs) as submodule.
 
-[unreleased]: https://github.com/mitchellgarrett/BISC
-[0.4.0]: https://github.com/mitchellgarrett/BISC/releases/tag/v0.4
-[0.3.0]: https://github.com/mitchellgarrett/BISC/releases/tag/v0.3
-[0.2.0]: https://github.com/mitchellgarrett/BISC/releases/tag/v0.2
-[0.1.0]: https://github.com/mitchellgarrett/BISC/releases/tag/v0.1
+### Changed
+
+- BISC ecosystem ownership to [FTG-Studios](https://github.com/FTG-Studios).
+
+[unreleased]: https://github.com/FTG-Studios/BISC
+[0.4.0]: https://github.com/FTG-Studios/BISC/releases/tag/v0.4
+[0.3.0]: https://github.com/FTG-Studios/BISC/releases/tag/v0.3
+[0.2.0]: https://github.com/FTG-Studios/BISC/releases/tag/v0.2
+[0.1.0]: https://github.com/FTG-Studios/BISC/releases/tag/v0.1
