@@ -25,7 +25,7 @@ help:
 	@echo "make       : build all make targets"
 	@echo "make asm   : run assembler"
 	@echo "make vm    : run virtual machine"
-	@echo "make test  : run test sute"
+	@echo "make test  : run test suite"
 	@echo "make docs  : buid documentation"
 	@echo "make clean : remove build files"
 
